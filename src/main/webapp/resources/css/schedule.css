@@ -1,0 +1,196 @@
+/* ================================================
+   Irion Fansite - Schedule Page Styles
+   ================================================ */
+
+.calendar-section {
+  padding: 40px 0 80px;
+}
+
+/* Legend */
+.calendar-legend {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+}
+
+/* Calendar Wrapper */
+.calendar-wrapper {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  overflow: hidden;
+}
+
+/* FullCalendar Customization */
+#calendar {
+  --fc-border-color: var(--border-color);
+  --fc-button-bg-color: var(--primary);
+  --fc-button-border-color: var(--primary);
+  --fc-button-hover-bg-color: var(--primary-dark);
+  --fc-button-hover-border-color: var(--primary-dark);
+  --fc-button-active-bg-color: var(--primary-dark);
+  --fc-button-active-border-color: var(--primary-dark);
+  --fc-today-bg-color: rgba(99, 102, 241, 0.1);
+  --fc-page-bg-color: var(--bg-card);
+  --fc-neutral-bg-color: var(--bg-dark);
+}
+
+.fc {
+  font-family: var(--font-main);
+}
+
+/* Toolbar */
+.fc .fc-toolbar {
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.fc .fc-toolbar-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.fc .fc-button {
+  padding: 8px 16px;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  transition: var(--transition);
+}
+
+.fc .fc-button:focus {
+  box-shadow: none;
+}
+
+/* Header */
+.fc .fc-col-header-cell {
+  background: var(--bg-dark);
+  padding: 12px 0;
+}
+
+.fc .fc-col-header-cell-cushion {
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+/* Day Cells */
+.fc .fc-daygrid-day {
+  background: var(--bg-card);
+  transition: var(--transition);
+}
+
+.fc .fc-daygrid-day:hover {
+  background: var(--bg-card-hover);
+}
+
+.fc .fc-daygrid-day-number {
+  color: var(--text-primary);
+  font-weight: 500;
+  padding: 8px 12px;
+}
+
+.fc .fc-day-other .fc-daygrid-day-number {
+  color: var(--text-muted);
+}
+
+.fc .fc-day-today {
+  background: rgba(99, 102, 241, 0.1) !important;
+}
+
+.fc .fc-day-today .fc-daygrid-day-number {
+  background: var(--primary);
+  color: white;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Events */
+.fc .fc-event {
+  border: none;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 0.813rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.fc .fc-event:hover {
+  transform: scale(1.02);
+}
+
+.fc .fc-daygrid-event-dot {
+  border-color: currentColor;
+}
+
+/* Modal Detail */
+.detail-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.detail-label {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.detail-value {
+  font-size: 1rem;
+  color: var(--text-primary);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .calendar-wrapper {
+    padding: 16px;
+  }
+
+  .fc .fc-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .fc .fc-toolbar-title {
+    font-size: 1.25rem;
+    text-align: center;
+  }
+
+  .fc .fc-button {
+    padding: 6px 12px;
+    font-size: 0.875rem;
+  }
+
+  .calendar-legend {
+    gap: 16px;
+  }
+}

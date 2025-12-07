@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.irion.admin.mapper.AdminMapper">
+
+    <!-- 로그인 ID로 관리자 조회 -->
+    <select id="selectAdminByLoginId" parameterType="String" resultType="AdminVO">
+        SELECT admin_id
+               ,admin_login_id
+               ,admin_password
+               ,admin_name
+               ,last_login_date
+               ,reg_date
+               ,mod_date
+               ,del_yn
+        FROM tb_admin
+        WHERE admin_login_id = #{adminLoginId}
+          AND del_yn = 'N'
+    </select>
+
+    <!-- 관리자 ID로 조회 -->
+    <select id="selectAdminById" parameterType="Long" resultType="AdminVO">
+        SELECT admin_id
+               ,admin_login_id
+               ,admin_password
+               ,admin_name
+               ,last_login_date
+               ,reg_date
+               ,mod_date
+               ,del_yn
+        FROM tb_admin
+        WHERE admin_id = #{adminId}
+          AND del_yn = 'N'
+    </select>
+
+    <!-- 마지막 로그인 시간 업데이트 -->
+    <update id="updateLastLoginDate" parameterType="Long">
+        UPDATE tb_admin
+        SET last_login_date = NOW()
+        WHERE admin_id = #{adminId}
+    </update>
+
+</mapper>

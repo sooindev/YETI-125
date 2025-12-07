@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>일정 관리 - 관리자</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/resources/css/common.css">
+  <link rel="stylesheet" href="/resources/css/admin.css">
+</head>
+<body>
+<!-- Admin Header -->
+<header class="admin-header">
+  <div class="header-container">
+    <a href="/admin/schedule.html" class="admin-logo">
+      <span>🔧</span> 관리자
+    </a>
+    <nav class="admin-nav">
+      <a href="/admin/schedule.html" class="active">일정 관리</a>
+      <a href="/" target="_blank">사이트 보기</a>
+      <a href="#" id="logoutBtn" class="logout-btn">로그아웃</a>
+    </nav>
+  </div>
+</header>
+
+<!-- Main Content -->
+<main class="admin-main">
+  <div class="admin-container">
+    <div class="page-header">
+      <h1>📅 일정 관리</h1>
+      <button class="btn btn-primary" onclick="openAddModal()">
+        + 새 일정 추가
+      </button>
+    </div>
+
+    <!-- Calendar -->
+    <div class="calendar-wrapper">
+      <div id="calendar"></div>
+    </div>
+  </div>
+</main>
+
+<!-- Add/Edit Modal -->
+<div id="scheduleModal" class="modal">
+  <div class="modal-content modal-large">
+    <div class="modal-header">
+      <h2 id="modalTitle">일정 추가</h2>
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+    </div>
+    <form id="scheduleForm" class="modal-body">
+      <input type="hidden" id="scheduleId" name="scheduleId">
+
+      <div class="form-row">
+        <div class="form-group full-width">
+          <label for="title">제목 *</label>
+          <input type="text" id="title" name="title" required placeholder="일정 제목">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="scheduleType">유형</label>
+          <select id="scheduleType" name="scheduleType">
+            <option value="STREAM">방송</option>
+            <option value="EVENT">이벤트</option>
+            <option value="OTHER">기타</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="color">색상</label>
+          <input type="color" id="color" name="color" value="#6366F1">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="startDate">시작 일시 *</label>
+          <input type="datetime-local" id="startDate" name="startDate" required>
+        </div>
+        <div class="form-group">
+          <label for="endDate">종료 일시</label>
+          <input type="datetime-local" id="endDate" name="endDate">
+        </div>
+      </div>
+
+      <div class="form-row checkbox-row">
+        <label class="checkbox-label">
+          <input type="checkbox" id="allDayYn" name="allDayYn">
+          <span>종일 일정</span>
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" id="displayYn" name="displayYn" checked>
+          <span>사용자에게 표시</span>
+        </label>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group full-width">
+          <label for="description">설명</label>
+          <textarea id="description" name="description" rows="3" placeholder="일정에 대한 설명"></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal()">취소</button>
+        <button type="button" class="btn btn-danger" id="deleteBtn" onclick="deleteSchedule()" style="display: none;">삭제</button>
+        <button type="submit" class="btn btn-primary">저장</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Toast Message -->
+<div id="toast" class="toast"></div>
+
+<!-- FullCalendar JS -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+<script src="/resources/js/admin-schedule.js"></script>
+</body>
+</html>

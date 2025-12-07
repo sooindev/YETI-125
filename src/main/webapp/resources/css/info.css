@@ -1,0 +1,178 @@
+/* ================================================
+   Irion Fansite - Info Page Styles
+   ================================================ */
+
+/* Profile Section */
+.profile-section {
+  padding: 40px 0;
+}
+
+.profile-card {
+  display: flex;
+  gap: 48px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 48px;
+  align-items: center;
+}
+
+.profile-image {
+  flex-shrink: 0;
+}
+
+.profile-placeholder {
+  width: 200px;
+  height: 200px;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 5rem;
+}
+
+.profile-info {
+  flex: 1;
+}
+
+.streamer-name {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.streamer-tagline {
+  font-size: 1.125rem;
+  color: var(--text-secondary);
+  margin-bottom: 32px;
+}
+
+.info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: var(--bg-dark);
+  border-radius: var(--radius-md);
+}
+
+.info-icon {
+  font-size: 1.5rem;
+}
+
+.info-label {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  min-width: 100px;
+}
+
+.info-value {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.social-links {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.social-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 28px;
+  background: var(--primary);
+  color: white;
+  font-weight: 600;
+  border-radius: 50px;
+  transition: var(--transition);
+}
+
+.social-btn:hover {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+}
+
+/* About Section */
+.about-section {
+  padding: 40px 0;
+}
+
+.about-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 48px;
+}
+
+.about-card h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 24px;
+}
+
+.about-card p {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  line-height: 1.8;
+  margin-bottom: 16px;
+}
+
+.about-card p:last-child {
+  margin-bottom: 0;
+}
+
+.about-card strong {
+  color: var(--primary);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .profile-card {
+    flex-direction: column;
+    text-align: center;
+    padding: 32px;
+    gap: 32px;
+  }
+
+  .profile-placeholder {
+    width: 150px;
+    height: 150px;
+    font-size: 4rem;
+  }
+
+  .streamer-name {
+    font-size: 2rem;
+  }
+
+  .info-item {
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
+  }
+
+  .info-label {
+    min-width: auto;
+  }
+
+  .social-links {
+    justify-content: center;
+  }
+
+  .about-card {
+    padding: 32px;
+  }
+
+  .about-card p {
+    font-size: 1rem;
+  }
+}

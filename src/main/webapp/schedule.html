@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>방송 일정 - 이리온 팬사이트</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <!-- FullCalendar CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/resources/css/common.css">
+  <link rel="stylesheet" href="/resources/css/schedule.css">
+</head>
+<body>
+<!-- Header -->
+<header class="header">
+  <div class="header-container">
+    <a href="/" class="logo">
+      <span class="logo-text">IRION</span>
+      <span class="logo-sub">팬사이트</span>
+    </a>
+    <nav class="nav">
+      <a href="/" class="nav-link">홈</a>
+      <a href="/schedule.html" class="nav-link active">일정</a>
+      <a href="/info.html" class="nav-link">정보</a>
+    </nav>
+    <button class="mobile-menu-btn">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </div>
+</header>
+
+<!-- Page Header -->
+<section class="page-header">
+  <div class="container">
+    <h1 class="page-title">📅 방송 일정</h1>
+    <p class="page-desc">이리온의 방송 및 이벤트 일정을 확인하세요</p>
+  </div>
+</section>
+
+<!-- Calendar Section -->
+<section class="calendar-section">
+  <div class="container">
+    <!-- Legend -->
+    <div class="calendar-legend">
+      <div class="legend-item">
+        <span class="legend-color" style="background: #6366F1;"></span>
+        <span>정규 방송</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-color" style="background: #EC4899;"></span>
+        <span>이벤트</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-color" style="background: #10B981;"></span>
+        <span>콜라보</span>
+      </div>
+    </div>
+
+    <!-- Calendar -->
+    <div class="calendar-wrapper">
+      <div id="calendar"></div>
+    </div>
+  </div>
+</section>
+
+<!-- Schedule Detail Modal -->
+<div id="scheduleModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 id="modalTitle">일정 상세</h2>
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="detail-row">
+        <span class="detail-label">📅 일시</span>
+        <span id="modalDate" class="detail-value"></span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">📌 유형</span>
+        <span id="modalType" class="detail-value"></span>
+      </div>
+      <div class="detail-row" id="descriptionRow">
+        <span class="detail-label">📝 설명</span>
+        <span id="modalDescription" class="detail-value"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <p class="footer-text">© 2024 Irion Fansite. This is an unofficial fan site.</p>
+  </div>
+</footer>
+
+<!-- FullCalendar JS -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+<script src="/resources/js/common.js"></script>
+<script src="/resources/js/schedule.js"></script>
+</body>
+</html>

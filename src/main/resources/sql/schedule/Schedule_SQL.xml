@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.irion.schedule.mapper.ScheduleMapper">
+
+    <!-- 일정 목록 조회 (기간별, 관리자용 - 모든 일정) -->
+    <select id="selectScheduleList" resultType="ScheduleVO">
+        SELECT schedule_id
+               ,title
+               ,description
+               ,schedule_type
+               ,start_date
+               ,end_date
+               ,all_day_yn
+               ,display_yn
+               ,color
+               ,reg_date
+               ,mod_date
+               ,del_yn
+        FROM tb_schedule
+        WHERE del_yn = 'N'
+          AND start_date &lt;= #{endDate}
+          AND (end_date &gt;= #{startDate} OR end_date IS NULL)
+        ORDER BY start_date ASC
+    </select>
+
+    <!-- 공개된 일정 목록 조회 (사용자용) -->
+    <select id="selectDisplayScheduleList" resultType="ScheduleVO">
+        SELECT schedule_id
+               ,title
+               ,description
+               ,schedule_type
+               ,start_date
+               ,end_date
+               ,all_day_yn
+               ,display_yn
+               ,color
+               ,reg_date
+               ,mod_date
+               ,del_yn
+        FROM tb_schedule
+        WHERE del_yn = 'N'
+          AND display_yn = 'Y'
+          AND start_date &lt;= #{endDate}
+          AND (end_date &gt;= #{startDate} OR end_date IS NULL)
+        ORDER BY start_date ASC
+    </select>
+
+    <!-- 일정 상세 조회 -->
+    <select id="selectScheduleById" parameterType="Long" resultType="ScheduleVO">
+        SELECT schedule_id
+               ,title
+               ,description
+               ,schedule_type
+               ,start_date
+               ,end_date
+               ,all_day_yn
+               ,display_yn
+               ,color
+               ,reg_date
+               ,mod_date
+               ,del_yn
+        FROM tb_schedule
+        WHERE schedule_id = #{scheduleId}
+          AND del_yn = 'N'
+    </select>
+
+    <!-- 일정 등록 -->
+    <insert id="insertSchedule" parameterType="ScheduleVO" useGeneratedKeys="true" keyProperty="scheduleId">
+        INSERT INTO tb_schedule (
+            title
+            ,description
+            ,schedule_type
+            ,start_date
+            ,end_date
+            ,all_day_yn
+            ,display_yn
+            ,color
+        ) VALUES (
+            #{title}
+            ,#{description}
+            ,#{scheduleType}
+            ,#{startDate}
+            ,#{endDate}
+            ,#{allDayYn}
+            ,#{displayYn}
+            ,#{color}
+        )
+    </insert>
+
+    <!-- 일정 수정 -->
+    <update id="updateSchedule" parameterType="ScheduleVO">
+        UPDATE tb_schedule
+        SET title = #{title}
+            ,description = #{description}
+            ,schedule_type = #{scheduleType}
+            ,start_date = #{startDate}
+            ,end_date = #{endDate}
+            ,all_day_yn = #{allDayYn}
+            ,display_yn = #{displayYn}
+            ,color = #{color}
+        WHERE schedule_id = #{scheduleId}
+          AND del_yn = 'N'
+    </update>
+
+    <!-- 일정 삭제 (소프트 삭제) -->
+    <update id="deleteSchedule" parameterType="Long">
+        UPDATE tb_schedule
+        SET del_yn = 'Y'
+        WHERE schedule_id = #{scheduleId}
+    </update>
+
+</mapper>
