@@ -1,0 +1,80 @@
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+.kotlin
+
+### IntelliJ IDEA ###
+.idea/modules.xml
+.idea/jarRepositories.xml
+.idea/compiler.xml
+.idea/libraries/
+*.iws
+*.iml
+*.ipr
+
+### Eclipse ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+
+### Mac OS ###
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+.AppleDouble
+.LSOverride
+
+### Environment & Config Files ###
+*.env
+*.env.local
+*.env.*.local
+.env.*
+**/database.properties
+**/application-*.properties
+**/application-*.yml
+**/application-*.yaml
+
+### Security & Credentials ###
+*.key
+*.pem
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.truststore
+secrets/
+credentials/
+
+### Logs ###
+logs/
+*.log
+*.log.*
+
+### IDE - Additional ###
+.idea/
+*.swp
+*.swo
+*~
+
+### OS ###
+Thumbs.db
+ehthumbs.db

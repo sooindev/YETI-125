@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+    <settings>
+        <!-- Camel Case 자동 매핑 (DB: user_name -> Java: userName) -->
+        <setting name="mapUnderscoreToCamelCase" value="true"/>
+        <!-- NULL 값 처리 -->
+        <setting name="jdbcTypeForNull" value="NULL"/>
+        <!-- 로그 -->
+        <setting name="logImpl" value="SLF4J"/>
+    </settings>
+
+    <!-- Type Aliases (VO 클래스 별칭) -->
+    <typeAliases>
+        <package name="com.irion.admin.vo"/>
+        <package name="com.irion.schedule.vo"/>
+    </typeAliases>
+
+</configuration>
