@@ -2,8 +2,8 @@
    Irion Fansite - Admin Schedule Management (jQuery)
    ================================================ */
 
-var calendar;
-var currentScheduleId = null;
+let calendar;
+let currentScheduleId = null;
 
 $(document).ready(function() {
   initCalendar();
@@ -12,7 +12,7 @@ $(document).ready(function() {
 
 // 캘린더 초기화
 function initCalendar() {
-  var calendarEl = document.getElementById('calendar');
+  const calendarEl = document.getElementById('calendar');
 
   calendar = new FullCalendar.Calendar(calendarEl, {
     initialView: 'dayGridMonth',
@@ -66,8 +66,8 @@ function initEventHandlers() {
 
   // 유형 변경 시 색상 자동 변경
   $('#scheduleType').on('change', function() {
-    var type = $(this).val();
-    var colors = {
+    const type = $(this).val();
+    const colors = {
       'STREAM': '#6366F1',
       'EVENT': '#EC4899',
       'OTHER': '#10B981'
@@ -87,7 +87,7 @@ function loadSchedules(start, end, callback) {
     },
     dataType: 'json',
     success: function(data) {
-      var events = [];
+      const events = [];
       $.each(data, function(index, item) {
         events.push({
           id: item.id,
@@ -170,8 +170,8 @@ function resetForm() {
 
 // 일정 저장 (추가/수정)
 function saveSchedule() {
-  var title = $('#title').val().trim();
-  var startDate = $('#startDate').val();
+  const title = $('#title').val().trim();
+  const startDate = $('#startDate').val();
 
   // 유효성 검사
   if (!title) {
@@ -186,7 +186,7 @@ function saveSchedule() {
     return;
   }
 
-  var data = {
+  const data = {
     title: title,
     description: $('#description').val().trim(),
     scheduleType: $('#scheduleType').val(),
@@ -197,8 +197,8 @@ function saveSchedule() {
     color: $('#color').val()
   };
 
-  var url = '/admin/schedule';
-  var method = 'POST';
+  let url = '/admin/schedule';
+  let method = 'POST';
 
   if (currentScheduleId) {
     url = '/admin/schedule/' + currentScheduleId;
@@ -261,7 +261,7 @@ function deleteSchedule() {
 
 // 드래그로 일정 날짜 변경
 function updateScheduleDate(event) {
-  var data = {
+  const data = {
     startDate: event.start.toISOString(),
     endDate: event.end ? event.end.toISOString() : null,
     allDayYn: event.allDay ? 'Y' : 'N'

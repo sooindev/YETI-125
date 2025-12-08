@@ -43,12 +43,12 @@ $(document).on('keydown', function(e) {
 
 // Date Format Helper
 function formatDate(date, format) {
-  var d = new Date(date);
-  var year = d.getFullYear();
-  var month = String(d.getMonth() + 1).padStart(2, '0');
-  var day = String(d.getDate()).padStart(2, '0');
-  var hours = String(d.getHours()).padStart(2, '0');
-  var minutes = String(d.getMinutes()).padStart(2, '0');
+  const d = new Date(date);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  const hours = String(d.getHours()).padStart(2, '0');
+  const minutes = String(d.getMinutes()).padStart(2, '0');
 
   if (format === 'date') {
     return year + '-' + month + '-' + day;
@@ -64,7 +64,7 @@ function formatDate(date, format) {
 
 // Schedule Type to Korean
 function getScheduleTypeName(type) {
-  var types = {
+  const types = {
     'STREAM': '방송',
     'EVENT': '이벤트',
     'OTHER': '기타'
@@ -74,7 +74,7 @@ function getScheduleTypeName(type) {
 
 // API Request Helper
 function apiRequest(url, method, data, callback) {
-  var options = {
+  const options = {
     url: url,
     type: method || 'GET',
     contentType: 'application/json',
@@ -105,7 +105,7 @@ function apiRequest(url, method, data, callback) {
 
 // Toast Message
 function showToast(message, type) {
-  var $toast = $('#toast');
+  const $toast = $('#toast');
   $toast.text(message)
       .removeClass('success error')
       .addClass(type || 'success')

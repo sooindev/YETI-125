@@ -12,8 +12,8 @@ $(document).ready(function() {
 
 // 로그인 처리
 function doLogin() {
-  var adminLoginId = $('#adminLoginId').val().trim();
-  var password = $('#password').val().trim();
+  const adminLoginId = $('#adminLoginId').val().trim();
+  const password = $('#password').val().trim();
 
   // 유효성 검사
   if (!adminLoginId) {
@@ -53,7 +53,7 @@ function doLogin() {
 
 // 에러 메시지 표시
 function showError(message) {
-  var $errorMsg = $('#errorMsg');
+  const $errorMsg = $('#errorMsg');
   $errorMsg.text(message).show();
 
   // 3초 후 숨김

@@ -2,7 +2,7 @@
    Irion Fansite - Schedule Calendar (jQuery)
    ================================================ */
 
-var calendar;
+let calendar;
 
 $(document).ready(function() {
   initCalendar();
@@ -10,7 +10,7 @@ $(document).ready(function() {
 
 // 캘린더 초기화
 function initCalendar() {
-  var calendarEl = document.getElementById('calendar');
+  const calendarEl = document.getElementById('calendar');
 
   calendar = new FullCalendar.Calendar(calendarEl, {
     initialView: 'dayGridMonth',
@@ -52,7 +52,7 @@ function loadSchedules(start, end, callback) {
     },
     dataType: 'json',
     success: function(data) {
-      var events = [];
+      const events = [];
       $.each(data, function(index, item) {
         events.push({
           id: item.id,
@@ -81,7 +81,7 @@ function showScheduleDetail(event) {
   $('#modalTitle').text(event.title);
 
   // 일시 포맷
-  var dateText = formatDate(event.start, 'display');
+  let dateText = formatDate(event.start, 'display');
   if (event.end) {
     dateText += ' ~ ' + formatDate(event.end, 'display');
   }
@@ -94,7 +94,7 @@ function showScheduleDetail(event) {
   $('#modalType').text(getScheduleTypeName(event.extendedProps.type));
 
   // 설명
-  var description = event.extendedProps.description;
+  const description = event.extendedProps.description;
   if (description) {
     $('#descriptionRow').show();
     $('#modalDescription').text(description);
