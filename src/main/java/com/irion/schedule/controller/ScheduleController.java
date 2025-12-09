@@ -1,12 +1,12 @@
 package com.irion.schedule.controller;
 
+import com.irion.common.util.JsonResult;
 import com.irion.schedule.service.ScheduleService;
 import com.irion.schedule.vo.ScheduleVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,16 +21,10 @@ public class ScheduleController {
     @Autowired
     private ScheduleService scheduleService;
 
-    // 캘린더 페이지
-    @GetMapping("")
-    public String calendar() {
-        return "schedule/calendar";
-    }
-
     // 일정 목록 조회 (JSON) - FullCalendar용
     @GetMapping("/list")
     @ResponseBody
-    public ResponseEntity<List<Map<String, Object>>> getScheduleList(
+    public List<Map<String, Object>> getScheduleList(
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date start,
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date end) {
 
@@ -52,18 +46,18 @@ public class ScheduleController {
             events.add(event);
         }
 
-        return ResponseEntity.ok(events);
+        return events;
     }
 
     // 일정 상세 조회 (JSON)
     @GetMapping("/{scheduleId}")
     @ResponseBody
-    public ResponseEntity<ScheduleVO> getSchedule(@PathVariable Long scheduleId) {
+    public JsonResult getSchedule(@PathVariable Long scheduleId) {
         ScheduleVO schedule = scheduleService.getSchedule(scheduleId);
         if (schedule == null || !"Y".equals(schedule.getDisplayYn())) {
-            return ResponseEntity.notFound().build();
+            return JsonResult.fail("일정을 찾을 수 없습니다.");
         }
-        return ResponseEntity.ok(schedule);
+        return JsonResult.success("조회 성공", schedule);
     }
 
 }

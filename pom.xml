@@ -5,11 +5,11 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.irion</groupId>
-  <artifactId>irion-fansite</artifactId>
+  <artifactId>Yeti-125</artifactId>
   <version>1.0.0</version>
   <packaging>war</packaging>
 
-  <name>Irion Fansite</name>
+  <name>Yeti 125</name>
   <description>이리온 팬 웹사이트</description>
 
   <properties>
@@ -116,7 +116,7 @@
   </dependencies>
 
   <build>
-    <finalName>irion-fansite</finalName>
+    <finalName>yeti-125</finalName>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

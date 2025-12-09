@@ -6,16 +6,19 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class HomeController {
 
-    // 메인 페이지
     @GetMapping("/")
     public String home() {
-        return "index";
+        return "redirect:/index.html";
     }
 
-    // 이리온 정보 페이지
     @GetMapping("/info")
     public String info() {
-        return "info/profile";
+        return "redirect:/info.html";
+    }
+
+    @GetMapping("/schedule")
+    public String schedule() {
+        return "redirect:/schedule.html";
     }
 
 }

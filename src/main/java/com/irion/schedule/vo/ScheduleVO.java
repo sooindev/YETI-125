@@ -1,5 +1,7 @@
 package com.irion.schedule.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.io.Serializable;
 import java.util.Date;
 
@@ -10,12 +12,17 @@ public class ScheduleVO implements Serializable {
     private Long scheduleId;
     private String title;
     private String description;
-    private String scheduleType;      // STREAM: 방송, EVENT: 이벤트, OTHER: 기타
+    private String scheduleType;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
     private Date startDate;
+  
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
     private Date endDate;
-    private String allDayYn;          // Y: 종일, N: 시간 지정
-    private String displayYn;         // Y: 표시, N: 숨김
-    private String color;             // 캘린더 색상 (HEX)
+
+    private String allDayYn;
+    private String displayYn;
+    private String color;
     private Date regDate;
     private Date modDate;
     private String delYn;
