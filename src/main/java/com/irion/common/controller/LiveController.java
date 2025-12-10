@@ -97,8 +97,7 @@ public class LiveController {
     // 클립 목록 조회 (인기순)
     @GetMapping("/clips")
     @ResponseBody
-    public JsonResult getClips(@RequestParam(defaultValue = "6") int limit,
-                               @RequestParam(defaultValue = "0") int offset) {
+    public JsonResult getClips(@RequestParam(defaultValue = "6") int limit, @RequestParam(defaultValue = "0") int offset) {
         try {
             // 캐시 확인
             long now = System.currentTimeMillis();
@@ -340,8 +339,7 @@ public class LiveController {
     // 다시보기 영상 조회
     @GetMapping("/videos")
     @ResponseBody
-    public JsonResult getVideos(@RequestParam(defaultValue = "6") int limit,
-                                @RequestParam(defaultValue = "0") int offset) {
+    public JsonResult getVideos(@RequestParam(defaultValue = "6") int limit, @RequestParam(defaultValue = "0") int offset) {
         try {
             // 캐시 확인
             long now = System.currentTimeMillis();
@@ -383,8 +381,7 @@ public class LiveController {
         List<Map<String, Object>> allVideos = new ArrayList<>();
 
         try {
-            String videoApiUrl = "https://api.chzzk.naver.com/service/v1/channels/" + CHANNEL_ID
-                    + "/videos?sortType=LATEST&pagingType=PAGE&page=0&size=50";
+            String videoApiUrl = "https://api.chzzk.naver.com/service/v1/channels/" + CHANNEL_ID + "/videos?sortType=LATEST&pagingType=PAGE&page=0&size=50";
 
             URL url = new URL(videoApiUrl);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
