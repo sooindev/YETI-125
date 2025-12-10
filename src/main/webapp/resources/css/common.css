@@ -4,6 +4,39 @@
 
 /* CSS Variables */
 :root {
+  /* Light Theme (Default) */
+  --primary: #3B82F6;
+  --primary-dark: #2563EB;
+  --primary-light: #60A5FA;
+  --secondary: #E5E7EB;
+  --accent: #9CA3AF;
+
+  --bg-dark: #F9FAFB;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #F3F4F6;
+  --text-primary: #1F2937;
+  --text-secondary: #6B7281;
+  --text-muted: #9CA3AF;
+  --border-color: #E5E7EB;
+
+  --header-bg: rgba(249, 250, 251, 0.85);
+  --modal-overlay-bg: rgba(0, 0, 0, 0.7);
+
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+
+  --font-main: 'Noto Sans KR', -apple-system, sans-serif;
+  --header-height: 70px;
+  --container-width: 1200px;
+  --transition: 0.3s ease;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+}
+
+[data-theme="dark"] {
+  /* Dark Theme Overrides */
   --primary: #6366F1;
   --primary-dark: #4F46E5;
   --primary-light: #818CF8;
@@ -18,18 +51,14 @@
   --text-muted: #6B6B80;
   --border-color: #2D2D44;
 
+  --header-bg: rgba(15, 15, 26, 0.85);
+  --modal-overlay-bg: rgba(0, 0, 0, 0.7);
+
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
-
-  --font-main: 'Noto Sans KR', -apple-system, sans-serif;
-  --header-height: 70px;
-  --container-width: 1200px;
-  --transition: 0.3s ease;
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 20px;
 }
+
 
 /* Reset */
 *, *::before, *::after {
@@ -40,6 +69,7 @@
 
 html {
   scroll-behavior: smooth;
+  background: var(--bg-dark);
 }
 
 body {
@@ -48,6 +78,7 @@ body {
   color: var(--text-primary);
   line-height: 1.6;
   min-height: 100vh;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
 a {
@@ -82,10 +113,12 @@ input, select, textarea {
   left: 0;
   right: 0;
   height: var(--header-height);
-  background: rgba(15, 15, 26, 0.95);
+  background: var(--header-bg);
   backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border-color);
   z-index: 1000;
+  transition: background 0.3s ease, border-color 0.3s ease;
 }
 
 .header-container {
@@ -107,7 +140,7 @@ input, select, textarea {
 .logo-text {
   font-size: 1.5rem;
   font-weight: 700;
-  background: linear-gradient(135deg, #6366F1, #EC4899);
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -120,6 +153,7 @@ input, select, textarea {
 
 .nav {
   display: flex;
+  align-items: center;
   gap: 8px;
 }
 
@@ -134,13 +168,53 @@ input, select, textarea {
 
 .nav-link:hover {
   color: var(--text-primary);
-  background: var(--bg-card);
+  background: var(--bg-card-hover);
 }
 
 .nav-link.active {
-  color: var(--text-primary);
+  color: #FFFFFF;
   background: var(--primary);
 }
+
+/* Theme Toggle Button */
+.theme-toggle-btn {
+  background: var(--bg-card-hover);
+  border: 1px solid var(--border-color);
+  border-radius: 50px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  margin-left: 16px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.theme-toggle-btn:hover {
+  border-color: var(--primary);
+}
+
+.theme-toggle-btn .icon-sun,
+.theme-toggle-btn .icon-moon {
+  font-size: 1.25rem;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.theme-toggle-btn .icon-moon {
+  display: none;
+}
+
+[data-theme="dark"] .theme-toggle-btn .icon-sun {
+  display: none;
+}
+
+[data-theme="dark"] .theme-toggle-btn .icon-moon {
+  display: block;
+}
+
 
 /* Mobile Menu Button */
 .mobile-menu-btn {
@@ -168,7 +242,7 @@ input, select, textarea {
 .page-header {
   padding: 120px 0 40px;
   text-align: center;
-  background: linear-gradient(180deg, var(--bg-dark) 0%, var(--bg-card) 100%);
+  background: transparent;
 }
 
 .page-title {
@@ -191,6 +265,7 @@ input, select, textarea {
   padding: 30px 0;
   margin-top: 80px;
   text-align: center;
+  transition: background 0.3s ease, border-color 0.3s ease;
 }
 
 .footer-text {
@@ -217,6 +292,14 @@ input, select, textarea {
 
 .btn-primary {
   background: var(--primary);
+  color: white;
+}
+
+[data-theme="light"] .btn-primary {
+  color: white;
+}
+
+[data-theme="dark"] .btn-primary {
   color: white;
 }
 
@@ -255,12 +338,14 @@ input, select, textarea {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: var(--modal-overlay-bg);
   backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   z-index: 2000;
   align-items: center;
   justify-content: center;
   padding: 20px;
+  transition: background 0.3s ease;
 }
 
 .modal.active {
@@ -275,6 +360,7 @@ input, select, textarea {
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: var(--shadow-lg);
+  transition: background 0.3s ease, box-shadow 0.3s ease;
 }
 
 .modal-header {
@@ -283,6 +369,7 @@ input, select, textarea {
   align-items: center;
   padding: 20px 24px;
   border-bottom: 1px solid var(--border-color);
+  transition: border-color 0.3s ease;
 }
 
 .modal-header h2 {

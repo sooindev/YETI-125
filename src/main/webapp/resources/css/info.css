@@ -19,7 +19,7 @@
 .snowflake {
   position: absolute;
   top: -20px;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(59, 130, 246, 0.3); /* Changed to a visible blue */
   font-size: 1.5rem;
   animation: snowfall linear infinite;
 }
@@ -66,11 +66,12 @@
   right: 0;
   bottom: 0;
   background:
-          radial-gradient(ellipse at 20% 20%, rgba(165, 243, 252, 0.25) 0%, transparent 50%),
-          radial-gradient(ellipse at 80% 80%, rgba(196, 181, 253, 0.2) 0%, transparent 50%),
-          radial-gradient(ellipse at 50% 50%, rgba(236, 72, 153, 0.1) 0%, transparent 70%),
-          linear-gradient(180deg, var(--bg-dark) 0%, #1a1a2e 100%);
+          radial-gradient(ellipse at 20% 20%, rgba(96, 165, 250, 0.2) 0%, transparent 50%),
+          radial-gradient(ellipse at 80% 80%, rgba(96, 165, 250, 0.15) 0%, transparent 50%),
+          radial-gradient(ellipse at 50% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 70%),
+          linear-gradient(180deg, var(--bg-dark) 0%, var(--bg-card) 100%);
   z-index: -1;
+  transition: background 0.3s ease;
 }
 
 .profile-hero-content {
@@ -84,15 +85,15 @@
   display: flex;
   align-items: center;
   gap: 48px;
-  background: rgba(26, 26, 46, 0.9);
+  background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(165, 243, 252, 0.2);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(59, 130, 246, 0.2);
   border-radius: 24px;
   padding: 48px;
   margin-bottom: 32px;
-  box-shadow:
-          0 20px 60px rgba(0, 0, 0, 0.4),
-          inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  box-shadow: var(--shadow-lg);
+  transition: var(--transition);
 }
 
 .profile-avatar {
@@ -119,7 +120,7 @@
   align-items: center;
   justify-content: center;
   font-size: 5rem;
-  background: linear-gradient(135deg, #a5f3fc, #c4b5fd);
+  background: linear-gradient(135deg, var(--primary-light), var(--primary));
   position: relative;
   z-index: 2;
 }
@@ -131,7 +132,7 @@
   right: -6px;
   bottom: -6px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #a5f3fc, #c4b5fd, #f0abfc, #a5f3fc);
+  background: linear-gradient(135deg, var(--primary-light), var(--primary), var(--primary-dark), var(--primary-light));
   background-size: 300% 300%;
   animation: ringGradient 4s ease infinite;
   z-index: 1;
@@ -144,7 +145,7 @@
   right: -20px;
   bottom: -20px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(165, 243, 252, 0.3) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(96, 165, 250, 0.3) 0%, transparent 70%);
   animation: glowPulse 3s ease-in-out infinite;
   z-index: 0;
 }
@@ -178,7 +179,7 @@
   font-size: 3.5rem;
   font-weight: 700;
   margin-bottom: 8px;
-  background: linear-gradient(135deg, #fff 0%, #a5f3fc 40%, #c4b5fd 70%, #f0abfc 100%);
+  background: linear-gradient(135deg, var(--text-primary) 0%, var(--primary-light) 50%, var(--primary) 100%);
   background-size: 200% 200%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -204,8 +205,8 @@
 }
 
 .meta-item {
-  background: rgba(165, 243, 252, 0.1);
-  border: 1px solid rgba(165, 243, 252, 0.2);
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.2);
   padding: 10px 18px;
   border-radius: 50px;
   font-size: 0.9rem;
@@ -214,8 +215,8 @@
 }
 
 .meta-item:hover {
-  background: rgba(165, 243, 252, 0.2);
-  border-color: rgba(165, 243, 252, 0.4);
+  background: rgba(59, 130, 246, 0.2);
+  border-color: rgba(96, 165, 250, 0.4);
   transform: translateY(-2px);
 }
 
@@ -233,9 +234,10 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  background: rgba(26, 26, 46, 0.9);
+  background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(165, 243, 252, 0.2);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(59, 130, 246, 0.2);
   border-radius: 16px;
   padding: 20px 28px;
   transition: var(--transition);
@@ -243,8 +245,8 @@
 
 .dday-card:hover {
   transform: translateY(-4px);
-  border-color: rgba(165, 243, 252, 0.4);
-  box-shadow: 0 10px 30px rgba(165, 243, 252, 0.1);
+  border-color: rgba(96, 165, 250, 0.4);
+  box-shadow: 0 10px 30px rgba(96, 165, 250, 0.2);
 }
 
 .dday-icon {
@@ -267,7 +269,7 @@
 .dday-count {
   font-size: 1.5rem;
   font-weight: 700;
-  background: linear-gradient(135deg, #a5f3fc, #c4b5fd);
+  background: linear-gradient(135deg, var(--primary-light), var(--primary));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -285,9 +287,8 @@
 .quick-social-btn {
   width: 60px;
   height: 60px;
-  background: rgba(26, 26, 46, 0.9);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -325,7 +326,8 @@
    ================================================ */
 .profile-detail-section {
   padding: 80px 0;
-  background: linear-gradient(180deg, #1a1a2e 0%, var(--bg-dark) 100%);
+  background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg-dark) 100%);
+  transition: background 0.3s ease;
 }
 
 .section-title {
@@ -361,18 +363,18 @@
 
 .detail-card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
-  border-color: rgba(165, 243, 252, 0.3);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary-light);
 }
 
 .detail-card.card-highlight {
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(236, 72, 153, 0.15));
-  border-color: rgba(196, 181, 253, 0.3);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(96, 165, 250, 0.05));
+  border-color: rgba(96, 165, 250, 0.2);
 }
 
 .detail-card.card-highlight:hover {
-  border-color: rgba(196, 181, 253, 0.5);
-  box-shadow: 0 20px 50px rgba(196, 181, 253, 0.2);
+  border-color: var(--primary-light);
+  box-shadow: 0 20px 50px rgba(96, 165, 250, 0.2);
 }
 
 .detail-card-header {
@@ -380,7 +382,7 @@
   align-items: center;
   gap: 12px;
   padding: 20px 24px;
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(59, 130, 246, 0.05);
   border-bottom: 1px solid var(--border-color);
 }
 
@@ -407,7 +409,7 @@
 }
 
 .detail-row:hover {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--bg-card-hover);
 }
 
 .detail-label {
@@ -422,7 +424,7 @@
 }
 
 .detail-value.highlight {
-  background: linear-gradient(135deg, #a5f3fc, #c4b5fd);
+  background: linear-gradient(135deg, var(--primary-light), var(--primary));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -439,6 +441,7 @@
 .social-section {
   padding: 80px 0;
   background: var(--bg-card);
+  transition: background 0.3s ease;
 }
 
 .social-grid {
@@ -565,7 +568,7 @@
 }
 
 .about-card:hover {
-  border-color: rgba(165, 243, 252, 0.3);
+  border-color: var(--primary-light);
 }
 
 .about-icon {
@@ -581,7 +584,7 @@
 }
 
 .about-card strong {
-  background: linear-gradient(135deg, #a5f3fc, #c4b5fd);
+  background: linear-gradient(135deg, var(--primary-light), var(--primary));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -591,137 +594,154 @@
    Responsive
    ================================================ */
 @media (max-width: 768px) {
-  .profile-hero {
-    padding: 120px 20px 40px;
-  }
-
-  .profile-card-main {
-    flex-direction: column;
-    text-align: center;
-    padding: 32px 24px;
-    gap: 24px;
-  }
-
-  .profile-avatar {
-    width: 140px;
-    height: 140px;
-  }
-
-  .avatar-emoji {
-    font-size: 4rem;
-  }
-
-  .profile-oshi {
-    font-size: 2rem;
-  }
-
-  .profile-name {
-    font-size: 2.5rem;
-  }
-
-  .profile-tagline {
-    font-size: 1rem;
-  }
-
-  .profile-meta {
-    justify-content: center;
-  }
-
-  .meta-item {
-    padding: 8px 14px;
-    font-size: 0.813rem;
-  }
-
-  .dday-container {
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .dday-card {
-    width: 100%;
-    max-width: 280px;
-    justify-content: center;
-  }
-
-  .quick-social {
-    gap: 12px;
-  }
-
-  .quick-social-btn {
-    width: 52px;
-    height: 52px;
-    font-size: 1.25rem;
-  }
-
-  .profile-detail-section {
-    padding: 60px 0;
-  }
-
-  .section-title {
-    font-size: 1.5rem;
-    margin-bottom: 32px;
-  }
-
-  .detail-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-
-  .detail-card-header {
-    padding: 16px 20px;
-  }
-
-  .detail-row {
-    padding: 14px 20px;
-  }
-
-  .social-section {
-    padding: 60px 0;
-  }
-
-  .social-card {
-    padding: 20px;
-  }
-
-  .social-icon {
-    width: 44px;
-    height: 44px;
-    font-size: 1.25rem;
-  }
-
-  .about-section {
-    padding: 40px 0;
-  }
-
-  .about-card {
-    padding: 28px;
-  }
+  .profile-hero { padding: 120px 20px 40px; }
+  .profile-card-main { flex-direction: column; text-align: center; padding: 32px 24px; gap: 24px; }
+  .profile-avatar { width: 140px; height: 140px; }
+  .avatar-emoji { font-size: 4rem; }
+  .profile-oshi { font-size: 2rem; }
+  .profile-name { font-size: 2.5rem; }
+  .profile-tagline { font-size: 1rem; }
+  .profile-meta { justify-content: center; }
+  .meta-item { padding: 8px 14px; font-size: 0.813rem; }
+  .dday-container { flex-direction: column; align-items: center; gap: 12px; }
+  .dday-card { width: 100%; max-width: 280px; justify-content: center; }
+  .quick-social { gap: 12px; }
+  .quick-social-btn { width: 52px; height: 52px; font-size: 1.25rem; }
+  .profile-detail-section { padding: 60px 0; }
+  .section-title { font-size: 1.5rem; margin-bottom: 32px; }
+  .detail-grid { grid-template-columns: 1fr; gap: 16px; }
+  .detail-card-header { padding: 16px 20px; }
+  .detail-row { padding: 14px 20px; }
+  .social-section { padding: 60px 0; }
+  .social-card { padding: 20px; }
+  .social-icon { width: 44px; height: 44px; font-size: 1.25rem; }
+  .about-section { padding: 40px 0; }
+  .about-card { padding: 28px; }
 }
 
 @media (max-width: 480px) {
-  .snowflake {
-    font-size: 1rem;
-  }
-
-  .profile-name {
-    font-size: 2rem;
-  }
+  .snowflake { font-size: 1rem; }
+  .profile-name { font-size: 2rem; }
 }
 
 /* Social Favicon */
-.social-favicon {
-  width: 28px;
-  height: 28px;
-  object-fit: contain;
+.social-favicon { width: 28px; height: 28px; object-fit: contain; }
+.quick-social-btn .social-favicon { width: 28px; height: 28px; }
+.social-icon .social-favicon { width: 28px; height: 28px; }
+
+/* ================================================
+   Dark Mode Overrides
+   ================================================ */
+[data-theme="dark"] .snowflake {
+  color: rgba(255, 255, 255, 0.4);
 }
 
-.quick-social-btn .social-favicon {
-  width: 28px;
-  height: 28px;
+[data-theme="dark"] .profile-hero-bg {
+  background:
+          radial-gradient(ellipse at 20% 20%, rgba(165, 243, 252, 0.25) 0%, transparent 50%),
+          radial-gradient(ellipse at 80% 80%, rgba(196, 181, 253, 0.2) 0%, transparent 50%),
+          radial-gradient(ellipse at 50% 50%, rgba(236, 72, 153, 0.1) 0%, transparent 70%),
+          linear-gradient(180deg, var(--bg-dark) 0%, #1a1a2e 100%);
 }
 
-.social-icon .social-favicon {
-  width: 28px;
-  height: 28px;
+[data-theme="dark"] .profile-card-main {
+  background: rgba(26, 26, 46, 0.9);
+  border: 1px solid rgba(165, 243, 252, 0.2);
+  box-shadow:
+          0 20px 60px rgba(0, 0, 0, 0.4),
+          inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .avatar-emoji {
+  background: linear-gradient(135deg, #a5f3fc, #c4b5fd);
+}
+
+[data-theme="dark"] .avatar-ring {
+  background: linear-gradient(135deg, #a5f3fc, #c4b5fd, #f0abfc, #a5f3fc);
+  background-size: 300% 300%;
+}
+
+[data-theme="dark"] .profile-name {
+  background: linear-gradient(135deg, #fff 0%, #a5f3fc 40%, #c4b5fd 70%, #f0abfc 100%);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+[data-theme="dark"] .meta-item {
+  background: rgba(165, 243, 252, 0.1);
+  border: 1px solid rgba(165, 243, 252, 0.2);
+}
+
+[data-theme="dark"] .meta-item:hover {
+  background: rgba(165, 243, 252, 0.2);
+  border-color: rgba(165, 243, 252, 0.4);
+}
+
+[data-theme="dark"] .dday-card {
+  background: rgba(26, 26, 46, 0.9);
+  border: 1px solid rgba(165, 243, 252, 0.2);
+}
+
+[data-theme="dark"] .dday-card:hover {
+  border-color: rgba(165, 243, 252, 0.4);
+  box-shadow: 0 10px 30px rgba(165, 243, 252, 0.1);
+}
+
+[data-theme="dark"] .dday-count {
+  background: linear-gradient(135deg, #a5f3fc, #c4b5fd);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+[data-theme="dark"] .quick-social-btn {
+  background: rgba(26, 26, 46, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .profile-detail-section {
+  background: linear-gradient(180deg, #1a1a2e 0%, var(--bg-dark) 100%);
+}
+
+[data-theme="dark"] .detail-card:hover {
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+  border-color: rgba(165, 243, 252, 0.3);
+}
+
+[data-theme="dark"] .detail-card.card-highlight {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(236, 72, 153, 0.15));
+  border-color: rgba(196, 181, 253, 0.3);
+}
+
+[data-theme="dark"] .detail-card.card-highlight:hover {
+  border-color: rgba(196, 181, 253, 0.5);
+  box-shadow: 0 20px 50px rgba(196, 181, 253, 0.2);
+}
+
+[data-theme="dark"] .detail-card-header {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .detail-row:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+[data-theme="dark"] .detail-value.highlight {
+  background: linear-gradient(135deg, #a5f3fc, #c4b5fd);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+[data-theme="dark"] .about-card:hover {
+  border-color: rgba(165, 243, 252, 0.3);
+}
+
+[data-theme="dark"] .about-card strong {
+  background: linear-gradient(135deg, #a5f3fc, #c4b5fd);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }

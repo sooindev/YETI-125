@@ -326,13 +326,14 @@ function escapeHtml(text) {
 
 // 모달 열기
 function openModal(modalId) {
-    $('#' + modalId).fadeIn(200);
+    const $modal = $('#' + modalId);
+    $modal.addClass('active');
     $('body').css('overflow', 'hidden');
 }
 
 // 모달 닫기
 function closeModal() {
-    $('.modal').fadeOut(200);
+    $('.modal').removeClass('active');
     $('body').css('overflow', 'auto');
 }
 

@@ -8,6 +8,21 @@ $(document).ready(function() {
         $('.nav').toggleClass('active');
         $(this).toggleClass('active');
     });
+
+    // Theme Toggler
+    const themeToggle = document.getElementById('theme-toggle');
+    const htmlEl = document.documentElement;
+
+    // 저장된 테마 적용
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    htmlEl.setAttribute('data-theme', savedTheme);
+
+    themeToggle.addEventListener('click', function() {
+        const currentTheme = htmlEl.getAttribute('data-theme');
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        htmlEl.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+    });
 });
 
 // Modal Functions
