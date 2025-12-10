@@ -708,3 +708,20 @@
     font-size: 2rem;
   }
 }
+
+/* Social Favicon */
+.social-favicon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
+.quick-social-btn .social-favicon {
+  width: 28px;
+  height: 28px;
+}
+
+.social-icon .social-favicon {
+  width: 28px;
+  height: 28px;
+}

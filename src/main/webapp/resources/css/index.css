@@ -575,3 +575,36 @@
     font-size: 0.95rem;
   }
 }
+
+/* Card Favicon */
+.card-favicon {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+.info-card {
+  display: block;
+  text-decoration: none;
+  background: var(--bg-dark);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  text-align: center;
+  transition: var(--transition);
+  cursor: pointer;
+}
+
+.info-card:hover {
+  transform: translateY(-8px);
+  border-color: var(--primary);
+  box-shadow: 0 0 30px rgba(99, 102, 241, 0.2);
+}
+
+.info-card h3 {
+  color: var(--text-primary);
+}
+
+.info-card p {
+  color: var(--text-secondary);
+}
