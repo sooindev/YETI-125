@@ -20,7 +20,7 @@ public class LiveController {
 
     private static final Logger logger = LoggerFactory.getLogger(LiveController.class);
 
-    private static final String CHANNEL_ID = "516937b5f85cbf2249ce31b0ad046b0f";
+    private static final String CHANNEL_ID = "63368ec9081dc85e61d0e4310b7e1602";
     private static final String CHZZK_API_URL = "https://api.chzzk.naver.com/service/v3/channels/" + CHANNEL_ID + "/live-detail";
 
     @GetMapping("/status")

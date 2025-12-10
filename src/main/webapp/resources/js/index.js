@@ -20,7 +20,7 @@ function checkLiveStatus() {
             console.log('Live status:', response);
 
             if (response.success && response.data) {
-                var data = response.data;
+                const data = response.data;
 
                 if (data.isLive) {
                     showLiveHero(data);
