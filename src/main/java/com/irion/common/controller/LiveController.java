@@ -445,7 +445,7 @@ public class LiveController {
                     video.put("duration", extractJsonNumber(videoJson, "duration"));
                     video.put("readCount", extractJsonNumber(videoJson, "readCount"));
                     video.put("publishDate", extractJsonValue(videoJson, "publishDate"));
-                    video.put("videoUrl", "https://chzzk.naver.com/" + CHANNEL_ID + "/video/" + videoNo);
+                    video.put("videoUrl", "https://chzzk.naver.com/video/" + videoNo);
                     videos.add(video);
                 }
 
@@ -455,7 +455,6 @@ public class LiveController {
         } catch (Exception e) {
             logger.error("Error parsing videos", e);
         }
-
         return videos;
     }
 
