@@ -24,7 +24,7 @@ public class AdminScheduleController {
     // 일정 관리 페이지
     @GetMapping("")
     public String scheduleManage() {
-        return "redirect:/admin/schedule.html";
+        return "redirect:/admin/admin-schedule.html";
     }
 
     // 일정 목록 조회 (JSON)

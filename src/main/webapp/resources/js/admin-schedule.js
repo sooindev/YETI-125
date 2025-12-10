@@ -109,7 +109,7 @@ function loadSchedules(start, end, callback) {
         error: function(xhr) {
             console.error('Failed to load schedules:', xhr);
             if (xhr.status === 401) {
-                window.location.href = '/admin/login.html';
+                window.location.href = '/admin/admin-login.html';
             }
             callback([]);
         }
@@ -221,7 +221,7 @@ function saveSchedule() {
         },
         error: function(xhr) {
             if (xhr.status === 401) {
-                window.location.href = '/admin/login.html';
+                window.location.href = '/admin/admin-login.html';
                 return;
             }
             showToast('저장 중 오류가 발생했습니다.', 'error');
@@ -300,10 +300,10 @@ function doLogout() {
         url: '/admin/logout',
         type: 'GET',
         success: function() {
-            window.location.href = '/admin/login.html';
+            window.location.href = '/admin/admin-login.html';
         },
         error: function() {
-            window.location.href = '/admin/login.html';
+            window.location.href = '/admin/admin-login.html';
         }
     });
 }

@@ -7,7 +7,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
-  <!-- FullCalendar CSS -->
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css" rel="stylesheet">
   <link rel="stylesheet" href="/resources/css/common.css">
   <link rel="stylesheet" href="/resources/css/schedule.css">
@@ -33,11 +32,17 @@
   </div>
 </header>
 
-<!-- Page Header -->
-<section class="page-header">
-  <div class="container">
-    <h1 class="page-title">📅 방송 일정</h1>
-    <p class="page-desc">이리온의 방송 및 이벤트 일정을 확인하세요</p>
+<!-- Schedule Header -->
+<section class="schedule-header">
+  <div class="schedule-header-content">
+    <div class="schedule-icon">📅</div>
+    <h1>방송 일정</h1>
+    <p>이리온의 방송 일정을 확인하세요</p>
+  </div>
+  <div class="schedule-header-decoration">
+    <div class="decoration-circle circle-1"></div>
+    <div class="decoration-circle circle-2"></div>
+    <div class="decoration-circle circle-3"></div>
   </div>
 </section>
 
@@ -48,7 +53,7 @@
     <div class="calendar-legend">
       <div class="legend-item">
         <span class="legend-color" style="background: #6366F1;"></span>
-        <span>정규 방송</span>
+        <span>방송</span>
       </div>
       <div class="legend-item">
         <span class="legend-color" style="background: #EC4899;"></span>
@@ -56,7 +61,7 @@
       </div>
       <div class="legend-item">
         <span class="legend-color" style="background: #10B981;"></span>
-        <span>콜라보</span>
+        <span>기타</span>
       </div>
     </div>
 
@@ -64,29 +69,33 @@
     <div class="calendar-wrapper">
       <div id="calendar"></div>
     </div>
+
+    <!-- Upcoming Events -->
+    <div class="upcoming-section">
+      <h2 class="upcoming-title">
+        <span class="upcoming-icon">🔔</span>
+        다가오는 일정
+      </h2>
+      <div id="upcomingEvents" class="upcoming-list">
+        <!-- 일정이 여기에 로드됨 -->
+      </div>
+      <div id="upcomingEmpty" class="upcoming-empty" style="display: none;">
+        <span>😴</span>
+        <p>예정된 일정이 없습니다</p>
+      </div>
+    </div>
   </div>
 </section>
 
 <!-- Schedule Detail Modal -->
-<div id="scheduleModal" class="modal">
+<div id="scheduleModal" class="modal schedule-detail-modal">
   <div class="modal-content">
     <div class="modal-header">
-      <h2 id="modalTitle">일정 상세</h2>
+      <h2>일정 상세</h2>
       <button class="modal-close" onclick="closeModal()">&times;</button>
     </div>
-    <div class="modal-body">
-      <div class="detail-row">
-        <span class="detail-label">📅 일시</span>
-        <span id="modalDate" class="detail-value"></span>
-      </div>
-      <div class="detail-row">
-        <span class="detail-label">📌 유형</span>
-        <span id="modalType" class="detail-value"></span>
-      </div>
-      <div class="detail-row" id="descriptionRow">
-        <span class="detail-label">📝 설명</span>
-        <span id="modalDescription" class="detail-value"></span>
-      </div>
+    <div class="modal-body" id="scheduleDetail">
+      <!-- 상세 내용이 여기에 로드됨 -->
     </div>
   </div>
 </div>
@@ -98,7 +107,7 @@
   </div>
 </footer>
 
-<!-- FullCalendar JS -->
+<!-- Scripts -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
 <script src="/resources/js/common.js"></script>

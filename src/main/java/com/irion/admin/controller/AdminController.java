@@ -24,7 +24,7 @@ public class AdminController {
     @GetMapping("/login")
     public String loginPage(HttpSession session) {
         if (session.getAttribute("adminUser") != null) {
-            return "redirect:/admin/schedule.html";
+            return "redirect:/admin/admin-schedule.html";
         }
         return "redirect:/admin/login.html";
     }
@@ -57,13 +57,13 @@ public class AdminController {
             logger.info("Admin logout: {}", admin.getAdminLoginId());
         }
         session.invalidate();
-        return "redirect:/admin/login.html";
+        return "redirect:/admin/admin-login.html";
     }
 
     // 관리자 메인
     @GetMapping("")
     public String adminMain() {
-        return "redirect:/admin/schedule.html";
+        return "redirect:/admin/admin-schedule.html";
     }
 
 }

@@ -38,10 +38,14 @@ function doLogin() {
         },
         dataType: 'json',
         success: function(response) {
-            console.log('Response:', response);  // 디버깅용
+            console.log('=== Login Response ===');
+            console.log('success:', response.success);
+            console.log('message:', response.message);
+            console.log('full response:', response);
+
             if (response.success) {
-                // 로그인 성공 - 일정 관리 페이지로 이동
-                window.location.href = '/admin/schedule.html';
+                console.log('Redirecting to /admin/admin-schedule.html...');
+                window.location.href = '/admin/admin-schedule.html';
             } else {
                 showError(response.message || '로그인에 실패했습니다.');
             }

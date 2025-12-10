@@ -55,16 +55,43 @@
 <!-- Hero Section (방송 안 할 때) -->
 <section id="defaultHero" class="hero">
   <div class="hero-bg"></div>
+  <div class="hero-particles">
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+  </div>
   <div class="hero-content">
+    <div class="offline-status">
+      <div class="offline-icon">
+        <div class="offline-circle"></div>
+        <span>📡</span>
+      </div>
+      <span class="offline-badge">OFFLINE</span>
+    </div>
     <h1 class="hero-title">
-      <span class="hero-welcome">Welcome to</span>
       <span class="hero-name">IRION</span>
       <span class="hero-fansite">FANSITE</span>
     </h1>
-    <p class="hero-desc">이리온과 함께하는 특별한 순간들</p>
+    <p class="hero-desc">현재 채널이 오프라인 상태입니다</p>
+    <p class="hero-subdesc">다음 라이브를 기대해주세요! ❄️ 🌸</p>
     <div class="hero-buttons">
-      <a href="/schedule.html" class="btn btn-primary">📅 방송 일정</a>
-      <a href="/info.html" class="btn btn-secondary">✨ 이리온 소개</a>
+      <a href="/schedule.html" class="btn btn-primary">
+        <span class="btn-icon">📅</span>
+        방송 일정 확인
+      </a>
+      <a href="https://chzzk.naver.com/63368ec9081dc85e61d0e4310b7e1602" target="_blank" class="btn btn-secondary">
+        <span class="btn-icon">🔔</span>
+        채널 방문하기
+      </a>
+    </div>
+    <div class="hero-profile-preview">
+      <img src="/resources/images/Irion-profile.jpg" alt="이리온" class="preview-avatar">
+      <div class="preview-info">
+        <span class="preview-name">이리온</span>
+        <span class="preview-status">치지직 스트리머</span>
+      </div>
     </div>
   </div>
 </section>
@@ -157,7 +184,7 @@
         <div class="card-icon">
           <img src="/resources/images/naver-cafe.png" alt="네이버 카페" class="card-favicon">
         </div>
-        <h3>팬카페</h3>
+        <h3>예티24</h3>
         <p>네이버 팬카페</p>
         <span class="card-link">바로가기 →</span>
       </a>
