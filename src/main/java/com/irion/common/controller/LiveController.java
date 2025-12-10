@@ -28,6 +28,11 @@ public class LiveController {
     private long clipCacheTime = 0;
     private static final long CLIP_CACHE_DURATION = 10 * 60 * 1000; // 10분
 
+    // 다시보기 캐시
+    private List<Map<String, Object>> recentVideos = null;
+    private long videoCacheTime = 0;
+    private static final long VIDEO_CACHE_DURATION = 10 * 60 * 1000; // 10분
+
     // 방송 상태 조회
     @GetMapping("/status")
     @ResponseBody
@@ -330,6 +335,131 @@ public class LiveController {
             }
         }
         return -1;
+    }
+
+    // 다시보기 영상 조회
+    @GetMapping("/videos")
+    @ResponseBody
+    public JsonResult getVideos(@RequestParam(defaultValue = "6") int limit,
+                                @RequestParam(defaultValue = "0") int offset) {
+        try {
+            // 캐시 확인
+            long now = System.currentTimeMillis();
+            if (recentVideos == null || (now - videoCacheTime) > VIDEO_CACHE_DURATION) {
+                loadRecentVideos();
+                videoCacheTime = now;
+            }
+
+            Map<String, Object> result = new HashMap<>();
+
+            if (recentVideos == null || recentVideos.isEmpty()) {
+                result.put("videos", new ArrayList<>());
+                result.put("hasMore", false);
+                return JsonResult.success("조회 성공", result);
+            }
+
+            // offset부터 limit개 반환
+            int endIndex = Math.min(offset + limit, recentVideos.size());
+            List<Map<String, Object>> videos = new ArrayList<>();
+
+            for (int i = offset; i < endIndex; i++) {
+                videos.add(recentVideos.get(i));
+            }
+
+            result.put("videos", videos);
+            result.put("hasMore", endIndex < recentVideos.size());
+            result.put("nextOffset", endIndex);
+
+            return JsonResult.success("조회 성공", result);
+
+        } catch (Exception e) {
+            logger.error("Error fetching videos", e);
+            return JsonResult.fail("다시보기 조회 중 오류 발생");
+        }
+    }
+
+    // 다시보기 영상 로드
+    private void loadRecentVideos() {
+        List<Map<String, Object>> allVideos = new ArrayList<>();
+
+        try {
+            String videoApiUrl = "https://api.chzzk.naver.com/service/v1/channels/" + CHANNEL_ID
+                    + "/videos?sortType=LATEST&pagingType=PAGE&page=0&size=50";
+
+            URL url = new URL(videoApiUrl);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("User-Agent", "Mozilla/5.0");
+            conn.setConnectTimeout(5000);
+            conn.setReadTimeout(5000);
+
+            if (conn.getResponseCode() == 200) {
+                BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
+                StringBuilder response = new StringBuilder();
+                String line;
+                while ((line = br.readLine()) != null) {
+                    response.append(line);
+                }
+                br.close();
+
+                String jsonResponse = response.toString();
+                allVideos = parseVideos(jsonResponse);
+            }
+
+            recentVideos = allVideos;
+            logger.info("Loaded {} recent videos", recentVideos.size());
+
+        } catch (Exception e) {
+            logger.error("Error loading recent videos", e);
+            recentVideos = new ArrayList<>();
+        }
+    }
+
+    // 다시보기 JSON 파싱
+    private List<Map<String, Object>> parseVideos(String json) {
+        List<Map<String, Object>> videos = new ArrayList<>();
+
+        try {
+            int dataStart = json.indexOf("\"data\":[");
+            if (dataStart == -1) return videos;
+
+            int arrayStart = json.indexOf("[", dataStart);
+            int arrayEnd = findMatchingBracket(json, arrayStart);
+            if (arrayStart == -1 || arrayEnd == -1) return videos;
+
+            String dataArray = json.substring(arrayStart + 1, arrayEnd);
+
+            int videoStart = 0;
+            while (true) {
+                int objStart = dataArray.indexOf("{", videoStart);
+                if (objStart == -1) break;
+
+                int objEnd = findMatchingBrace(dataArray, objStart);
+                if (objEnd == -1) break;
+
+                String videoJson = dataArray.substring(objStart, objEnd + 1);
+
+                String videoNo = extractJsonNumber(videoJson, "videoNo");
+                if (videoNo != null && !videoNo.isEmpty()) {
+                    Map<String, Object> video = new HashMap<>();
+                    video.put("videoNo", videoNo);
+                    video.put("videoTitle", extractJsonValue(videoJson, "videoTitle"));
+                    video.put("thumbnailUrl", extractJsonValue(videoJson, "thumbnailImageUrl"));
+                    video.put("duration", extractJsonNumber(videoJson, "duration"));
+                    video.put("readCount", extractJsonNumber(videoJson, "readCount"));
+                    video.put("publishDate", extractJsonValue(videoJson, "publishDate"));
+                    video.put("videoUrl", "https://chzzk.naver.com/" + CHANNEL_ID + "/video/" + videoNo);
+                    videos.add(video);
+                }
+
+                videoStart = objEnd + 1;
+            }
+
+        } catch (Exception e) {
+            logger.error("Error parsing videos", e);
+        }
+
+        return videos;
     }
 
 }

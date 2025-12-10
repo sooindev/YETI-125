@@ -2,8 +2,8 @@
    Irion Fansite - Index Page (jQuery)
    ================================================ */
 
-var clipOffset = 0;
-var hasMoreClips = false;
+let clipOffset = 0;
+let hasMoreClips = false;
 
 $(document).ready(function() {
     checkLiveStatus();
@@ -73,7 +73,7 @@ function loadClips() {
             $('#clipsLoading').hide();
 
             if (response.success && response.data) {
-                var clips = response.data.clips;
+                const clips = response.data.clips;
                 hasMoreClips = response.data.hasMore;
                 clipOffset = response.data.nextOffset || 6;
 
@@ -103,7 +103,7 @@ function loadClips() {
 function loadMoreClips() {
     if (!hasMoreClips) return;
 
-    var $btn = $('#loadMoreBtn');
+    const $btn = $('#loadMoreBtn');
     $btn.prop('disabled', true).text('불러오는 중...');
 
     $.ajax({
@@ -118,7 +118,7 @@ function loadMoreClips() {
             $btn.prop('disabled', false).text('더보기');
 
             if (response.success && response.data) {
-                var clips = response.data.clips;
+                const clips = response.data.clips;
                 hasMoreClips = response.data.hasMore;
                 clipOffset = response.data.nextOffset;
 
@@ -140,18 +140,18 @@ function loadMoreClips() {
 }
 
 function renderClips(clips, append) {
-    var $container = $('#clipsContainer');
+    const $container = $('#clipsContainer');
 
     if (!append) {
         $container.empty();
     }
 
     $.each(clips, function(index, clip) {
-        var duration = formatDuration(clip.duration);
-        var viewCount = numberFormat(clip.viewCount || 0);
-        var date = formatDate(clip.createdAt);
+        const duration = formatDuration(clip.duration);
+        const viewCount = numberFormat(clip.viewCount || 0);
+        const date = formatDate(clip.createdAt);
 
-        var clipHtml =
+        const clipHtml =
             '<a href="' + clip.clipUrl + '" target="_blank" class="clip-card">' +
             '<div class="clip-thumbnail">' +
             '<img src="' + (clip.thumbnailUrl || '') + '" alt="' + escapeHtml(clip.clipTitle) + '">' +
@@ -175,15 +175,15 @@ function renderClips(clips, append) {
 
 function formatDuration(seconds) {
     if (!seconds) return '0:00';
-    var mins = Math.floor(seconds / 60);
-    var secs = seconds % 60;
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
     return mins + ':' + String(secs).padStart(2, '0');
 }
 
 function formatDate(dateStr) {
     if (!dateStr) return '';
     try {
-        var date = new Date(dateStr);
+        const date = new Date(dateStr);
         return (date.getMonth() + 1) + '월 ' + date.getDate() + '일';
     } catch (e) {
         return '';
@@ -202,4 +202,153 @@ function escapeHtml(text) {
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;');
+}
+
+let videoOffset = 0;
+let hasMoreVideos = false;
+
+$(document).ready(function() {
+    checkLiveStatus();
+    loadClips();
+    loadVideos(); // 다시보기 로드 추가
+    setInterval(checkLiveStatus, 60000);
+
+    $('#loadMoreBtn').on('click', function() {
+        loadMoreClips();
+    });
+
+    // 다시보기 더보기 버튼
+    $('#loadMoreVideosBtn').on('click', function() {
+        loadMoreVideos();
+    });
+});
+
+// 다시보기 로드 (초기)
+function loadVideos() {
+    videoOffset = 0;
+
+    $.ajax({
+        url: '/live/videos',
+        type: 'GET',
+        data: { limit: 6, offset: 0 },
+        dataType: 'json',
+        success: function(response) {
+            console.log('Videos response:', response);
+
+            $('#videosLoading').hide();
+
+            if (response.success && response.data) {
+                const videos = response.data.videos;
+                hasMoreVideos = response.data.hasMore;
+                videoOffset = response.data.nextOffset || 6;
+
+                if (videos && videos.length > 0) {
+                    renderVideos(videos, false);
+
+                    if (hasMoreVideos) {
+                        $('#videosMore').show();
+                    } else {
+                        $('#videosMore').hide();
+                    }
+                } else {
+                    $('#videosEmpty').show();
+                }
+            } else {
+                $('#videosEmpty').show();
+            }
+        },
+        error: function() {
+            $('#videosLoading').hide();
+            $('#videosEmpty').show();
+        }
+    });
+}
+
+// 다시보기 더보기
+function loadMoreVideos() {
+    if (!hasMoreVideos) return;
+
+    const $btn = $('#loadMoreVideosBtn');
+    $btn.prop('disabled', true).text('불러오는 중...');
+
+    $.ajax({
+        url: '/live/videos',
+        type: 'GET',
+        data: {
+            limit: 6,
+            offset: videoOffset
+        },
+        dataType: 'json',
+        success: function(response) {
+            $btn.prop('disabled', false).text('더보기');
+
+            if (response.success && response.data) {
+                const videos = response.data.videos;
+                hasMoreVideos = response.data.hasMore;
+                videoOffset = response.data.nextOffset;
+
+                if (videos && videos.length > 0) {
+                    renderVideos(videos, true);
+
+                    if (!hasMoreVideos) {
+                        $('#videosMore').hide();
+                    }
+                } else {
+                    $('#videosMore').hide();
+                }
+            }
+        },
+        error: function() {
+            $btn.prop('disabled', false).text('더보기');
+        }
+    });
+}
+
+// 다시보기 렌더링
+function renderVideos(videos, append) {
+    const $container = $('#videosContainer');
+
+    if (!append) {
+        $container.empty();
+    }
+
+    $.each(videos, function(index, video) {
+        const duration = formatVideoDuration(video.duration);
+        const viewCount = numberFormat(video.readCount || 0);
+        const date = formatDate(video.publishDate);
+
+        const videoHtml =
+            '<a href="' + video.videoUrl + '" target="_blank" class="video-card">' +
+            '<div class="video-thumbnail">' +
+            '<img src="' + (video.thumbnailUrl || '') + '" alt="' + escapeHtml(video.videoTitle) + '">' +
+            '<span class="video-duration">' + duration + '</span>' +
+            '<div class="video-play-overlay">' +
+            '<div class="video-play-icon">▶</div>' +
+            '</div>' +
+            '</div>' +
+            '<div class="video-info">' +
+            '<h3 class="video-title">' + escapeHtml(video.videoTitle) + '</h3>' +
+            '<div class="video-meta">' +
+            '<span class="video-meta-item">👁 ' + viewCount + '</span>' +
+            '<span class="video-meta-item">📅 ' + date + '</span>' +
+            '</div>' +
+            '</div>' +
+            '</a>';
+
+        $container.append(videoHtml);
+    });
+}
+
+// 영상 시간 포맷 (초 -> HH:MM:SS 또는 MM:SS)
+function formatVideoDuration(seconds) {
+    if (!seconds) return '0:00';
+
+    const hours = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+
+    if (hours > 0) {
+        return hours + ':' + String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+    }
+    return mins + ':' + String(secs).padStart(2, '0');
 }

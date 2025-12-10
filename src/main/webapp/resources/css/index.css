@@ -608,3 +608,215 @@
 .info-card p {
   color: var(--text-secondary);
 }
+
+/* ================================================
+   Videos Section (다시보기)
+   ================================================ */
+.videos-section {
+  padding: 80px 0;
+  background: var(--bg-dark);
+}
+
+.videos-section .section-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 1.75rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.videos-section .title-icon {
+  font-size: 1.5rem;
+}
+
+.videos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.video-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: var(--transition);
+  text-decoration: none;
+  display: block;
+}
+
+.video-card:hover {
+  transform: translateY(-8px);
+  border-color: var(--primary);
+  box-shadow: 0 20px 40px rgba(99, 102, 241, 0.2);
+}
+
+.video-thumbnail {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%;
+  background: var(--bg-dark);
+  overflow: hidden;
+}
+
+.video-thumbnail img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.video-card:hover .video-thumbnail img {
+  transform: scale(1.1);
+}
+
+.video-duration {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.video-play-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: var(--transition);
+}
+
+.video-card:hover .video-play-overlay {
+  opacity: 1;
+}
+
+.video-play-icon {
+  width: 60px;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  padding-left: 4px;
+  color: var(--primary);
+  transform: scale(0.8);
+  transition: var(--transition);
+}
+
+.video-card:hover .video-play-icon {
+  transform: scale(1);
+}
+
+.video-info {
+  padding: 16px;
+}
+
+.video-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.video-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 0.813rem;
+  color: var(--text-muted);
+}
+
+.video-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Loading & Empty */
+.videos-loading,
+.videos-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+  font-size: 1rem;
+}
+
+.videos-loading span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.videos-loading span::before {
+  content: '';
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border-color);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.videos-empty span {
+  font-size: 1.25rem;
+}
+
+/* More Button */
+.videos-more {
+  text-align: center;
+  margin-top: 40px;
+}
+
+.videos-more .btn {
+  padding: 14px 48px;
+  font-size: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .videos-section {
+    padding: 60px 0;
+  }
+
+  .videos-section .section-title {
+    font-size: 1.5rem;
+    margin-bottom: 32px;
+  }
+
+  .videos-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .video-info {
+    padding: 14px;
+  }
+
+  .video-title {
+    font-size: 0.95rem;
+  }
+}
