@@ -160,6 +160,8 @@ function showScheduleDetail(event) {
     const color = event.backgroundColor || '#6366F1';
     const type = event.extendedProps.type || 'STREAM';
     const description = event.extendedProps.description || '';
+    const typeClass = getTypeClass(type);
+    const typeName = getScheduleTypeName(type);
 
     let dateText = formatDateTime(event.start);
     if (event.end) {
@@ -185,7 +187,9 @@ function showScheduleDetail(event) {
             <span class="detail-icon">🏷️</span>
             <div class="detail-content">
                 <div class="detail-label">유형</div>
-                <div class="detail-value">${getScheduleTypeName(type)}</div>
+                <div class="detail-value">
+                    <span class="detail-type-badge ${typeClass}">${typeName}</span>
+                </div>
             </div>
         </div>
         ${description ? `
@@ -205,6 +209,9 @@ function showScheduleDetail(event) {
 
 // ID로 일정 상세 보기 (다가오는 일정에서 클릭 시)
 function showScheduleDetailById(id, title, start, end, allDay, color, type, description) {
+    const typeClass = getTypeClass(type);
+    const typeName = getScheduleTypeName(type);
+
     let dateText = formatDateTime(new Date(start));
     if (end) {
         dateText += ' ~ ' + formatDateTime(new Date(end));
@@ -229,7 +236,9 @@ function showScheduleDetailById(id, title, start, end, allDay, color, type, desc
             <span class="detail-icon">🏷️</span>
             <div class="detail-content">
                 <div class="detail-label">유형</div>
-                <div class="detail-value">${getScheduleTypeName(type)}</div>
+                <div class="detail-value">
+                    <span class="detail-type-badge ${typeClass}">${typeName}</span>
+                </div>
             </div>
         </div>
         ${description ? `
