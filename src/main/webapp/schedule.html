@@ -5,11 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>방송 일정 - 이리온 팬사이트</title>
   <script>
-    // FOUC 방지: 페이지 로드 전에 테마 즉시 적용 (기본값: 다크모드)
-    (function() {
-      const savedTheme = localStorage.getItem('theme') || 'dark';
-      document.documentElement.setAttribute('data-theme', savedTheme);
-    })();
+    // 다크모드 적용
+    document.documentElement.setAttribute('data-theme', 'dark');
 
     // 페이지 로드 시 transition 비활성화
     document.addEventListener('DOMContentLoaded', function() {
@@ -38,10 +35,6 @@
       <a href="/" class="nav-link">홈</a>
       <a href="/schedule.html" class="nav-link active">일정</a>
       <a href="/info.html" class="nav-link">프로필</a>
-      <button id="theme-toggle" class="theme-toggle-btn" aria-label="테마 전환">
-        <span class="icon-sun">☀️</span>
-        <span class="icon-moon">🌙</span>
-      </button>
     </nav>
     <button class="mobile-menu-btn">
       <span></span>
@@ -107,14 +100,11 @@
 </section>
 
 <!-- Schedule Detail Modal -->
-<div id="scheduleModal" class="modal schedule-detail-modal">
+<div id="scheduleModal" class="modal">
   <div class="modal-content">
-    <div class="modal-header">
-      <h2>일정 상세</h2>
-      <button class="modal-close" onclick="closeModal()">&times;</button>
-    </div>
-    <div class="modal-body" id="scheduleDetail">
-      <!-- 상세 내용이 여기에 로드됨 -->
+    <button class="modal-close" onclick="closeModal('scheduleModal')">&times;</button>
+    <div id="scheduleDetail">
+      <!-- 일정 상세 내용이 여기에 로드됨 -->
     </div>
   </div>
 </div>

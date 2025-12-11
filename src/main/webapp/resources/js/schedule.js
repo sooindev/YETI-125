@@ -155,6 +155,83 @@ function renderUpcomingEvents(events) {
     });
 }
 
+// 유형별 클래스
+function getTypeClass(type) {
+    switch (type) {
+        case 'STREAM': return 'type-stream';
+        case 'EVENT': return 'type-event';
+        case 'OTHER': return 'type-other';
+        default: return 'type-stream';
+    }
+}
+
+// 유형 이름
+function getScheduleTypeName(type) {
+    switch (type) {
+        case 'STREAM': return '방송';
+        case 'EVENT': return '이벤트';
+        case 'OTHER': return '기타';
+        default: return '방송';
+    }
+}
+
+// 월 이름 (짧은 형식)
+function getMonthName(month) {
+    const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+    return months[month];
+}
+
+// 날짜를 ISO 형식으로 변환
+function formatDateToISO(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+// 시간 포맷
+function formatTime(date) {
+    const hours = date.getHours();
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const ampm = hours >= 12 ? '오후' : '오전';
+    const displayHours = hours % 12 || 12;
+    return `${ampm} ${displayHours}:${minutes}`;
+}
+
+// 날짜/시간 포맷
+function formatDateTime(date) {
+    if (!(date instanceof Date)) {
+        date = new Date(date);
+    }
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const time = formatTime(date);
+    return `${year}년 ${month}월 ${day}일 ${time}`;
+}
+
+// 날짜 포맷 (한국어)
+function formatDateKorean(date) {
+    if (!(date instanceof Date)) {
+        date = new Date(date);
+    }
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    return `${year}년 ${month}월 ${day}일`;
+}
+
+// HTML 이스케이프
+function escapeHtml(text) {
+    if (!text) return '';
+    return text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
 // 일정 상세 보기
 function showScheduleDetail(event) {
     const color = event.backgroundColor || '#6366F1';
@@ -256,83 +333,6 @@ function showScheduleDetailById(id, title, start, end, allDay, color, type, desc
     openModal('scheduleModal');
 }
 
-// 유형별 클래스
-function getTypeClass(type) {
-    switch (type) {
-        case 'STREAM': return 'type-stream';
-        case 'EVENT': return 'type-event';
-        case 'OTHER': return 'type-other';
-        default: return 'type-stream';
-    }
-}
-
-// 유형 이름
-function getScheduleTypeName(type) {
-    switch (type) {
-        case 'STREAM': return '방송';
-        case 'EVENT': return '이벤트';
-        case 'OTHER': return '기타';
-        default: return '방송';
-    }
-}
-
-// 월 이름 (짧은 형식)
-function getMonthName(month) {
-    const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-    return months[month];
-}
-
-// 날짜를 ISO 형식으로 변환
-function formatDateToISO(date) {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-}
-
-// 시간 포맷
-function formatTime(date) {
-    const hours = date.getHours();
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const ampm = hours >= 12 ? '오후' : '오전';
-    const displayHours = hours % 12 || 12;
-    return `${ampm} ${displayHours}:${minutes}`;
-}
-
-// 날짜/시간 포맷
-function formatDateTime(date) {
-    if (!(date instanceof Date)) {
-        date = new Date(date);
-    }
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
-    const time = formatTime(date);
-    return `${year}년 ${month}월 ${day}일 ${time}`;
-}
-
-// 날짜 포맷 (한국어)
-function formatDateKorean(date) {
-    if (!(date instanceof Date)) {
-        date = new Date(date);
-    }
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
-    return `${year}년 ${month}월 ${day}일`;
-}
-
-// HTML 이스케이프
-function escapeHtml(text) {
-    if (!text) return '';
-    return text
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-}
-
 // 모달 열기
 function openModal(modalId) {
     const $modal = $('#' + modalId);
@@ -341,8 +341,12 @@ function openModal(modalId) {
 }
 
 // 모달 닫기
-function closeModal() {
-    $('.modal').removeClass('active');
+function closeModal(modalId) {
+    if (modalId) {
+        $('#' + modalId).removeClass('active');
+    } else {
+        $('.modal').removeClass('active');
+    }
     $('body').css('overflow', 'auto');
 }
 
