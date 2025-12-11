@@ -25,6 +25,7 @@ public class AdminLoginFilter implements Filter {
         // /admin/** 경로 체크 (login 제외)
         if (uri.startsWith(contextPath + "/admin/") &&
                 !uri.contains("/admin/login") &&
+                !uri.contains("/admin/admin-login") &&
                 !uri.contains("/admin/loginProc")) {
 
             HttpSession session = httpRequest.getSession(false);

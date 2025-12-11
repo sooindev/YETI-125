@@ -21,12 +21,12 @@ public class AdminController {
     private AdminService adminService;
 
     // 로그인 페이지
-    @GetMapping("/login")
+    @GetMapping("/admin-login")
     public String loginPage(HttpSession session) {
         if (session.getAttribute("adminUser") != null) {
             return "redirect:/admin/admin-schedule.html";
         }
-        return "redirect:/admin/login.html";
+        return "redirect:/admin/admin-login.html";
     }
 
     // 로그인 처리 (AJAX)

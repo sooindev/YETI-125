@@ -13,8 +13,8 @@ $(document).ready(function() {
     const themeToggle = document.getElementById('theme-toggle');
     const htmlEl = document.documentElement;
 
-    // 저장된 테마 적용
-    const savedTheme = localStorage.getItem('theme') || 'light';
+    // 저장된 테마 적용 (기본값: 다크모드)
+    const savedTheme = localStorage.getItem('theme') || 'dark';
     htmlEl.setAttribute('data-theme', savedTheme);
 
     themeToggle.addEventListener('click', function() {

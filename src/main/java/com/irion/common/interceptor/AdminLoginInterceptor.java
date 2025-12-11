@@ -32,7 +32,7 @@ public class AdminLoginInterceptor implements HandlerInterceptor {
             }
 
             // 일반 요청인 경우
-            response.sendRedirect(request.getContextPath() + "/admin/login");
+            response.sendRedirect(request.getContextPath() + "/admin/admin-login.html");
             return false;
         }
 

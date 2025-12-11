@@ -81,6 +81,11 @@ body {
     transition: background 0.3s ease, color 0.3s ease;
 }
 
+/* FOUC 방지: 페이지 로드 시 transition 비활성화 */
+body.preload * {
+    transition: none !important;
+}
+
 a {
     color: inherit;
     text-decoration: none;

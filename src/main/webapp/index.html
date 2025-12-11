@@ -4,6 +4,21 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>이리온 팬사이트</title>
+  <script>
+    // FOUC 방지: 페이지 로드 전에 테마 즉시 적용 (기본값: 다크모드)
+    (function() {
+      const savedTheme = localStorage.getItem('theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    })();
+
+    // 페이지 로드 시 transition 비활성화
+    document.addEventListener('DOMContentLoaded', function() {
+      document.body.classList.add('preload');
+      setTimeout(function() {
+        document.body.classList.remove('preload');
+      }, 100);
+    });
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -21,7 +36,7 @@
     <nav class="nav">
       <a href="/" class="nav-link active">홈</a>
       <a href="/schedule.html" class="nav-link">일정</a>
-      <a href="/info.html" class="nav-link">정보</a>
+      <a href="/info.html" class="nav-link">프로필</a>
       <button id="theme-toggle" class="theme-toggle-btn" aria-label="테마 전환">
         <span class="icon-sun">☀️</span>
         <span class="icon-moon">🌙</span>

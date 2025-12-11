@@ -4,6 +4,21 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>이리온 정보 - 이리온 팬사이트</title>
+  <script>
+    // FOUC 방지: 페이지 로드 전에 테마 즉시 적용 (기본값: 다크모드)
+    (function() {
+      const savedTheme = localStorage.getItem('theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    })();
+
+    // 페이지 로드 시 transition 비활성화
+    document.addEventListener('DOMContentLoaded', function() {
+      document.body.classList.add('preload');
+      setTimeout(function() {
+        document.body.classList.remove('preload');
+      }, 100);
+    });
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -21,7 +36,7 @@
     <nav class="nav">
       <a href="/" class="nav-link">홈</a>
       <a href="/schedule.html" class="nav-link">일정</a>
-      <a href="/info.html" class="nav-link active">정보</a>
+      <a href="/info.html" class="nav-link active">프로필</a>
       <button id="theme-toggle" class="theme-toggle-btn" aria-label="테마 전환">
         <span class="icon-sun">☀️</span>
         <span class="icon-moon">🌙</span>
@@ -87,7 +102,7 @@
 
     <!-- Quick Social Icons -->
     <div class="quick-social">
-      <a href="https://chzzk.naver.com/live/516937b5f85cbf2249ce31b0ad046b0f" target="_blank" class="quick-social-btn social-chzzk" title="치지직">
+      <a href="https://chzzk.naver.com/live/63368ec9081dc85e61d0e4310b7e1602" target="_blank" class="quick-social-btn social-chzzk" title="치지직">
         <img src="/resources/images/chzzk.png" alt="치지직" class="social-favicon">
       </a>
       <a href="https://www.youtube.com/@2leon0809" target="_blank" class="quick-social-btn social-youtube" title="유튜브">
@@ -211,7 +226,7 @@
     </h2>
     <div class="social-grid">
       <!-- 치지직 -->
-      <a href="https://chzzk.naver.com/live/516937b5f85cbf2249ce31b0ad046b0f" target="_blank" class="social-card social-chzzk">
+      <a href="https://chzzk.naver.com/live/63368ec9081dc85e61d0e4310b7e1602" target="_blank" class="social-card social-chzzk">
         <div class="social-icon">
           <img src="https://ssl.pstatic.net/static/nng/glive/icon/favicon.png" alt="치지직" class="social-favicon">
         </div>
