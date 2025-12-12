@@ -28,7 +28,7 @@
     display: none;
 }
 
-/* Mountain Silhouettes - Optimized */
+/* Mountain Silhouettes - Removed for transparent background */
 .door-intro::before {
     content: '';
     position: absolute;
@@ -36,15 +36,7 @@
     left: 0;
     width: 100%;
     height: 40%;
-    background:
-        /* Simplified mountains */
-        linear-gradient(to bottom,
-            transparent 0%,
-            transparent 30%,
-            #2c5f7e 30%,
-            #2c5f7e 100%
-        ),
-        radial-gradient(ellipse 700px 350px at 50% 100%, rgba(44, 75, 95, 0.8) 0%, transparent 70%);
+    background: transparent;
     pointer-events: none;
     z-index: 2;
     will-change: opacity;
