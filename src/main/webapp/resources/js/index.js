@@ -8,10 +8,15 @@ let hasMoreClips = false;
 $(document).ready(function() {
     checkLiveStatus();
     loadClips();
+    loadVideos();
     setInterval(checkLiveStatus, 60000);
 
     $('#loadMoreBtn').on('click', function() {
         loadMoreClips();
+    });
+
+    $('#loadMoreVideosBtn').on('click', function() {
+        loadMoreVideos();
     });
 });
 
@@ -206,22 +211,6 @@ function escapeHtml(text) {
 
 let videoOffset = 0;
 let hasMoreVideos = false;
-
-$(document).ready(function() {
-    checkLiveStatus();
-    loadClips();
-    loadVideos(); // 다시보기 로드 추가
-    setInterval(checkLiveStatus, 60000);
-
-    $('#loadMoreBtn').on('click', function() {
-        loadMoreClips();
-    });
-
-    // 다시보기 더보기 버튼
-    $('#loadMoreVideosBtn').on('click', function() {
-        loadMoreVideos();
-    });
-});
 
 // 다시보기 로드 (초기)
 function loadVideos() {
