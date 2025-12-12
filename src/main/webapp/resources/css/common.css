@@ -5,16 +5,15 @@
 
 /* CSS Variables - Dark Theme Only */
 :root {
-    /* Dark Theme - Winter Night 🌌 */
+    /* Simple Snow Theme ❄️ */
     --primary: #22D3EE;
     --primary-dark: #06B6D4;
     --primary-light: #67E8F9;
     --secondary: #0C4A6E;
     --accent: #38BDF8;
-    --ice-blue: #0369A1;
-    --crystal: #0891B2;
 
-    --bg-dark: linear-gradient(135deg, #0A1628 0%, #1E293B 50%, #0F172A 100%);
+    --bg-dark: #0A1628;
+    --bg-darker: #08111f;
     --bg-card: rgba(30, 41, 59, 0.6);
     --bg-card-hover: rgba(30, 41, 59, 0.8);
     --text-primary: #F0F9FF;
@@ -26,21 +25,13 @@
     --header-bg: rgba(10, 22, 40, 0.7);
     --modal-overlay-bg: rgba(0, 0, 0, 0.8);
 
-    /* Dark Glassmorphism Shadows */
-    --shadow-sm: 0 2px 8px rgba(34, 211, 238, 0.15),
-                 0 1px 3px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 8px 24px rgba(34, 211, 238, 0.2),
-                 0 4px 12px rgba(0, 0, 0, 0.4),
+    /* Clean Shadows */
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4),
                  inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    --shadow-lg: 0 16px 48px rgba(34, 211, 238, 0.25),
-                 0 8px 24px rgba(0, 0, 0, 0.5),
+    --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.5),
                  inset 0 1px 0 rgba(255, 255, 255, 0.15);
-    --shadow-glow: 0 0 30px rgba(34, 211, 238, 0.4),
-                   0 0 60px rgba(34, 211, 238, 0.2);
-
-    /* Aurora Gradient - Dark */
-    --aurora: linear-gradient(135deg, #22D3EE 0%, #6366F1 50%, #A855F7 100%);
-    --ice-gradient: linear-gradient(180deg, rgba(30,41,59,0.9) 0%, rgba(15,23,42,0.7) 100%);
+    --shadow-glow: 0 0 30px rgba(34, 211, 238, 0.3);
 
     --font-main: 'Noto Sans KR', -apple-system, sans-serif;
     --header-height: 70px;
@@ -117,7 +108,19 @@ body {
     -webkit-backface-visibility: hidden;
 }
 
-/* Snowflake Background Effect */
+/* 성능 최적화 - Containment */
+.card,
+.info-card,
+.clip-card,
+.video-card {
+    contain: layout style paint;
+}
+
+.header {
+    contain: layout style;
+}
+
+/* Premium Snowfall Effect ❄️ - Optimized */
 body::before {
     content: '';
     position: fixed;
@@ -126,31 +129,58 @@ body::before {
     width: 100%;
     height: 100%;
     background-image:
-        radial-gradient(2px 2px at 20% 30%, white, transparent),
-        radial-gradient(2px 2px at 60% 70%, white, transparent),
-        radial-gradient(1px 1px at 50% 50%, white, transparent),
-        radial-gradient(1px 1px at 80% 10%, white, transparent),
-        radial-gradient(2px 2px at 90% 60%, white, transparent),
-        radial-gradient(1px 1px at 33% 70%, white, transparent),
-        radial-gradient(1px 1px at 70% 25%, white, transparent);
-    background-size: 200% 200%;
-    background-position: 0% 0%, 40% 60%, 130% 270%, 70% 100%;
+        /* Large snowflakes */
+        radial-gradient(3px 3px at 20px 40px, white, transparent),
+        radial-gradient(3px 3px at 320px 80px, rgba(255, 255, 255, 0.9), transparent),
+        radial-gradient(4px 4px at 600px 150px, rgba(255, 255, 255, 0.7), transparent),
+        radial-gradient(3px 3px at 880px 180px, white, transparent),
+        /* Medium snowflakes */
+        radial-gradient(2px 2px at 90px 60px, rgba(186, 230, 253, 0.9), transparent),
+        radial-gradient(2px 2px at 380px 100px, white, transparent),
+        radial-gradient(2px 2px at 670px 130px, rgba(186, 230, 253, 0.85), transparent),
+        /* Small snowflakes */
+        radial-gradient(1px 1px at 150px 90px, rgba(186, 230, 253, 0.7), transparent),
+        radial-gradient(1px 1px at 420px 140px, rgba(186, 230, 253, 0.6), transparent),
+        radial-gradient(1px 1px at 830px 40px, rgba(255, 255, 255, 0.7), transparent);
+    background-size: 1000px 200px;
+    background-repeat: repeat;
+    opacity: 0.5;
+    pointer-events: none;
+    z-index: 1;
+    will-change: transform;
+    animation: snowfallDown 20s linear infinite;
+}
+
+/* Second snowfall layer - Optimized */
+body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image:
+        radial-gradient(2px 2px at 80px 70px, rgba(255, 255, 255, 0.4), transparent),
+        radial-gradient(2px 2px at 250px 130px, rgba(186, 230, 253, 0.5), transparent),
+        radial-gradient(2px 2px at 490px 160px, rgba(255, 255, 255, 0.45), transparent),
+        radial-gradient(2px 2px at 720px 60px, rgba(186, 230, 253, 0.4), transparent),
+        radial-gradient(1px 1px at 860px 140px, rgba(255, 255, 255, 0.38), transparent);
+    background-size: 1000px 200px;
+    background-repeat: repeat;
     opacity: 0.3;
     pointer-events: none;
     z-index: 1;
-    animation: snowfall 20s linear infinite;
+    will-change: transform;
+    animation: snowfallDown 35s linear infinite;
+    filter: blur(0.5px);
 }
 
-[data-theme="dark"] body::before {
-    opacity: 0.15;
-}
-
-@keyframes snowfall {
+@keyframes snowfallDown {
     0% {
-        background-position: 0% 0%, 40% 60%, 130% 270%, 70% 100%;
+        background-position: 0px 0px, 0px 0px;
     }
     100% {
-        background-position: 0% 100%, 40% 160%, 130% 370%, 70% 200%;
+        background-position: 100px 100vh, -50px 100vh;
     }
 }
 
@@ -219,12 +249,13 @@ input, select, textarea {
     right: 0;
     height: var(--header-height);
     background: var(--header-bg);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--border-color);
-    box-shadow: 0 4px 24px rgba(6, 182, 212, 0.08);
+    box-shadow: 0 2px 12px rgba(6, 182, 212, 0.08);
     z-index: 1000;
     transition: all var(--transition);
+    will-change: transform;
 }
 
 .header::before {
@@ -262,10 +293,7 @@ input, select, textarea {
 .logo-text {
     font-size: 1.5rem;
     font-weight: 700;
-    background: var(--aurora);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--primary);
     position: relative;
 }
 
@@ -312,7 +340,7 @@ input, select, textarea {
     left: 50%;
     width: 0;
     height: 2px;
-    background: var(--aurora);
+    background: var(--primary);
     transform: translateX(-50%);
     transition: width var(--transition);
 }
@@ -374,17 +402,16 @@ input, select, textarea {
     content: '';
     flex: 1;
     height: 2px;
-    background: linear-gradient(90deg, var(--border-glow), transparent);
+    background: var(--border-color);
     margin-left: 1rem;
 }
 
 .title-icon {
     font-size: 1.75rem;
-    filter: drop-shadow(0 0 10px var(--primary-light));
 }
 
 /* ================================================
-   Buttons - Ice Crystal Style 💎
+   Buttons - Clean Style 💎
    ================================================ */
 .btn {
     display: inline-flex;
@@ -410,7 +437,7 @@ input, select, textarea {
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    background: rgba(255, 255, 255, 0.1);
     transition: left 0.5s ease;
 }
 
@@ -419,19 +446,20 @@ input, select, textarea {
 }
 
 .btn-primary {
-    background: var(--aurora);
+    background: var(--primary);
     color: white;
     box-shadow: var(--shadow-md);
 }
 
 .btn-primary:hover {
+    background: var(--primary-light);
     transform: translateY(-2px);
-    box-shadow: var(--shadow-lg), var(--shadow-glow);
+    box-shadow: var(--shadow-lg);
 }
 
 .btn-secondary {
     background: var(--bg-card);
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(8px);
     color: var(--text-primary);
     border-color: var(--border-color);
     box-shadow: var(--shadow-sm);
@@ -453,8 +481,8 @@ input, select, textarea {
    ================================================ */
 .card {
     background: var(--bg-card);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
     padding: 1.5rem;
@@ -462,6 +490,7 @@ input, select, textarea {
     transition: all var(--transition);
     position: relative;
     overflow: hidden;
+    will-change: transform;
 }
 
 .card::before {
@@ -491,7 +520,7 @@ input, select, textarea {
         right: 0;
         flex-direction: column;
         background: var(--header-bg);
-        backdrop-filter: blur(20px);
+        backdrop-filter: blur(10px);
         padding: 1rem;
         gap: 0.5rem;
         transform: translateY(-100%);
@@ -520,10 +549,7 @@ input, select, textarea {
    Utility Classes ✨
    ================================================ */
 .text-gradient {
-    background: var(--aurora);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--primary);
 }
 
 .glow {
@@ -531,8 +557,8 @@ input, select, textarea {
 }
 
 .frost {
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 /* ================================================
@@ -546,8 +572,8 @@ input, select, textarea {
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
     z-index: 9999;
     overflow-y: auto;
     align-items: center;
@@ -568,8 +594,8 @@ input, select, textarea {
     top: 24px;
     right: 24px;
     background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
     border: 1px solid rgba(255, 255, 255, 0.12);
     font-size: 24px;
     font-weight: 400;
@@ -583,7 +609,7 @@ input, select, textarea {
     border-radius: 14px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 100;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .modal-close:hover {
@@ -593,9 +619,7 @@ input, select, textarea {
     border-color: rgba(34, 211, 238, 0.4);
     color: #F0F9FF;
     transform: rotate(90deg) scale(1.1);
-    box-shadow:
-        0 8px 24px rgba(34, 211, 238, 0.3),
-        0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+    box-shadow: 0 4px 16px rgba(34, 211, 238, 0.3);
 }
 
 .modal-close:active {

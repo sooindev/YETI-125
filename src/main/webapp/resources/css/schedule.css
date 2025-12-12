@@ -1,6 +1,13 @@
 /* ================================================
-   Irion Fansite - Modern Schedule Styles
+   Irion Fansite - Modern Schedule Styles ❄️
+   Simple & Clean with Snowfall
    ================================================ */
+
+/* Dark Background for Schedule Page */
+body {
+    background: var(--bg-dark);
+    background-attachment: fixed;
+}
 
 :root {
     /* Modern Theme Variables - Light Version */
@@ -24,29 +31,6 @@
     transition: background 0.3s ease;
 }
 
-/* Modern Mesh Gradient Background */
-.schedule-header::before {
-    content: '';
-    position: absolute;
-    top: -30%;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100vw;
-    height: 800px;
-    background:
-            radial-gradient(circle at 20% 50%, rgba(96, 165, 250, 0.2), transparent 50%),
-            radial-gradient(circle at 80% 50%, rgba(59, 130, 246, 0.2), transparent 50%),
-            radial-gradient(circle at 50% 30%, rgba(165, 243, 252, 0.15), transparent 70%);
-    filter: blur(60px);
-    z-index: 0;
-    pointer-events: none;
-    animation: pulseGlow 10s ease-in-out infinite alternate;
-}
-
-@keyframes pulseGlow {
-    0% { opacity: 0.5; transform: translateX(-50%) scale(1); }
-    100% { opacity: 0.8; transform: translateX(-50%) scale(1.1); }
-}
 
 .schedule-header-content {
     position: relative;
@@ -57,8 +41,6 @@
     font-size: 3.5rem;
     margin-bottom: 20px;
     display: inline-block;
-    color: var(--primary);
-    filter: drop-shadow(0 0 20px var(--primary-glow));
     animation: float 6s ease-in-out infinite;
 }
 
@@ -72,10 +54,7 @@
     font-weight: 800;
     letter-spacing: -0.02em;
     margin-bottom: 16px;
-    background: linear-gradient(to bottom right, var(--text-primary) 30%, var(--primary) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow: 0 0 30px rgba(59, 130, 246, 0.1);
+    color: var(--text-primary);
 }
 
 .schedule-header p {
@@ -650,6 +629,7 @@
     border-left: 4px solid var(--primary);
 }
 
+
 .upcoming-list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
@@ -1018,18 +998,8 @@
     background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #0f0f1a 100%);
 }
 
-[data-theme="dark"] .schedule-header::before {
-    background:
-            radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.15), transparent 50%),
-            radial-gradient(circle at 80% 50%, rgba(236, 72, 153, 0.15), transparent 50%),
-            radial-gradient(circle at 50% 30%, rgba(165, 243, 252, 0.1), transparent 70%);
-}
-
 [data-theme="dark"] .schedule-header h1 {
-    background: linear-gradient(to bottom right, #ffffff 30%, #a5f3fc 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow: 0 0 30px rgba(99, 102, 241, 0.2);
+    color: var(--text-primary);
 }
 
 [data-theme="dark"] .schedule-header p {
