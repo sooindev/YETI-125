@@ -1,0 +1,485 @@
+/* ================================================
+   Premium Door Opening Intro Effect 🚪❄️
+   Elegant Gate Animation
+   ================================================ */
+
+/* Full Screen Overlay - Winter Mountain Theme */
+.door-intro {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 999999;
+    overflow: hidden;
+    perspective: 2000px;
+    background: transparent;
+    pointer-events: all;
+    opacity: 1;
+    transition: opacity 0.8s ease;
+}
+
+.door-intro.fading {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.door-intro.hidden {
+    display: none;
+}
+
+/* Mountain Silhouettes - Optimized */
+.door-intro::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 40%;
+    background:
+        /* Simplified mountains */
+        linear-gradient(to bottom,
+            transparent 0%,
+            transparent 30%,
+            #2c5f7e 30%,
+            #2c5f7e 100%
+        ),
+        radial-gradient(ellipse 700px 350px at 50% 100%, rgba(44, 75, 95, 0.8) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 2;
+    will-change: opacity;
+}
+
+/* Door Container */
+.door-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    z-index: 3;
+    contain: layout style;
+}
+
+/* Individual Door Panel - Optimized Ice Theme */
+.door-panel {
+    position: absolute;
+    top: 0;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(180deg,
+        rgba(230, 245, 255, 0.95) 0%,
+        rgba(200, 230, 250, 0.98) 20%,
+        rgba(220, 240, 255, 0.96) 50%,
+        rgba(200, 230, 250, 0.98) 80%,
+        rgba(230, 245, 255, 0.95) 100%
+    );
+    box-shadow:
+        inset 0 0 100px rgba(255, 255, 255, 0.3),
+        0 0 60px rgba(174, 214, 241, 0.2),
+        0 10px 40px rgba(100, 150, 180, 0.3);
+    transition: transform 2s cubic-bezier(0.77, 0, 0.175, 1);
+    transform-style: preserve-3d;
+    will-change: transform;
+    contain: layout style paint;
+}
+
+/* Left Door */
+.door-left {
+    left: 0;
+    transform-origin: left center;
+    border-right: 3px solid rgba(192, 192, 192, 0.6);
+    box-shadow: inset -3px 0 10px rgba(255, 255, 255, 0.5);
+}
+
+/* Right Door */
+.door-right {
+    right: 0;
+    transform-origin: right center;
+    border-left: 3px solid rgba(192, 192, 192, 0.6);
+    box-shadow: inset 3px 0 10px rgba(255, 255, 255, 0.5);
+}
+
+/* Door Frame Decoration - Classic Molding */
+.door-panel::before {
+    content: '';
+    position: absolute;
+    top: 5%;
+    left: 10%;
+    right: 10%;
+    bottom: 5%;
+    border: 5px solid rgba(192, 192, 192, 0.7);
+    border-radius: 4px;
+    background: linear-gradient(135deg,
+        rgba(255, 255, 255, 0.3) 0%,
+        transparent 50%,
+        rgba(174, 214, 241, 0.2) 100%
+    );
+    box-shadow:
+        inset 0 0 50px rgba(255, 255, 255, 0.4),
+        inset 3px 3px 10px rgba(255, 255, 255, 0.6),
+        inset -3px -3px 10px rgba(150, 180, 200, 0.4),
+        0 0 30px rgba(174, 214, 241, 0.3);
+}
+
+/* Door Pattern - Simplified Frost */
+.door-panel::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+        /* Simple diagonal pattern */
+        repeating-linear-gradient(
+            45deg,
+            transparent 0px,
+            rgba(255, 255, 255, 0.05) 1px,
+            transparent 2px,
+            transparent 40px
+        ),
+        repeating-linear-gradient(
+            -45deg,
+            transparent 0px,
+            rgba(255, 255, 255, 0.05) 1px,
+            transparent 2px,
+            transparent 40px
+        );
+    opacity: 0.5;
+}
+
+/* Door Opening Animation */
+.door-intro.opening .door-left {
+    transform: rotateY(-120deg);
+}
+
+.door-intro.opening .door-right {
+    transform: rotateY(120deg);
+}
+
+/* Door Handle - Classic Crystal */
+.door-handle {
+    position: absolute;
+    top: 50%;
+    width: 100px;
+    height: 100px;
+    margin-top: -50px;
+    background: radial-gradient(circle,
+        rgba(255, 255, 255, 0.8) 0%,
+        rgba(200, 230, 250, 0.6) 30%,
+        rgba(174, 214, 241, 0.4) 60%,
+        transparent 100%);
+    border: 4px solid rgba(192, 192, 192, 0.8);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.4s ease;
+    z-index: 10;
+    cursor: pointer;
+    box-shadow:
+        0 0 30px rgba(255, 255, 255, 0.5),
+        inset 0 0 20px rgba(255, 255, 255, 0.6),
+        inset -5px -5px 15px rgba(174, 214, 241, 0.4);
+}
+
+.door-left .door-handle {
+    right: -50px;
+}
+
+.door-right .door-handle {
+    left: -50px;
+}
+
+.door-handle::before {
+    content: '';
+    width: 60px;
+    height: 60px;
+    border: 3px solid rgba(192, 192, 192, 0.9);
+    border-radius: 50%;
+    background: radial-gradient(circle,
+        rgba(255, 255, 255, 0.9) 0%,
+        rgba(220, 240, 255, 0.7) 50%,
+        rgba(174, 214, 241, 0.5) 100%
+    );
+    box-shadow:
+        0 0 20px rgba(255, 255, 255, 0.6),
+        inset 0 0 15px rgba(174, 214, 241, 0.5);
+    animation: crystalPulse 2s ease-in-out infinite;
+}
+
+@keyframes crystalPulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+        box-shadow:
+            0 0 20px rgba(255, 255, 255, 0.6),
+            inset 0 0 15px rgba(174, 214, 241, 0.5);
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 0.9;
+        box-shadow:
+            0 0 30px rgba(255, 255, 255, 0.8),
+            inset 0 0 20px rgba(174, 214, 241, 0.7);
+    }
+}
+
+/* Center Content */
+.door-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 5;
+    text-align: center;
+    pointer-events: none;
+    opacity: 1;
+    transition: all 0.8s cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+.door-intro.opening .door-content {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+}
+
+/* Snowflake Icon - Winter Theme */
+.door-icon {
+    font-size: 6rem;
+    margin-bottom: 2rem;
+    display: block;
+    animation: floatIcon 4s ease-in-out infinite;
+    filter: drop-shadow(0 15px 40px rgba(255, 255, 255, 0.6));
+    text-shadow:
+        0 0 40px rgba(255, 255, 255, 0.8),
+        0 0 20px rgba(174, 214, 241, 0.6);
+}
+
+@keyframes floatIcon {
+    0%, 100% {
+        transform: translateY(0) rotate(0deg);
+    }
+    50% {
+        transform: translateY(-20px) rotate(10deg);
+    }
+}
+
+/* Title - Winter Theme */
+.door-title {
+    font-size: 4.5rem;
+    font-weight: 200;
+    color: #ffffff;
+    margin-bottom: 1.5rem;
+    letter-spacing: 1.5rem;
+    text-transform: uppercase;
+    line-height: 1;
+    text-shadow:
+        0 0 40px rgba(255, 255, 255, 0.8),
+        0 5px 20px rgba(174, 214, 241, 0.6),
+        2px 2px 4px rgba(100, 150, 180, 0.5);
+}
+
+/* Subtitle - Winter Theme */
+.door-subtitle {
+    font-size: 1.25rem;
+    color: rgba(255, 255, 255, 0.95);
+    margin-bottom: 3rem;
+    font-weight: 300;
+    letter-spacing: 0.5em;
+    text-transform: uppercase;
+    opacity: 0.9;
+    text-shadow:
+        0 2px 10px rgba(174, 214, 241, 0.6),
+        0 0 20px rgba(255, 255, 255, 0.4);
+}
+
+/* Enter Button - Optimized */
+.door-enter {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 20px 60px;
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    border: 3px solid rgba(255, 255, 255, 0.8);
+    border-radius: 100px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.5s cubic-bezier(0.77, 0, 0.175, 1);
+    position: relative;
+    overflow: hidden;
+    pointer-events: all;
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.4);
+}
+
+.door-enter::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.4);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s ease, height 0.6s ease;
+    z-index: -1;
+}
+
+.door-enter:hover::before {
+    width: 400px;
+    height: 400px;
+}
+
+.door-enter:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 1);
+    transform: translateY(-4px);
+    box-shadow: 0 10px 40px rgba(255, 255, 255, 0.5);
+}
+
+.door-enter span {
+    position: relative;
+    z-index: 1;
+}
+
+/* Snowflakes Decoration - Optimized */
+.door-snowflakes {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    overflow: hidden;
+    opacity: 0.5;
+    z-index: 1;
+    will-change: opacity;
+}
+
+.door-snowflake {
+    position: absolute;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1.5rem;
+    animation: snowDrift linear infinite;
+    filter: drop-shadow(0 0 8px rgba(174, 214, 241, 0.6));
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+}
+
+.door-snowflake:nth-child(1) { left: 10%; animation-duration: 18s; animation-delay: 0s; }
+.door-snowflake:nth-child(2) { left: 25%; animation-duration: 22s; animation-delay: 4s; font-size: 1.2rem; }
+.door-snowflake:nth-child(3) { left: 40%; animation-duration: 20s; animation-delay: 8s; font-size: 1.8rem; }
+.door-snowflake:nth-child(4) { left: 55%; animation-duration: 24s; animation-delay: 3s; }
+.door-snowflake:nth-child(5) { left: 70%; animation-duration: 19s; animation-delay: 7s; font-size: 1.4rem; }
+.door-snowflake:nth-child(6) { left: 85%; animation-duration: 21s; animation-delay: 10s; }
+
+@keyframes snowDrift {
+    0% {
+        transform: translateY(-10vh) translateX(0) rotate(0deg);
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(110vh) translateX(30px) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* Light Beam Effect - Winter Theme */
+.door-intro::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 0%;
+    height: 100%;
+    transform: translateX(-50%);
+    background: radial-gradient(
+        ellipse,
+        rgba(255, 255, 255, 0.6) 0%,
+        rgba(174, 214, 241, 0.4) 30%,
+        rgba(200, 230, 250, 0.2) 50%,
+        transparent 70%
+    );
+    opacity: 0;
+    transition: all 2s cubic-bezier(0.77, 0, 0.175, 1);
+    pointer-events: none;
+}
+
+.door-intro.opening::after {
+    width: 120%;
+    opacity: 1;
+}
+
+/* Prevent Background Scroll */
+body:has(.door-intro:not(.hidden)) {
+    overflow: hidden;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .door-intro {
+        perspective: 1500px;
+    }
+
+    .door-icon {
+        font-size: 4rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .door-title {
+        font-size: 2.5rem;
+        letter-spacing: 0.8rem;
+    }
+
+    .door-subtitle {
+        font-size: 0.95rem;
+        letter-spacing: 0.3em;
+        margin-bottom: 2.5rem;
+    }
+
+    .door-enter {
+        padding: 16px 40px;
+        font-size: 0.8rem;
+        letter-spacing: 0.2em;
+    }
+
+    .door-panel::before {
+        top: 8%;
+        left: 12%;
+        right: 12%;
+        bottom: 8%;
+    }
+
+    .door-intro.opening .door-left {
+        transform: rotateY(-100deg);
+    }
+
+    .door-intro.opening .door-right {
+        transform: rotateY(100deg);
+    }
+}
+
+/* Performance */
+@media (prefers-reduced-motion: reduce) {
+    .door-intro,
+    .door-panel,
+    .door-content,
+    .door-icon,
+    .door-enter {
+        animation: none !important;
+        transition-duration: 0.01s !important;
+    }
+}
