@@ -1010,8 +1010,6 @@ body {
     background: var(--glass-bg);
     border: 1px solid var(--glass-border);
     box-shadow: var(--glass-shadow);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
 }
 
 [data-theme="dark"] .fc .fc-button {
@@ -1029,7 +1027,6 @@ body {
     background: rgba(30, 41, 59, 0.8);
     border-left: 3px solid var(--primary);
     color: var(--text-primary);
-    backdrop-filter: blur(4px);
 }
 
 [data-theme="dark"] .fc .fc-event:hover {
@@ -1039,8 +1036,6 @@ body {
 [data-theme="dark"] .upcoming-item {
     background: linear-gradient(145deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
     border: 1px solid var(--glass-border);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
 }
 
 [data-theme="dark"] .upcoming-item:hover {

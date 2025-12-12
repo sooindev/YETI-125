@@ -25,12 +25,10 @@
     --header-bg: rgba(10, 22, 40, 0.7);
     --modal-overlay-bg: rgba(0, 0, 0, 0.8);
 
-    /* Clean Shadows */
+    /* Clean Shadows - Simplified for performance */
     --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4),
-                 inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.5),
-                 inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.5);
     --shadow-glow: 0 0 30px rgba(34, 211, 238, 0.3);
 
     --font-main: 'Noto Sans KR', -apple-system, sans-serif;
@@ -120,69 +118,7 @@ body {
     contain: layout style;
 }
 
-/* Premium Snowfall Effect ❄️ - Optimized */
-body::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image:
-        /* Large snowflakes */
-        radial-gradient(3px 3px at 20px 40px, white, transparent),
-        radial-gradient(3px 3px at 320px 80px, rgba(255, 255, 255, 0.9), transparent),
-        radial-gradient(4px 4px at 600px 150px, rgba(255, 255, 255, 0.7), transparent),
-        radial-gradient(3px 3px at 880px 180px, white, transparent),
-        /* Medium snowflakes */
-        radial-gradient(2px 2px at 90px 60px, rgba(186, 230, 253, 0.9), transparent),
-        radial-gradient(2px 2px at 380px 100px, white, transparent),
-        radial-gradient(2px 2px at 670px 130px, rgba(186, 230, 253, 0.85), transparent),
-        /* Small snowflakes */
-        radial-gradient(1px 1px at 150px 90px, rgba(186, 230, 253, 0.7), transparent),
-        radial-gradient(1px 1px at 420px 140px, rgba(186, 230, 253, 0.6), transparent),
-        radial-gradient(1px 1px at 830px 40px, rgba(255, 255, 255, 0.7), transparent);
-    background-size: 1000px 200px;
-    background-repeat: repeat;
-    opacity: 0.5;
-    pointer-events: none;
-    z-index: 1;
-    will-change: transform;
-    animation: snowfallDown 20s linear infinite;
-}
-
-/* Second snowfall layer - Optimized */
-body::after {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image:
-        radial-gradient(2px 2px at 80px 70px, rgba(255, 255, 255, 0.4), transparent),
-        radial-gradient(2px 2px at 250px 130px, rgba(186, 230, 253, 0.5), transparent),
-        radial-gradient(2px 2px at 490px 160px, rgba(255, 255, 255, 0.45), transparent),
-        radial-gradient(2px 2px at 720px 60px, rgba(186, 230, 253, 0.4), transparent),
-        radial-gradient(1px 1px at 860px 140px, rgba(255, 255, 255, 0.38), transparent);
-    background-size: 1000px 200px;
-    background-repeat: repeat;
-    opacity: 0.3;
-    pointer-events: none;
-    z-index: 1;
-    will-change: transform;
-    animation: snowfallDown 35s linear infinite;
-    filter: blur(0.5px);
-}
-
-@keyframes snowfallDown {
-    0% {
-        background-position: 0px 0px, 0px 0px;
-    }
-    100% {
-        background-position: 100px 100vh, -50px 100vh;
-    }
-}
+/* 눈송이 애니메이션 제거 - 성능 최적화 */
 
 /* FOUC 방지 */
 body.preload * {
@@ -249,8 +185,6 @@ input, select, textarea {
     right: 0;
     height: var(--header-height);
     background: var(--header-bg);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--border-color);
     box-shadow: 0 2px 12px rgba(6, 182, 212, 0.08);
     z-index: 1000;
@@ -459,7 +393,6 @@ input, select, textarea {
 
 .btn-secondary {
     background: var(--bg-card);
-    backdrop-filter: blur(8px);
     color: var(--text-primary);
     border-color: var(--border-color);
     box-shadow: var(--shadow-sm);
@@ -481,8 +414,6 @@ input, select, textarea {
    ================================================ */
 .card {
     background: var(--bg-card);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
     padding: 1.5rem;
@@ -520,7 +451,6 @@ input, select, textarea {
         right: 0;
         flex-direction: column;
         background: var(--header-bg);
-        backdrop-filter: blur(10px);
         padding: 1rem;
         gap: 0.5rem;
         transform: translateY(-100%);
@@ -557,8 +487,7 @@ input, select, textarea {
 }
 
 .frost {
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    /* backdrop-filter removed for performance */
 }
 
 /* ================================================
@@ -572,8 +501,6 @@ input, select, textarea {
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
     z-index: 9999;
     overflow-y: auto;
     align-items: center;
@@ -594,8 +521,6 @@ input, select, textarea {
     top: 24px;
     right: 24px;
     background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
     border: 1px solid rgba(255, 255, 255, 0.12);
     font-size: 24px;
     font-weight: 400;
