@@ -651,3 +651,14 @@ body {
         font-size: 1.75rem;
     }
 }
+
+/* ================================================
+   Footer - Info Page
+   ================================================ */
+.footer-text {
+    color: #1a3a52;
+}
+
+.footer-text a {
+    color: #2c5f7e !important;
+}

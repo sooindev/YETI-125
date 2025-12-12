@@ -998,3 +998,14 @@ body {
         display: none;
     }
 }
+
+/* ================================================
+   Footer - Index Page
+   ================================================ */
+.footer-text {
+    color: #2c3e50;
+}
+
+.footer-text a {
+    color: #1a3a52 !important;
+}

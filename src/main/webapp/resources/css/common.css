@@ -550,3 +550,25 @@ input, select, textarea {
 .modal-close:active {
     transform: rotate(90deg) scale(0.95);
 }
+
+/* ================================================
+   Footer
+   ================================================ */
+.footer {
+    padding: 40px 20px;
+    text-align: center;
+}
+
+.footer-text {
+    text-align: center;
+    line-height: 1.8;
+    color: var(--text-secondary);
+}
+
+.footer-text a {
+    transition: opacity 0.3s ease;
+}
+
+.footer-text a:hover {
+    opacity: 0.8;
+}
