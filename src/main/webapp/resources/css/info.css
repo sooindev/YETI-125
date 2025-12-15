@@ -338,7 +338,7 @@ body {
 
 .detail-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
     gap: 28px;
     max-width: 1200px;
     margin: 0 auto;
@@ -354,6 +354,8 @@ body {
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 .detail-card::before {
@@ -412,6 +414,8 @@ body {
     display: flex;
     flex-direction: column;
     gap: 16px;
+    flex: 1;
+    justify-content: center;
 }
 
 .detail-row {
@@ -452,6 +456,19 @@ body {
 .detail-value.emoji-large {
     font-size: 1.75rem;
     filter: drop-shadow(0 0 8px rgba(255, 182, 193, 0.3));
+}
+
+.detail-link {
+    color: #FF85A1;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.detail-link:hover {
+    color: #FF6B8A;
+    text-shadow: 0 0 12px rgba(255, 182, 193, 0.5);
+    text-decoration: underline;
 }
 
 /* ================================================

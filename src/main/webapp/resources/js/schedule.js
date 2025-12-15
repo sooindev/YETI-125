@@ -158,20 +158,22 @@ function renderUpcomingEvents(events) {
 // 유형별 클래스
 function getTypeClass(type) {
     switch (type) {
-        case 'STREAM': return 'type-stream';
-        case 'EVENT': return 'type-event';
-        case 'OTHER': return 'type-other';
-        default: return 'type-stream';
+        case 'COLLAB': return 'type-collab';
+        case 'JUSTCHAT': return 'type-justchat';
+        case 'GAME': return 'type-game';
+        case 'KARAOKE': return 'type-karaoke';
+        default: return 'type-game';
     }
 }
 
 // 유형 이름
 function getScheduleTypeName(type) {
     switch (type) {
-        case 'STREAM': return '방송';
-        case 'EVENT': return '이벤트';
-        case 'OTHER': return '기타';
-        default: return '방송';
+        case 'COLLAB': return '합방';
+        case 'JUSTCHAT': return '저스트 채팅';
+        case 'GAME': return '종합게임';
+        case 'KARAOKE': return '노래방송';
+        default: return '종합게임';
     }
 }
 

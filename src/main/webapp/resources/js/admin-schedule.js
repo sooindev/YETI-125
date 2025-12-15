@@ -68,9 +68,10 @@ function initEventHandlers() {
     $('#scheduleType').on('change', function() {
         const type = $(this).val();
         const colors = {
-            'STREAM': '#6366F1',
-            'EVENT': '#EC4899',
-            'OTHER': '#10B981'
+            'COLLAB': '#EC4899',
+            'JUSTCHAT': '#10B981',
+            'GAME': '#6366F1',
+            'KARAOKE': '#FFC107'
         };
         $('#color').val(colors[type] || '#6366F1');
     });
