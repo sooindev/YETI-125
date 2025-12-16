@@ -3,8 +3,6 @@ package com.irion.schedule.service.impl;
 import com.irion.schedule.mapper.ScheduleMapper;
 import com.irion.schedule.service.ScheduleService;
 import com.irion.schedule.vo.ScheduleVO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,67 +13,59 @@ import java.util.List;
 @Service
 public class ScheduleServiceImpl implements ScheduleService {
 
-    private static final Logger logger = LoggerFactory.getLogger(ScheduleServiceImpl.class);
-
     @Autowired
     private ScheduleMapper scheduleMapper;
 
+    /** 전체 일정 목록 (관리자용) */
     @Override
     public List<ScheduleVO> getScheduleList(Date startDate, Date endDate) {
-        logger.debug("Getting schedule list: {} ~ {}", startDate, endDate);
         return scheduleMapper.selectScheduleList(startDate, endDate);
     }
 
+    /** 공개 일정 목록 (사용자용) */
     @Override
     public List<ScheduleVO> getDisplayScheduleList(Date startDate, Date endDate) {
-        logger.debug("Getting display schedule list: {} ~ {}", startDate, endDate);
         return scheduleMapper.selectDisplayScheduleList(startDate, endDate);
     }
 
+    /** 일정 상세 조회 */
     @Override
     public ScheduleVO getSchedule(Long scheduleId) {
-        logger.debug("Getting schedule: {}", scheduleId);
         return scheduleMapper.selectScheduleById(scheduleId);
     }
 
+    /** 일정 등록 */
     @Override
     @Transactional
-    public Long createSchedule(ScheduleVO scheduleVO) {
-        logger.info("Creating schedule: {}", scheduleVO.getTitle());
-
+    public Long createSchedule(ScheduleVO schedule) {
         // 기본값 설정
-        if (scheduleVO.getAllDayYn() == null) {
-            scheduleVO.setAllDayYn("N");
-        }
-        if (scheduleVO.getDisplayYn() == null) {
-            scheduleVO.setDisplayYn("Y");
-        }
-        if (scheduleVO.getColor() == null) {
-            scheduleVO.setColor("#6366F1");
-        }
+        setDefaults(schedule);
 
-        int result = scheduleMapper.insertSchedule(scheduleVO);
-        if (result > 0) {
-            logger.info("Schedule created: {}", scheduleVO.getScheduleId());
-            return scheduleVO.getScheduleId();
-        }
-        return null;
+        int result = scheduleMapper.insertSchedule(schedule);
+        return result > 0 ? schedule.getScheduleId() : null;
     }
 
+    /** 일정 수정 */
     @Override
     @Transactional
-    public boolean updateSchedule(ScheduleVO scheduleVO) {
-        logger.info("Updating schedule: {}", scheduleVO.getScheduleId());
-        int result = scheduleMapper.updateSchedule(scheduleVO);
-        return result > 0;
+    public boolean updateSchedule(ScheduleVO schedule) {
+        return scheduleMapper.updateSchedule(schedule) > 0;
     }
 
+    /** 일정 삭제 */
     @Override
     @Transactional
     public boolean deleteSchedule(Long scheduleId) {
-        logger.info("Deleting schedule: {}", scheduleId);
-        int result = scheduleMapper.deleteSchedule(scheduleId);
-        return result > 0;
+        return scheduleMapper.deleteSchedule(scheduleId) > 0;
     }
 
+    /** 기본값 설정 */
+    private void setDefaults(ScheduleVO schedule) {
+        if (schedule.getAllDayYn() == null)
+            schedule.setAllDayYn("N");
+        if (schedule.getDisplayYn() == null)
+            schedule.setDisplayYn("Y");
+        if (schedule.getColor() == null)
+            schedule.setColor("#6366F1");
+    }
 }
