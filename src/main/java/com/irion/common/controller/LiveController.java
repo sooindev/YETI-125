@@ -297,7 +297,44 @@ public class LiveController {
 
         start += search.length();
         int end = json.indexOf("\"", start);
-        return (end > start) ? json.substring(start, end) : "";
+        String value = (end > start) ? json.substring(start, end) : "";
+
+        // 유니코드 이스케이프 시퀀스 디코딩 (XXXX -> 실제 문자)
+        return decodeUnicode(value);
+    }
+
+    /** 유니코드 이스케이프 시퀀스 디코딩 */
+    private String decodeUnicode(String str) {
+        if (str == null || str.isEmpty()) {
+            return str;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        int length = str.length();
+
+        for (int i = 0; i < length; i++) {
+            char ch = str.charAt(i);
+
+            // XXXX 형태의 유니코드 이스케이프 시퀀스 확인
+            if (ch == '\\' && i + 1 < length && str.charAt(i + 1) == 'u') {
+                // 다음 4자리가 16진수인지 확인
+                if (i + 5 < length) {
+                    try {
+                        String hex = str.substring(i + 2, i + 6);
+                        int code = Integer.parseInt(hex, 16);
+                        sb.append((char) code);
+                        i += 5; // XXXX 전체를 건너뜀
+                        continue;
+                    } catch (NumberFormatException e) {
+                        // 16진수가 아니면 그대로 추가
+                    }
+                }
+            }
+
+            sb.append(ch);
+        }
+
+        return sb.toString();
     }
 
     /** 숫자 값 추출 */

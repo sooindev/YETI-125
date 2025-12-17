@@ -14,20 +14,33 @@
     <!-- Enable MVC Annotation (@Controller, @RequestMapping 등) -->
     <mvc:annotation-driven>
         <mvc:message-converters>
-            <!-- JSON 변환 설정 -->
+            <!-- JSON 변환 설정 (이모티콘 지원) -->
             <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
-                <property name="objectMapper">
-                    <bean class="com.fasterxml.jackson.databind.ObjectMapper">
-                        <property name="dateFormat">
-                            <bean class="java.text.SimpleDateFormat">
-                                <constructor-arg value="yyyy-MM-dd HH:mm:ss"/>
-                            </bean>
-                        </property>
-                    </bean>
+                <property name="objectMapper" ref="objectMapper"/>
+                <property name="supportedMediaTypes">
+                    <list>
+                        <value>application/json;charset=UTF-8</value>
+                    </list>
                 </property>
             </bean>
         </mvc:message-converters>
     </mvc:annotation-driven>
+
+    <!-- ObjectMapper 설정 (이모티콘 출력 지원) -->
+    <bean id="objectMapper" class="org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean">
+        <property name="dateFormat">
+            <bean class="java.text.SimpleDateFormat">
+                <constructor-arg value="yyyy-MM-dd HH:mm:ss"/>
+            </bean>
+        </property>
+        <property name="featuresToDisable">
+            <list>
+                <bean class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean">
+                    <property name="staticField" value="com.fasterxml.jackson.core.JsonGenerator.Feature.ESCAPE_NON_ASCII"/>
+                </bean>
+            </list>
+        </property>
+    </bean>
 
     <!-- Component Scan (Controller Only) -->
     <context:component-scan base-package="com.irion" use-default-filters="false">

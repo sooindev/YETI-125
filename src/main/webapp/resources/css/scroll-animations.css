@@ -1,0 +1,281 @@
+/* ================================================
+   Fancy Scroll Animations
+   Dynamic, eye-catching, impressive effects
+   ================================================ */
+
+/* 기본 애니메이션 상태 */
+.scroll-animate {
+    opacity: 0;
+    will-change: opacity, transform;
+}
+
+.scroll-animate.is-visible {
+    opacity: 1;
+}
+
+/* ==================== Fancy Easing Functions ==================== */
+:root {
+    --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-spring: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* ==================== Fade In ==================== */
+.fade-in {
+    opacity: 0;
+    transition: opacity 0.7s var(--ease-smooth);
+}
+
+.fade-in.is-visible {
+    opacity: 1;
+}
+
+/* ==================== Slide Up ==================== */
+.slide-up {
+    opacity: 0;
+    transform: translateY(40px) scale(0.95);
+    transition: opacity 0.7s var(--ease-smooth),
+                transform 0.7s var(--ease-smooth);
+}
+
+.slide-up.is-visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+/* ==================== 3D Perspective Container ==================== */
+.clips-grid,
+.videos-grid {
+    perspective: 1500px;
+}
+
+/* ==================== Fancy Card Animations ==================== */
+.clip-card,
+.video-card {
+    transform-style: preserve-3d;
+    will-change: transform, opacity;
+    opacity: 0;
+    position: relative;
+}
+
+/* 홀수 카드 - 왼쪽에서 회전하며 등장 */
+.clip-card:nth-child(odd),
+.video-card:nth-child(odd) {
+    transform: perspective(1000px)
+               rotateY(-20deg)
+               translateX(-40px)
+               scale(0.85);
+}
+
+/* 짝수 카드 - 오른쪽에서 회전하며 등장 */
+.clip-card:nth-child(even),
+.video-card:nth-child(even) {
+    transform: perspective(1000px)
+               rotateY(20deg)
+               translateX(40px)
+               scale(0.85);
+}
+
+/* 카드 등장 애니메이션 */
+.clip-card.is-visible,
+.video-card.is-visible {
+    opacity: 1;
+    transform: perspective(1000px)
+               rotateY(0deg)
+               translateX(0)
+               scale(1);
+    transition: transform 0.8s var(--ease-smooth),
+                opacity 0.6s var(--ease-smooth);
+}
+
+/* 순차 등장 효과 */
+.clip-card:nth-child(1).is-visible,
+.video-card:nth-child(1).is-visible {
+    transition-delay: 0s;
+}
+
+.clip-card:nth-child(2).is-visible,
+.video-card:nth-child(2).is-visible {
+    transition-delay: 0.1s;
+}
+
+.clip-card:nth-child(3).is-visible,
+.video-card:nth-child(3).is-visible {
+    transition-delay: 0.2s;
+}
+
+.clip-card:nth-child(4).is-visible,
+.video-card:nth-child(4).is-visible {
+    transition-delay: 0.3s;
+}
+
+.clip-card:nth-child(5).is-visible,
+.video-card:nth-child(5).is-visible {
+    transition-delay: 0.4s;
+}
+
+.clip-card:nth-child(6).is-visible,
+.video-card:nth-child(6).is-visible {
+    transition-delay: 0.5s;
+}
+
+/* ==================== Hover State - Fancy Effects ==================== */
+.clip-card,
+.video-card {
+    transition: transform 0.4s var(--ease-bounce),
+                box-shadow 0.4s ease;
+}
+
+.clip-card:hover,
+.video-card:hover {
+    transform: translateY(-12px) scale(1.03);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3),
+                0 10px 20px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+}
+
+/* 반짝이는 효과 */
+.clip-card::after,
+.video-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+    );
+    transition: left 0.5s ease;
+    pointer-events: none;
+}
+
+.clip-card:hover::after,
+.video-card:hover::after {
+    left: 100%;
+}
+
+/* ==================== Thumbnail Zoom & Rotate Effect ==================== */
+.clip-thumbnail img,
+.video-thumbnail img {
+    transition: transform 0.5s var(--ease-smooth);
+}
+
+.clip-card:hover .clip-thumbnail img,
+.video-card:hover .video-thumbnail img {
+    transform: scale(1.1) rotate(2deg);
+}
+
+/* ==================== Play Overlay Enhancement ==================== */
+.clip-play-overlay,
+.video-play-overlay {
+    transition: all 0.4s var(--ease-smooth);
+}
+
+.clip-card:hover .clip-play-overlay,
+.video-card:hover .video-play-overlay {
+    background: rgba(0, 0, 0, 0.7);
+}
+
+.clip-play-icon,
+.video-play-icon {
+    transition: transform 0.4s var(--ease-bounce);
+}
+
+.clip-card:hover .clip-play-icon,
+.video-card:hover .video-play-icon {
+    transform: scale(1.3) rotate(360deg);
+}
+
+/* ==================== Info Glow Effect ==================== */
+.clip-info,
+.video-info {
+    position: relative;
+    transition: all 0.4s ease;
+}
+
+.clip-card:hover .clip-info,
+.video-card:hover .video-info {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* ==================== Section Title Animation ==================== */
+.section-title {
+    opacity: 0;
+    transform: translateY(30px) scale(0.9);
+    transition: opacity 0.7s var(--ease-smooth),
+                transform 0.7s var(--ease-bounce);
+}
+
+.section-title.is-visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+/* ==================== Reduced Motion Support ==================== */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        transition-delay: 0s !important;
+    }
+
+    .clip-card,
+    .video-card {
+        transform: none !important;
+        filter: none !important;
+        opacity: 1 !important;
+    }
+}
+
+/* ==================== Mobile Optimizations ==================== */
+@media (max-width: 768px) {
+    .clips-grid,
+    .videos-grid {
+        perspective: 1200px;
+    }
+
+    /* 모바일에서는 더 부드러운 애니메이션 */
+    .clip-card:nth-child(odd),
+    .video-card:nth-child(odd) {
+        transform: perspective(1000px)
+                   rotateY(-25deg)
+                   translateX(-40px)
+                   scale(0.9);
+        filter: blur(5px) brightness(0.8);
+    }
+
+    .clip-card:nth-child(even),
+    .video-card:nth-child(even) {
+        transform: perspective(1000px)
+                   rotateY(25deg)
+                   translateX(40px)
+                   scale(0.9);
+        filter: blur(5px) brightness(0.8);
+    }
+
+    .clip-card.is-visible,
+    .video-card.is-visible {
+        transition-duration: 0.8s, 0.6s, 0.7s;
+    }
+
+    /* 모바일에서는 호버 효과 단순화 */
+    .clip-card:hover,
+    .video-card:hover {
+        transform: translateY(-8px) scale(1.01);
+    }
+}
+
+/* ==================== High Performance Devices ==================== */
+@media (min-width: 1920px) {
+    .clips-grid,
+    .videos-grid {
+        perspective: 2500px;
+    }
+}

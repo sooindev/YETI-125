@@ -23,6 +23,7 @@
   <link rel="stylesheet" href="/resources/css/common.css">
   <link rel="stylesheet" href="/resources/css/index.css">
   <link rel="stylesheet" href="/resources/css/door-intro.css">
+  <link rel="stylesheet" href="/resources/css/scroll-animations.css">
 </head>
 <body>
 <!-- Door Opening Intro -->
@@ -84,12 +85,12 @@
 <section id="liveHero" class="live-hero" style="display: none;">
   <div class="live-hero-bg"></div>
   <div class="live-hero-content">
-    <div class="live-status">
+    <div class="live-status scroll-animate fade-in delay-100">
       <span class="live-badge-large">🔴 LIVE</span>
       <span id="liveViewers" class="live-viewers-large"></span>
     </div>
-    <h1 id="liveTitle" class="live-title-large">방송 중!</h1>
-    <div class="live-thumbnail-large">
+    <h1 id="liveTitle" class="live-title-large scroll-animate slide-up delay-200">방송 중!</h1>
+    <div class="live-thumbnail-large scroll-animate scale-in delay-300">
       <a id="liveLink" href="#" target="_blank">
         <img id="liveThumbnail" src="" alt="방송 썸네일">
         <div class="thumbnail-overlay">
@@ -112,20 +113,20 @@
     <div class="particle"></div>
   </div>
   <div class="hero-content">
-    <div class="offline-status">
+    <div class="offline-status scroll-animate fade-in delay-100">
       <div class="offline-icon">
         <div class="offline-circle"></div>
         <span>📡</span>
       </div>
       <span class="offline-badge">OFFLINE</span>
     </div>
-    <h1 class="hero-title">
+    <h1 class="hero-title scroll-animate slide-up delay-200">
       <span class="hero-name">IRION</span>
       <span class="hero-fansite">FANSITE</span>
     </h1>
-    <p class="hero-desc">현재 채널이 오프라인 상태입니다</p>
-    <p class="hero-subdesc">다음 라이브를 기대해주세요! ❄️ 🌸</p>
-    <div class="hero-buttons">
+    <p class="hero-desc scroll-animate fade-in delay-300">현재 채널이 오프라인 상태입니다</p>
+    <p class="hero-subdesc scroll-animate fade-in delay-400">다음 라이브를 기대해주세요! ❄️ 🌸</p>
+    <div class="hero-buttons scroll-animate slide-up delay-500">
       <a href="/schedule.html" class="btn btn-primary">
         <span class="btn-icon">📅</span>
         방송 일정 확인
@@ -135,7 +136,7 @@
         채널 방문하기
       </a>
     </div>
-    <div class="hero-profile-preview">
+    <div class="hero-profile-preview scroll-animate scale-in delay-600">
       <img src="/resources/images/Irion-profile.jpg" alt="이리온" class="preview-avatar">
       <div class="preview-info">
         <span class="preview-name">이리온</span>
@@ -148,14 +149,110 @@
 <!-- Clips Section -->
 <section class="clips-section">
   <div class="container">
-    <h2 class="section-title">
+    <h2 class="section-title scroll-animate slide-up">
       <span class="title-icon">🎬</span>
       인기 클립
     </h2>
     <div id="clipsContainer" class="clips-grid">
-      <!-- 클립이 여기에 로드됨 -->
+      <!-- 테스트용 더미 클립 데이터 -->
+      <a href="#" class="clip-card scroll-animate">
+        <div class="clip-thumbnail">
+          <img src="https://via.placeholder.com/400x225/1a1a2e/ffffff?text=Clip+1" alt="클립 1">
+          <span class="clip-duration">5:23</span>
+          <div class="clip-play-overlay">
+            <div class="clip-play-icon">▶</div>
+          </div>
+        </div>
+        <div class="clip-info">
+          <h3 class="clip-title">재미있는 순간 클립 1</h3>
+          <div class="clip-meta">
+            <span class="clip-meta-item">👁 1,234</span>
+            <span class="clip-meta-item">📅 12월 15일</span>
+          </div>
+        </div>
+      </a>
+      <a href="#" class="clip-card scroll-animate">
+        <div class="clip-thumbnail">
+          <img src="https://via.placeholder.com/400x225/16213e/ffffff?text=Clip+2" alt="클립 2">
+          <span class="clip-duration">3:45</span>
+          <div class="clip-play-overlay">
+            <div class="clip-play-icon">▶</div>
+          </div>
+        </div>
+        <div class="clip-info">
+          <h3 class="clip-title">하이라이트 모음 2</h3>
+          <div class="clip-meta">
+            <span class="clip-meta-item">👁 2,567</span>
+            <span class="clip-meta-item">📅 12월 14일</span>
+          </div>
+        </div>
+      </a>
+      <a href="#" class="clip-card scroll-animate">
+        <div class="clip-thumbnail">
+          <img src="https://via.placeholder.com/400x225/0f3460/ffffff?text=Clip+3" alt="클립 3">
+          <span class="clip-duration">4:12</span>
+          <div class="clip-play-overlay">
+            <div class="clip-play-icon">▶</div>
+          </div>
+        </div>
+        <div class="clip-info">
+          <h3 class="clip-title">웃긴 장면 클립 3</h3>
+          <div class="clip-meta">
+            <span class="clip-meta-item">👁 3,890</span>
+            <span class="clip-meta-item">📅 12월 13일</span>
+          </div>
+        </div>
+      </a>
+      <a href="#" class="clip-card scroll-animate">
+        <div class="clip-thumbnail">
+          <img src="https://via.placeholder.com/400x225/533483/ffffff?text=Clip+4" alt="클립 4">
+          <span class="clip-duration">2:58</span>
+          <div class="clip-play-overlay">
+            <div class="clip-play-icon">▶</div>
+          </div>
+        </div>
+        <div class="clip-info">
+          <h3 class="clip-title">명장면 클립 4</h3>
+          <div class="clip-meta">
+            <span class="clip-meta-item">👁 4,123</span>
+            <span class="clip-meta-item">📅 12월 12일</span>
+          </div>
+        </div>
+      </a>
+      <a href="#" class="clip-card scroll-animate">
+        <div class="clip-thumbnail">
+          <img src="https://via.placeholder.com/400x225/e94560/ffffff?text=Clip+5" alt="클립 5">
+          <span class="clip-duration">6:01</span>
+          <div class="clip-play-overlay">
+            <div class="clip-play-icon">▶</div>
+          </div>
+        </div>
+        <div class="clip-info">
+          <h3 class="clip-title">베스트 순간 클립 5</h3>
+          <div class="clip-meta">
+            <span class="clip-meta-item">👁 5,678</span>
+            <span class="clip-meta-item">📅 12월 11일</span>
+          </div>
+        </div>
+      </a>
+      <a href="#" class="clip-card scroll-animate">
+        <div class="clip-thumbnail">
+          <img src="https://via.placeholder.com/400x225/f67280/ffffff?text=Clip+6" alt="클립 6">
+          <span class="clip-duration">7:34</span>
+          <div class="clip-play-overlay">
+            <div class="clip-play-icon">▶</div>
+          </div>
+        </div>
+        <div class="clip-info">
+          <h3 class="clip-title">인기 클립 6</h3>
+          <div class="clip-meta">
+            <span class="clip-meta-item">👁 6,789</span>
+            <span class="clip-meta-item">📅 12월 10일</span>
+          </div>
+        </div>
+      </a>
     </div>
-    <div id="clipsLoading" class="clips-loading">
+    <div id="clipsLoading" class="clips-loading" style="display: none;">
       <span>클립을 불러오는 중...</span>
     </div>
     <div id="clipsEmpty" class="clips-empty" style="display: none;">
@@ -170,14 +267,110 @@
 <!-- Videos Section (다시보기) -->
 <section class="videos-section">
   <div class="container">
-    <h2 class="section-title">
+    <h2 class="section-title scroll-animate slide-up">
       <span class="title-icon">📺</span>
       다시보기
     </h2>
     <div id="videosContainer" class="videos-grid">
-      <!-- 영상이 여기에 로드됨 -->
+      <!-- 테스트용 더미 비디오 데이터 -->
+      <a href="#" class="video-card scroll-animate">
+        <div class="video-thumbnail">
+          <img src="https://via.placeholder.com/400x225/283593/ffffff?text=Video+1" alt="영상 1">
+          <span class="video-duration">1:23:45</span>
+          <div class="video-play-overlay">
+            <div class="video-play-icon">▶</div>
+          </div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">2024년 12월 15일 방송 다시보기</h3>
+          <div class="video-meta">
+            <span class="video-meta-item">👁 12,345</span>
+            <span class="video-meta-item">📅 12월 15일</span>
+          </div>
+        </div>
+      </a>
+      <a href="#" class="video-card scroll-animate">
+        <div class="video-thumbnail">
+          <img src="https://via.placeholder.com/400x225/5e35b1/ffffff?text=Video+2" alt="영상 2">
+          <span class="video-duration">2:10:30</span>
+          <div class="video-play-overlay">
+            <div class="video-play-icon">▶</div>
+          </div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">특별 방송 - 시청자와 함께</h3>
+          <div class="video-meta">
+            <span class="video-meta-item">👁 23,456</span>
+            <span class="video-meta-item">📅 12월 14일</span>
+          </div>
+        </div>
+      </a>
+      <a href="#" class="video-card scroll-animate">
+        <div class="video-thumbnail">
+          <img src="https://via.placeholder.com/400x225/7b1fa2/ffffff?text=Video+3" alt="영상 3">
+          <span class="video-duration">1:45:20</span>
+          <div class="video-play-overlay">
+            <div class="video-play-icon">▶</div>
+          </div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">게임 플레이 하이라이트</h3>
+          <div class="video-meta">
+            <span class="video-meta-item">👁 34,567</span>
+            <span class="video-meta-item">📅 12월 13일</span>
+          </div>
+        </div>
+      </a>
+      <a href="#" class="video-card scroll-animate">
+        <div class="video-thumbnail">
+          <img src="https://via.placeholder.com/400x225/c2185b/ffffff?text=Video+4" alt="영상 4">
+          <span class="video-duration">3:05:15</span>
+          <div class="video-play-overlay">
+            <div class="video-play-icon">▶</div>
+          </div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">주말 특집 방송</h3>
+          <div class="video-meta">
+            <span class="video-meta-item">👁 45,678</span>
+            <span class="video-meta-item">📅 12월 12일</span>
+          </div>
+        </div>
+      </a>
+      <a href="#" class="video-card scroll-animate">
+        <div class="video-thumbnail">
+          <img src="https://via.placeholder.com/400x225/d32f2f/ffffff?text=Video+5" alt="영상 5">
+          <span class="video-duration">2:30:45</span>
+          <div class="video-play-overlay">
+            <div class="video-play-icon">▶</div>
+          </div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">토크쇼 - 시청자 질문 답변</h3>
+          <div class="video-meta">
+            <span class="video-meta-item">👁 56,789</span>
+            <span class="video-meta-item">📅 12월 11일</span>
+          </div>
+        </div>
+      </a>
+      <a href="#" class="video-card scroll-animate">
+        <div class="video-thumbnail">
+          <img src="https://via.placeholder.com/400x225/f4511e/ffffff?text=Video+6" alt="영상 6">
+          <span class="video-duration">1:55:30</span>
+          <div class="video-play-overlay">
+            <div class="video-play-icon">▶</div>
+          </div>
+        </div>
+        <div class="video-info">
+          <h3 class="video-title">인기 방송 다시보기</h3>
+          <div class="video-meta">
+            <span class="video-meta-item">👁 67,890</span>
+            <span class="video-meta-item">📅 12월 10일</span>
+          </div>
+        </div>
+      </a>
     </div>
-    <div id="videosLoading" class="videos-loading">
+    <div id="videosLoading" class="videos-loading" style="display: none;">
       <span>다시보기를 불러오는 중...</span>
     </div>
     <div id="videosEmpty" class="videos-empty" style="display: none;">
@@ -192,11 +385,11 @@
 <!-- Community Section -->
 <section class="community-section">
   <div class="container">
-    <h2 class="section-title">
+    <h2 class="section-title scroll-animate slide-up">
       <span class="title-icon">💬</span>
       커뮤니티
     </h2>
-    <a href="https://chzzk.naver.com/63368ec9081dc85e61d0e4310b7e1602/community" target="_blank" class="community-card">
+    <a href="https://chzzk.naver.com/63368ec9081dc85e61d0e4310b7e1602/community" target="_blank" class="community-card scroll-animate scale-in">
       <div class="community-card-bg"></div>
       <div class="community-card-content">
         <div class="community-icon">
@@ -225,7 +418,7 @@
 <!-- Quick Info Section -->
 <section class="quick-info">
   <div class="container">
-    <div class="info-cards">
+    <div class="info-cards stagger-container">
       <a href="https://chzzk.naver.com/live/63368ec9081dc85e61d0e4310b7e1602" target="_blank" class="info-card">
         <div class="card-icon">
           <img src="https://ssl.pstatic.net/static/nng/glive/icon/favicon.png" alt="치지직" class="card-favicon">
@@ -288,6 +481,7 @@
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="/resources/js/door-intro.js"></script>
 <script src="/resources/js/common.js"></script>
+<script src="/resources/js/scroll-animations.js"></script>
 <script src="/resources/js/index.js"></script>
 </body>
 </html>

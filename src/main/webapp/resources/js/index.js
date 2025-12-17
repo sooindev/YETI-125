@@ -67,6 +67,10 @@ function showDefaultHero() {
 function loadClips() {
     clipOffset = 0;
 
+    // 로딩 표시
+    $('#clipsLoading').show();
+    $('#clipsEmpty').hide();
+
     $.ajax({
         url: '/live/clips',
         type: 'GET',
@@ -157,7 +161,7 @@ function renderClips(clips, append) {
         const date = formatDate(clip.createdAt);
 
         const clipHtml =
-            '<a href="' + clip.clipUrl + '" target="_blank" class="clip-card">' +
+            '<a href="' + clip.clipUrl + '" target="_blank" class="clip-card scroll-animate scale-in">' +
             '<div class="clip-thumbnail">' +
             '<img src="' + (clip.thumbnailUrl || '') + '" alt="' + escapeHtml(clip.clipTitle) + '">' +
             '<span class="clip-duration">' + duration + '</span>' +
@@ -176,6 +180,13 @@ function renderClips(clips, append) {
 
         $container.append(clipHtml);
     });
+
+    // DOM 렌더링 완료 후 애니메이션 적용
+    setTimeout(function() {
+        if (typeof window.observeNewElements === 'function') {
+            window.observeNewElements();
+        }
+    }, 50);
 }
 
 function formatDuration(seconds) {
@@ -215,6 +226,10 @@ let hasMoreVideos = false;
 // 다시보기 로드 (초기)
 function loadVideos() {
     videoOffset = 0;
+
+    // 로딩 표시
+    $('#videosLoading').show();
+    $('#videosEmpty').hide();
 
     $.ajax({
         url: '/live/videos',
@@ -307,7 +322,7 @@ function renderVideos(videos, append) {
         const date = formatDate(video.publishDate);
 
         const videoHtml =
-            '<a href="' + video.videoUrl + '" target="_blank" class="video-card">' +
+            '<a href="' + video.videoUrl + '" target="_blank" class="video-card scroll-animate scale-in">' +
             '<div class="video-thumbnail">' +
             '<img src="' + (video.thumbnailUrl || '') + '" alt="' + escapeHtml(video.videoTitle) + '">' +
             '<span class="video-duration">' + duration + '</span>' +
@@ -326,6 +341,13 @@ function renderVideos(videos, append) {
 
         $container.append(videoHtml);
     });
+
+    // DOM 렌더링 완료 후 애니메이션 적용
+    setTimeout(function() {
+        if (typeof window.observeNewElements === 'function') {
+            window.observeNewElements();
+        }
+    }, 50);
 }
 
 // 영상 시간 포맷 (초 -> HH:MM:SS 또는 MM:SS)
