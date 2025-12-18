@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>방송 일정 - YETI-125</title>
+  <link rel="icon" type="image/svg+xml" href="/resources/images/snowflake.png">
+  <script>
+    // 다크모드 적용
+    document.documentElement.setAttribute('data-theme', 'dark');
+
+    // 페이지 로드 시 transition 비활성화
+    document.addEventListener('DOMContentLoaded', function() {
+      document.body.classList.add('preload');
+      setTimeout(function() {
+        document.body.classList.remove('preload');
+      }, 100);
+    });
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/resources/css/common/common.css">
+  <link rel="stylesheet" href="/resources/css/schedule/schedule.css">
+</head>
+<body>
+<!-- Header -->
+<header class="header">
+  <div class="header-container">
+    <a href="/" class="logo">
+      <span class="logo-text">IRION</span>
+      <span class="logo-sub">팬사이트</span>
+    </a>
+    <nav class="nav">
+      <a href="/" class="nav-link">홈</a>
+      <a href="/schedule/schedule.html" class="nav-link active">일정</a>
+      <a href="/info.html" class="nav-link">프로필</a>
+    </nav>
+    <button class="mobile-menu-btn">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </div>
+</header>
+
+<!-- Schedule Header -->
+<section class="schedule-header">
+  <div class="schedule-header-content">
+    <div class="schedule-icon">📅</div>
+    <h1>방송 일정</h1>
+    <p>이리온의 방송 일정을 확인하세요</p>
+  </div>
+  <div class="schedule-header-decoration">
+    <div class="decoration-circle circle-1"></div>
+    <div class="decoration-circle circle-2"></div>
+    <div class="decoration-circle circle-3"></div>
+  </div>
+</section>
+
+<!-- Calendar Section -->
+<section class="calendar-section">
+  <div class="container">
+    <!-- Legend -->
+    <div class="calendar-legend">
+      <div class="legend-item">
+        <span class="legend-color" style="background: #10B981;"></span>
+        <span>저스트 채팅</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-color" style="background: #6366F1;"></span>
+        <span>종합게임</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-color" style="background: #FFC107;"></span>
+        <span>노래방송</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-color" style="background: #EC4899;"></span>
+        <span>합방</span>
+      </div>
+    </div>
+
+    <!-- Calendar -->
+    <div class="calendar-wrapper">
+      <div id="calendar"></div>
+    </div>
+
+    <!-- Upcoming Events -->
+    <div class="upcoming-section">
+      <h2 class="upcoming-title">
+        <span class="upcoming-icon">🔔</span>
+        다가오는 일정
+      </h2>
+      <div id="upcomingEvents" class="upcoming-list">
+        <!-- 일정이 여기에 로드됨 -->
+      </div>
+      <div id="upcomingEmpty" class="upcoming-empty" style="display: none;">
+        <span>😴</span>
+        <p>예정된 일정이 없습니다</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Schedule Detail Modal -->
+<div id="scheduleModal" class="modal">
+  <div class="modal-content">
+    <button class="modal-close" onclick="closeModal('scheduleModal')">&times;</button>
+    <div id="scheduleDetail">
+      <!-- 일정 상세 내용이 여기에 로드됨 -->
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <p class="footer-text">
+      © 2024 Irion Fansite. 비공식 팬사이트입니다. 모든 콘텐츠의 저작권은 원 저작자에게 있습니다.<br>
+      Developed by <a href="https://github.com/SooinDev" target="_blank" style="color: var(--primary); text-decoration: none;">SooinDev</a>
+    </p>
+  </div>
+</footer>
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+<script src="/resources/js/common/common.js"></script>
+<script src="/resources/js/schedule/schedule.js"></script>
+</body>
+</html>
