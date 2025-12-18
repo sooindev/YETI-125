@@ -25,6 +25,7 @@ function checkLiveStatus() {
         url: '/live/status',
         type: 'GET',
         dataType: 'json',
+        timeout: 10000,
         success: function(response) {
             if (response.success && response.data) {
                 if (response.data.isLive) {
@@ -76,6 +77,7 @@ function loadClips() {
         type: 'GET',
         data: { limit: 6, offset: 0 },
         dataType: 'json',
+        timeout: 10000,
         success: function(response) {
             console.log('Clips response:', response);
 
@@ -123,6 +125,7 @@ function loadMoreClips() {
             offset: clipOffset
         },
         dataType: 'json',
+        timeout: 10000,
         success: function(response) {
             $btn.prop('disabled', false).text('더보기');
 
@@ -236,6 +239,7 @@ function loadVideos() {
         type: 'GET',
         data: { limit: 6, offset: 0 },
         dataType: 'json',
+        timeout: 10000,
         success: function(response) {
             console.log('Videos response:', response);
 
@@ -283,6 +287,7 @@ function loadMoreVideos() {
             offset: videoOffset
         },
         dataType: 'json',
+        timeout: 10000,
         success: function(response) {
             $btn.prop('disabled', false).text('더보기');
 
