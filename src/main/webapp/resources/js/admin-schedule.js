@@ -75,6 +75,21 @@ function initEventHandlers() {
         };
         $('#color').val(colors[type] || '#6366F1');
     });
+
+    // 새 일정 추가 버튼
+    $('.btn-primary[data-action="add"]').on('click', function() {
+        openAddModal();
+    });
+
+    // 모달 닫기 버튼
+    $('.modal-close, .btn-secondary[data-action="cancel"]').on('click', function() {
+        closeModal('scheduleModal');
+    });
+
+    // 삭제 버튼
+    $('#deleteBtn').on('click', function() {
+        deleteSchedule();
+    });
 }
 
 // 일정 데이터 로드
