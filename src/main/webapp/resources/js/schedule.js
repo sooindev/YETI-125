@@ -280,9 +280,7 @@ function showScheduleDetail(event) {
             <span class="detail-icon">🏷️</span>
             <div class="detail-content">
                 <div class="detail-label">유형</div>
-                <div class="detail-value">
-                    <span class="detail-type-badge ${typeClass}">${typeName}</span>
-                </div>
+                <div class="detail-value">${typeName}</div>
             </div>
         </div>
         ${description ? `
@@ -329,9 +327,7 @@ function showScheduleDetailById(id, title, start, end, allDay, color, type, desc
             <span class="detail-icon">🏷️</span>
             <div class="detail-content">
                 <div class="detail-label">유형</div>
-                <div class="detail-value">
-                    <span class="detail-type-badge ${typeClass}">${typeName}</span>
-                </div>
+                <div class="detail-value">${typeName}</div>
             </div>
         </div>
         ${description ? `
