@@ -484,15 +484,15 @@ body {
     background: rgba(99, 102, 241, 0.1);
 }
 
+/* 다크모드에서도 일정의 실제 color 값 사용 */
 [data-theme="dark"] .fc .fc-daygrid-event,
 [data-theme="dark"] .fc .fc-daygrid-dot-event {
-    background: rgba(255, 255, 255, 0.05);
-    color: var(--text-primary);
+    color: white;
 }
 
 [data-theme="dark"] .fc .fc-daygrid-event:hover,
 [data-theme="dark"] .fc .fc-daygrid-dot-event:hover {
-    background: rgba(99, 102, 241, 0.15);
+    filter: brightness(1.2);
 }
 
 [data-theme="dark"] .fc .fc-popover {
@@ -1060,16 +1060,6 @@ body {
 [data-theme="dark"] .fc .fc-day-today .fc-daygrid-day-frame {
     background: rgba(99, 102, 241, 0.05);
     border: 1px solid rgba(99, 102, 241, 0.2);
-}
-
-[data-theme="dark"] .fc .fc-event {
-    background: rgba(30, 41, 59, 0.8);
-    border-left: 3px solid var(--primary);
-    color: var(--text-primary);
-}
-
-[data-theme="dark"] .fc .fc-event:hover {
-    background: rgba(99, 102, 241, 0.15);
 }
 
 [data-theme="dark"] .upcoming-item {
