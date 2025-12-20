@@ -41,6 +41,20 @@ function initCalendar() {
         },
         eventDidMount: function(info) {
             $(info.el).attr('title', info.event.title);
+
+            // 색상이 없으면 일정 타입에 따라 자동 설정
+            if (!info.event.backgroundColor || info.event.backgroundColor === '') {
+                const type = info.event.extendedProps.type;
+                const colors = {
+                    'JUSTCHAT': '#10B981',
+                    'GAME': '#6366F1',
+                    'KARAOKE': '#FFC107',
+                    'COLLAB': '#EC4899'
+                };
+                const color = colors[type] || '#6366F1';
+                info.el.style.backgroundColor = color;
+                info.el.style.borderColor = color;
+            }
         }
     });
 

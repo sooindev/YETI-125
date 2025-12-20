@@ -721,6 +721,10 @@ body {
 }
 
 /* Type Colors for light mode */
+.type-justchat { background: rgba(16, 185, 129, 0.1); color: #059669; }
+.type-game { background: rgba(99, 102, 241, 0.1); color: #4F46E5; }
+.type-karaoke { background: rgba(255, 193, 7, 0.1); color: #F59E0B; }
+.type-collab { background: rgba(236, 72, 153, 0.1); color: #DB2777; }
 .type-stream { background: rgba(59, 130, 246, 0.1); color: #2563EB; }
 .type-event { background: rgba(219, 39, 119, 0.1); color: #be185d; }
 .type-other { background: rgba(5, 150, 105, 0.1); color: #047857; }
@@ -1085,6 +1089,10 @@ body {
     color: var(--secondary);
 }
 
+[data-theme="dark"] .type-justchat { background: rgba(16, 185, 129, 0.2); color: #6EE7B7; }
+[data-theme="dark"] .type-game { background: rgba(99, 102, 241, 0.2); color: #A5B4FC; }
+[data-theme="dark"] .type-karaoke { background: rgba(255, 193, 7, 0.2); color: #FCD34D; }
+[data-theme="dark"] .type-collab { background: rgba(236, 72, 153, 0.2); color: #F9A8D4; }
 [data-theme="dark"] .type-stream { background: rgba(99, 102, 241, 0.2); color: #a5b4fc; }
 [data-theme="dark"] .type-event { background: rgba(236, 72, 153, 0.2); color: #fbcfe8; }
 [data-theme="dark"] .type-other { background: rgba(16, 185, 129, 0.2); color: #a7f3d0; }
