@@ -206,8 +206,8 @@ function saveSchedule() {
         title: title,
         description: $('#description').val().trim(),
         scheduleType: $('#scheduleType').val(),
-        startDate: new Date($('#startDate').val()).toISOString(),
-        endDate: $('#endDate').val() ? new Date($('#endDate').val()).toISOString() : null,
+        startDate: formatDateForServer($('#startDate').val()),
+        endDate: $('#endDate').val() ? formatDateForServer($('#endDate').val()) : null,
         allDayYn: $('#allDayYn').is(':checked') ? 'Y' : 'N',
         displayYn: $('#displayYn').is(':checked') ? 'Y' : 'N',
         color: $('#color').val()
@@ -277,9 +277,17 @@ function deleteSchedule() {
 
 // 드래그로 일정 날짜 변경
 function updateScheduleDate(event) {
+    // 로컬 타임존을 유지하면서 ISO 형식으로 변환
+    const formatEventDate = (dateObj) => {
+        if (!dateObj) return null;
+        const offset = dateObj.getTimezoneOffset();
+        const localDate = new Date(dateObj.getTime() - (offset * 60 * 1000));
+        return localDate.toISOString();
+    };
+
     const data = {
-        startDate: event.start.toISOString(),
-        endDate: event.end ? event.end.toISOString() : null,
+        startDate: formatEventDate(event.start),
+        endDate: event.end ? formatEventDate(event.end) : null,
         allDayYn: event.allDay ? 'Y' : 'N'
     };
 
@@ -308,6 +316,21 @@ function updateScheduleDate(event) {
             calendar.refetchEvents();
         }
     });
+}
+
+// 날짜를 서버로 전송할 형식으로 변환 (로컬 타임존 유지)
+function formatDateForServer(dateTimeLocalString) {
+    if (!dateTimeLocalString) return null;
+
+    // datetime-local input 값: "2024-01-01T18:00"
+    // 로컬 시간을 유지하면서 ISO 형식으로 변환
+    const date = new Date(dateTimeLocalString);
+
+    // 타임존 오프셋을 고려하여 로컬 시간 유지
+    const offset = date.getTimezoneOffset();
+    const localDate = new Date(date.getTime() - (offset * 60 * 1000));
+
+    return localDate.toISOString();
 }
 
 // 로그아웃
