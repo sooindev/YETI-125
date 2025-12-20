@@ -56,7 +56,7 @@ public class PasswordUtil {
     // 비밀번호 생성용 메인 메서드
     // 실행하면 암호화된 비밀번호 출력됨
     public static void main(String[] args) {
-        String password = "CHANGE_ME";  // 원하는 비밀번호로 변경
+        String password = "1234";  // 원하는 비밀번호로 변경
         String encoded = encode(password);
         System.out.println("Password: " + password);
         System.out.println("Encoded: " + encoded);
