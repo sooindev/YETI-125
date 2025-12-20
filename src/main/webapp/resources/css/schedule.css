@@ -284,21 +284,22 @@ body {
 
 .fc .fc-daygrid-event,
 .fc .fc-daygrid-dot-event {
+    background: var(--bg-card) !important;
     border: none;
+    border-left: 4px solid var(--primary);
     border-radius: 6px;
     padding: 4px 8px;
     font-size: 0.75rem;
     font-weight: 500;
-    color: white;
+    color: var(--text-primary);
     transition: all 0.2s ease;
-    /* 일정의 실제 color 값을 사용 (FullCalendar가 자동으로 적용) */
 }
 
 .fc .fc-daygrid-event:hover,
 .fc .fc-daygrid-dot-event:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    filter: brightness(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    background: var(--bg-card-hover) !important;
 }
 
 .fc .fc-daygrid-event-dot {

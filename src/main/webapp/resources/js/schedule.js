@@ -42,19 +42,19 @@ function initCalendar() {
         eventDidMount: function(info) {
             $(info.el).attr('title', info.event.title);
 
-            // 색상이 없으면 일정 타입에 따라 자동 설정
-            if (!info.event.backgroundColor || info.event.backgroundColor === '') {
-                const type = info.event.extendedProps.type;
-                const colors = {
-                    'JUSTCHAT': '#10B981',
-                    'GAME': '#6366F1',
-                    'KARAOKE': '#FFC107',
-                    'COLLAB': '#EC4899'
-                };
-                const color = colors[type] || '#6366F1';
-                info.el.style.backgroundColor = color;
-                info.el.style.borderColor = color;
-            }
+            // 일정 타입에 따라 왼쪽 보더 색상 설정
+            const type = info.event.extendedProps.type;
+            const colors = {
+                'JUSTCHAT': '#10B981',
+                'GAME': '#6366F1',
+                'KARAOKE': '#FFC107',
+                'COLLAB': '#EC4899'
+            };
+
+            // 타입이 소문자로 올 수도 있으니 대문자로 변환
+            const upperType = type ? type.toUpperCase() : '';
+            const color = colors[upperType] || '#6366F1';
+            info.el.style.borderLeftColor = color;
         }
     });
 
