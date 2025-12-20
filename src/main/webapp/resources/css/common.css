@@ -129,11 +129,11 @@ a {
     color: inherit;
     text-decoration: none;
     transition: all var(--transition);
-    will-change: color, transform;
 }
 
 a:hover {
     color: var(--primary);
+    will-change: color;
 }
 
 button {
@@ -141,7 +141,10 @@ button {
     cursor: pointer;
     border: none;
     transition: all var(--transition);
-    will-change: transform, background-color;
+}
+
+button:hover {
+    will-change: transform;
 }
 
 input, select, textarea {
@@ -444,6 +447,28 @@ input, select, textarea {
    Responsive Design 📱
    ================================================ */
 @media (max-width: 768px) {
+    /* 모바일에서 will-change 제거 - 메모리 절약 */
+    .container {
+        will-change: auto;
+    }
+
+    .header {
+        will-change: auto;
+    }
+
+    .btn {
+        will-change: auto;
+    }
+
+    .card {
+        will-change: auto;
+    }
+
+    /* 모바일에서 애니메이션 duration 단축 */
+    :root {
+        --transition: 0.3s ease;
+    }
+
     .nav {
         position: fixed;
         top: var(--header-height);
@@ -456,8 +481,10 @@ input, select, textarea {
         transform: translateY(-100%);
         opacity: 0;
         visibility: hidden;
-        transition: all var(--transition);
+        transition: all 0.3s ease;
         border-bottom: 1px solid var(--border-color);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
     }
 
     .nav.active {
@@ -468,10 +495,47 @@ input, select, textarea {
 
     .mobile-menu-btn {
         display: flex;
+        -webkit-tap-highlight-color: transparent;
     }
 
     .section-title {
         font-size: 1.5rem;
+    }
+
+    /* 터치 디바이스 최적화 */
+    .btn {
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+    }
+
+    .btn:active {
+        transform: scale(0.97);
+    }
+
+    .card {
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    /* 터치 디바이스에서 호버 효과 제거 */
+    @media (hover: none) and (pointer: coarse) {
+        .card:hover {
+            transform: none;
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn:hover {
+            transform: none;
+        }
+
+        .logo:hover {
+            transform: none;
+        }
+
+        /* 탭 시에만 피드백 */
+        .card:active {
+            transform: scale(0.98);
+            transition: transform 0.1s ease;
+        }
     }
 }
 

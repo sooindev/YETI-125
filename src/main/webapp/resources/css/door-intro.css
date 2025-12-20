@@ -407,29 +407,30 @@ body:has(.door-intro:not(.hidden)) {
 /* Responsive */
 @media (max-width: 768px) {
     .door-intro {
-        perspective: 1500px;
+        perspective: 1000px;
     }
 
     .door-icon {
-        font-size: 4rem;
+        font-size: 3.5rem;
         margin-bottom: 1.5rem;
+        animation: none;
     }
 
     .door-title {
-        font-size: 2.5rem;
-        letter-spacing: 0.8rem;
+        font-size: 2rem;
+        letter-spacing: 0.5rem;
     }
 
     .door-subtitle {
-        font-size: 0.95rem;
-        letter-spacing: 0.3em;
-        margin-bottom: 2.5rem;
+        font-size: 0.85rem;
+        letter-spacing: 0.2em;
+        margin-bottom: 2rem;
     }
 
     .door-enter {
-        padding: 16px 40px;
-        font-size: 0.8rem;
-        letter-spacing: 0.2em;
+        padding: 14px 32px;
+        font-size: 0.75rem;
+        letter-spacing: 0.15em;
     }
 
     .door-panel::before {
@@ -437,14 +438,66 @@ body:has(.door-intro:not(.hidden)) {
         left: 12%;
         right: 12%;
         bottom: 8%;
+        border: 3px solid rgba(192, 192, 192, 0.6);
     }
 
+    /* 모바일에서는 3D 회전 각도를 줄여서 성능 향상 */
     .door-intro.opening .door-left {
-        transform: rotateY(-100deg);
+        transform: rotateY(-90deg);
     }
 
     .door-intro.opening .door-right {
-        transform: rotateY(100deg);
+        transform: rotateY(90deg);
+    }
+
+    /* 모바일에서 눈송이 애니메이션 간소화 */
+    .door-snowflake {
+        font-size: 1.2rem;
+        animation: snowDriftMobile linear infinite;
+    }
+
+    @keyframes snowDriftMobile {
+        0% {
+            transform: translateY(-10vh) rotate(0deg);
+            opacity: 0;
+        }
+        10% {
+            opacity: 1;
+        }
+        90% {
+            opacity: 1;
+        }
+        100% {
+            transform: translateY(110vh) rotate(180deg);
+            opacity: 0;
+        }
+    }
+
+    /* 손잡이 크기 줄이기 */
+    .door-handle {
+        width: 80px;
+        height: 80px;
+        margin-top: -40px;
+    }
+
+    .door-left .door-handle {
+        right: -40px;
+    }
+
+    .door-right .door-handle {
+        left: -40px;
+    }
+
+    .door-handle::before {
+        width: 50px;
+        height: 50px;
+        border: 2px solid rgba(192, 192, 192, 0.9);
+        animation: none;
+    }
+
+    /* 모바일에서 패턴 단순화 */
+    .door-panel::after {
+        opacity: 0.3;
     }
 }
 
