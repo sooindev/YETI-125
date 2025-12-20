@@ -79,8 +79,7 @@ public class LiveController {
     /** 다시보기 목록 조회 */
     @GetMapping("/videos")
     @ResponseBody
-    public JsonResult getVideos(@RequestParam(defaultValue = "6") int limit,
-                                @RequestParam(defaultValue = "0") int offset) {
+    public JsonResult getVideos(@RequestParam(defaultValue = "6") int limit, @RequestParam(defaultValue = "0") int offset) {
         try {
             // 캐시 갱신
             if (cachedVideos == null || isExpired(videosCacheTime)) {
