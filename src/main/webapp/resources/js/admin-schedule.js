@@ -180,7 +180,8 @@ function openEditModal(event) {
 function resetForm() {
     $('#scheduleForm')[0].reset();
     $('#scheduleId').val('');
-    $('#color').val('#6366F1');
+    $('#scheduleType').val('JUSTCHAT');  // 기본값을 저스트채팅으로 설정
+    $('#color').val('#10B981');  // 초록색 (저스트채팅)
     $('#displayYn').prop('checked', true);
 }
 
