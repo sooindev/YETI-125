@@ -16,9 +16,12 @@ public class LiveController {
 
     private static final String CHANNEL_ID = "63368ec9081dc85e61d0e4310b7e1602";
     private static final String CHZZK_API = "https://api.chzzk.naver.com/service/v3/channels/" + CHANNEL_ID + "/live-detail";
-    private static final long CACHE_DURATION = 10 * 60 * 1000; // 10분
+    private static final long CACHE_DURATION = 10 * 60 * 1000; // 10분 (클립/비디오)
+    private static final long LIVE_CACHE_DURATION = 1 * 60 * 1000; // 1분 (방송 상태)
 
     // 캐시
+    private Map<String, Object> cachedLiveStatus = null;
+    private long liveStatusCacheTime = 0;
     private List<Map<String, Object>> cachedClips = null;
     private List<Map<String, Object>> cachedVideos = null;
     private long clipsCacheTime = 0;
@@ -32,9 +35,18 @@ public class LiveController {
     @GetMapping("/status")
     @ResponseBody
     public JsonResult getLiveStatus() {
+        // 캐시 확인 (1분 이내면 캐시 반환)
+        if (cachedLiveStatus != null && !isExpired(liveStatusCacheTime, LIVE_CACHE_DURATION)) {
+            return JsonResult.success("조회 성공 (캐시)", cachedLiveStatus);
+        }
+
         try {
             String json = fetchApi(CHZZK_API);
             if (json == null) {
+                // API 실패 시 캐시가 있으면 그것이라도 반환
+                if (cachedLiveStatus != null) {
+                    return JsonResult.success("조회 성공 (캐시)", cachedLiveStatus);
+                }
                 return JsonResult.fail("API 호출 실패");
             }
 
@@ -51,9 +63,17 @@ public class LiveController {
                 data.put("viewerCount", extractNumber(json, "concurrentUserCount"));
             }
 
+            // 캐시 업데이트
+            cachedLiveStatus = data;
+            liveStatusCacheTime = System.currentTimeMillis();
+
             return JsonResult.success("조회 성공", data);
 
         } catch (Exception e) {
+            // 오류 발생 시 캐시가 있으면 그것이라도 반환
+            if (cachedLiveStatus != null) {
+                return JsonResult.success("조회 성공 (캐시)", cachedLiveStatus);
+            }
             return JsonResult.fail("방송 상태 확인 중 오류 발생");
         }
     }
@@ -231,9 +251,14 @@ public class LiveController {
         return result;
     }
 
-    /** 캐시 만료 확인 */
+    /** 캐시 만료 확인 (기본 10분) */
     private boolean isExpired(long cacheTime) {
         return System.currentTimeMillis() - cacheTime > CACHE_DURATION;
+    }
+
+    /** 캐시 만료 확인 (커스텀 duration) */
+    private boolean isExpired(long cacheTime, long duration) {
+        return System.currentTimeMillis() - cacheTime > duration;
     }
 
     /** JSON 배열 파싱 */
