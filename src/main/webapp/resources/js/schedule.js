@@ -116,15 +116,42 @@ function loadUpcomingEvents() {
         dataType: 'json',
         success: function(data) {
             if (data && data.length > 0) {
-                // 시작일 기준 정렬
-                data.sort(function(a, b) {
-                    return new Date(a.start) - new Date(b.start);
+                const now = new Date();
+
+                // 이미 지난 일정 필터링
+                const futureEvents = data.filter(function(event) {
+                    const startDate = new Date(event.start);
+                    const endDate = event.end ? new Date(event.end) : null;
+
+                    // 종료 시간이 있으면 종료 시간 기준, 없으면 시작 시간 기준
+                    if (endDate) {
+                        return endDate > now;
+                    } else if (event.allDay) {
+                        // 종일 일정은 오늘이거나 미래면 표시
+                        const startOfDay = new Date(startDate);
+                        startOfDay.setHours(0, 0, 0, 0);
+                        const todayStart = new Date(now);
+                        todayStart.setHours(0, 0, 0, 0);
+                        return startOfDay >= todayStart;
+                    } else {
+                        return startDate > now;
+                    }
                 });
 
-                // 최대 6개만 표시
-                const upcomingEvents = data.slice(0, 6);
-                renderUpcomingEvents(upcomingEvents);
-                $('#upcomingEmpty').hide();
+                if (futureEvents.length > 0) {
+                    // 시작일 기준 정렬
+                    futureEvents.sort(function(a, b) {
+                        return new Date(a.start) - new Date(b.start);
+                    });
+
+                    // 최대 6개만 표시
+                    const upcomingEvents = futureEvents.slice(0, 6);
+                    renderUpcomingEvents(upcomingEvents);
+                    $('#upcomingEmpty').hide();
+                } else {
+                    $('#upcomingEvents').empty();
+                    $('#upcomingEmpty').show();
+                }
             } else {
                 $('#upcomingEvents').empty();
                 $('#upcomingEmpty').show();
