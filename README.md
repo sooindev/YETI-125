@@ -1,182 +1,203 @@
-# YETI-125 🎮
+<div align="center">
 
-치지직 스트리머 이리온(Irion)의 비공식 팬사이트입니다.
+# ❄️ YETI-125
 
-> ⚠️ **비상업적 프로젝트**
-> 이 프로젝트는 순수한 팬 활동의 일환으로 제작된 비상업적 웹사이트입니다.
-> 어떠한 상업적 목적이나 수익 창출을 의도하지 않으며, 오직 정보 제공 및 아카이빙 목적으로 운영됩니다.
+**치지직 스트리머 이리온(IRION)의 비공식 팬사이트**
 
-## 📋 주요 기능
+라이브 상태 · 방송 일정 · 클립 아카이브를 한곳에서.
+
+<br>
+
+![Java](https://img.shields.io/badge/Java-8-007396?style=flat-square&logo=openjdk&logoColor=white)
+![Spring](https://img.shields.io/badge/Spring-5.3-6DB33F?style=flat-square&logo=spring&logoColor=white)
+![MyBatis](https://img.shields.io/badge/MyBatis-3.x-DC382D?style=flat-square)
+![MariaDB](https://img.shields.io/badge/MariaDB-10-003545?style=flat-square&logo=mariadb&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-4ea8d8?style=flat-square)
+
+</div>
+
+<br>
+
+> [!NOTE]
+> **비상업적 팬 프로젝트** — 순수한 팬 활동의 일환으로 제작된 비상업적 웹사이트입니다.
+> 어떠한 상업적 목적이나 수익 창출도 의도하지 않으며, 정보 제공 및 아카이빙 목적으로만 운영됩니다.
+> 원 저작자(이리온)와 직접적인 관련이 없습니다.
+
+<br>
+
+## 목차
+
+- [소개](#소개)
+- [주요 기능](#주요-기능)
+- [기술 스택](#기술-스택)
+- [디자인](#디자인)
+- [시작하기](#시작하기)
+- [프로젝트 구조](#프로젝트-구조)
+- [라이선스](#라이선스)
+
+<br>
+
+## 소개
+
+**YETI-125** 는 치지직 스트리머 이리온의 활동을 한곳에 모아 보여주는 팬 아카이브입니다.
+chzzk API와 연동해 실시간 방송 상태를 보여주고, 인기 클립·다시보기를 자동으로 수집하며,
+관리자가 직접 등록한 방송 일정을 캘린더로 제공합니다.
+
+<br>
+
+## 주요 기능
 
 ### 🏠 홈
-- 실시간 방송 상태 확인
-- 최근 클립 및 동영상
-- 다가오는 방송 일정
-- 커뮤니티 링크 (chzzk, YouTube, Discord)
+- chzzk API 연동 **실시간 방송 상태** (LIVE / OFFLINE)
+- **인기 클립** 자동 수집 — 조회수순, 더보기 페이지네이션
+- **다시보기(VOD)** 목록 — 최신순
+- 채널 & 링크 모음 (chzzk · YouTube · X · 네이버 카페)
 
 ### 📅 방송 일정
-- 월간 캘린더 뷰로 방송 일정 확인
+- **월간 캘린더** 뷰 ([FullCalendar](https://fullcalendar.io/) 기반)
 - 일정 유형별 색상 구분
-  - 🟢 저스트채팅
-  - 🟣 종합게임
-  - 🟡 노래방송
-  - 🩷 합방
-- 다가오는 일정 미리보기
-- 일정 상세 정보 모달
+  - 🟢 저스트 채팅 &nbsp; 🔵 종합게임 &nbsp; 🟡 노래방송 &nbsp; 🩷 합방
+- 다가오는 일정 미리보기 · 상세 정보 모달
 
 ### 👤 프로필
-- 스트리머 소개
-- 방송 스타일 및 특징
-- 팬아트 갤러리
+- 스트리머 소개 및 캐릭터 명세
+- 데뷔 / 생일 **D-Day 카운터**
+- 채널 & SNS 링크
 
 ### 🔧 관리자
-- 방송 일정 관리 (CRUD)
-- 실시간 일정 추가/수정/삭제
-- chzzk API 연동으로 자동 방송 상태 확인
+- 방송 일정 **등록 · 수정 · 삭제** (CRUD)
+- 캘린더에서 **드래그 앤 드롭**으로 일정 이동
+- 일정 유형 · 색상 · 노출 여부 설정
+- 로그인 인증 (필터 + 인터셉터)
 
-## 🛠 기술 스택
+<br>
 
-### Backend
-- **Java 8**
-- **Spring Framework 5.3.x**
-- **Spring MVC**
-- **MyBatis**
-- **MySQL**
-- **Maven**
+## 기술 스택
 
-### Frontend
-- **HTML5 / CSS3**
-- **JavaScript (ES6+)**
-- **jQuery 3.7.1**
-- **FullCalendar 6.1.10**
+| 영역 | 사용 기술 |
+|------|-----------|
+| **Backend** | Java 8, Spring Framework 5.3 (Spring MVC), MyBatis |
+| **Database** | MariaDB, HikariCP (커넥션 풀) |
+| **Frontend** | HTML5, CSS3, JavaScript (ES6+), jQuery 3.7 |
+| **Library** | FullCalendar 6.1 |
+| **External API** | [chzzk API](https://chzzk.naver.com/) — 방송 상태 · 클립 · 다시보기 |
+| **Build / Server** | Maven, Apache Tomcat 9 |
 
-### API
-- **chzzk API** - 실시간 방송 상태 확인
+<br>
 
-### 디자인
-- 반응형 웹 디자인 (모바일 최적화)
-- 모던 UI/UX with 글래스모피즘
+## 디자인
 
-## 🚀 설치 및 실행
+에디토리얼 감성의 **파스텔 라이트 테마**.
+
+- 🎨 **하늘색 메인 + 분홍 포인트** 파스텔 팔레트
+- 🔤 **Anton**(디스플레이) × **JetBrains Mono**(본문) 타이포그래피 대비
+- 🌫️ 화면 전체 **그레인 노이즈** 텍스처 오버레이
+- 📐 **비대칭 그리드** 레이아웃 · 균일 3열 미디어 카드
+- 📱 모바일까지 고려한 **반응형** 디자인
+
+<br>
+
+## 시작하기
 
 ### 사전 요구사항
-- JDK 8 이상
-- Maven 3.6+
-- MySQL 8.0+
-- Tomcat 9.0+
+
+- JDK **8** 이상
+- Maven **3.6+**
+- MariaDB **10+**
+- Apache Tomcat **9+**
 
 ### 1. 저장소 클론
+
 ```bash
-git clone https://github.com/SooinDev/YETI-125.git
-cd YETI-125
+git clone https://github.com/SooinDev/For-125.git
+cd For-125
 ```
 
-### 2. 데이터베이스 설정
-```sql
-CREATE DATABASE for_125;
-USE for_125;
+### 2. 데이터베이스 준비
 
--- 테이블 생성 스크립트 실행
--- (schema.sql 파일 참조)
+`src/main/resources/sql/schema.sql` 을 실행해 데이터베이스와 테이블을 생성합니다.
+
+```bash
+mysql -u root -p < src/main/resources/sql/schema.sql
 ```
 
-### 3. 설정 파일 수정
-`src/main/resources/application.properties` 파일에서 데이터베이스 연결 정보를 수정하세요:
+> `for_125` 데이터베이스와 `tb_admin`, `tb_schedule` 테이블이 생성됩니다.
+
+### 3. DB 접속 정보 설정
+
+`src/main/resources/properties/database.properties` 에서 계정 정보를 수정합니다.
+
 ```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/for_125
-spring.datasource.username=your_username
-spring.datasource.password=your_password
+db.driver=org.mariadb.jdbc.Driver
+db.url=jdbc:mariadb://localhost:3306/for_125?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Seoul
+DB_USERNAME=your_username
+DB_PASSWORD=your_password
 ```
 
-### 4. 빌드 및 실행
+### 4. 빌드 & 실행
+
 ```bash
-# Maven 빌드
+# WAR 빌드
 mvn clean package
 
 # Tomcat에 배포
-cp target/yeti-125.war $TOMCAT_HOME/webapps/
-
-# Tomcat 시작
+cp target/*.war $TOMCAT_HOME/webapps/
 $TOMCAT_HOME/bin/startup.sh
 ```
 
-또는 Maven Tomcat 플러그인 사용:
-```bash
-mvn tomcat7:run
-```
+### 5. 접속
 
-### 6. 접속
-브라우저에서 `http://localhost:8080` 접속
+| 페이지 | 주소 |
+|--------|------|
+| 메인 사이트 | `http://localhost:8080` |
+| 관리자 | `http://localhost:8080/admin/admin-login.html` |
 
-## 📱 모바일 최적화
+<br>
 
-- 터치 디바이스 감지 및 최적화
-- 모바일에서 무거운 애니메이션 제거
-- 반응형 그리드 레이아웃
-- 터치 제스처 지원
-
-## 🎨 주요 디자인 특징
-
-- **글래스모피즘** 디자인
-- **부드러운 애니메이션** (모바일에서는 단순화)
-- **접근성** 고려한 색상 대비
-- **모던한 UI 컴포넌트**
-
-## 📂 프로젝트 구조
+## 프로젝트 구조
 
 ```
-YETI-125/
+For-125/
 ├── src/main/
-│   ├── java/
-│   │   └── com/irion/
-│   │       ├── common/         # 공통 유틸리티
-│   │       ├── schedule/       # 일정 관리
-│   │       ├── admin/          # 관리자 기능
-│   │       └── live/           # 실시간 방송 상태
+│   ├── java/com/irion/
+│   │   ├── common/        # 공통 — 라이브 상태, 필터, 인터셉터, 유틸
+│   │   ├── schedule/      # 방송 일정 — controller / service / mapper / vo
+│   │   └── admin/         # 관리자 — 인증, 일정 관리
 │   ├── resources/
-│   │   └── application.properties
+│   │   ├── spring/        # Spring 설정 (root / servlet context)
+│   │   ├── mybatis/       # MyBatis 설정
+│   │   ├── properties/    # DB 접속 정보
+│   │   └── sql/           # 스키마 · 매퍼 SQL
 │   └── webapp/
-│       ├── resources/
-│       │   ├── css/           # 스타일시트
-│       │   ├── js/            # JavaScript
-│       │   └── images/        # 이미지
-│       ├── WEB-INF/
-│       │   ├── spring/        # Spring 설정
-│       │   └── views/         # JSP 뷰
-│       └── *.html             # 정적 페이지
+│       ├── resources/     # css · js · images
+│       ├── WEB-INF/       # web.xml
+│       └── *.html         # 정적 페이지 (홈 / 일정 / 프로필 / 관리자)
 └── pom.xml
 ```
 
-## 🔐 관리자 기능
+<br>
 
-관리자 페이지 접속: `/admin/admin-login.html`
+## 라이선스
 
-**주요 기능:**
-- 방송 일정 추가/수정/삭제
-- 일정 유형 설정 (저스트채팅, 종합게임, 노래방송, 합방)
-- 일정 색상 커스터마이징
-- 드래그 앤 드롭으로 일정 이동
+이 프로젝트의 **소스 코드**는 [MIT License](LICENSE) 하에 배포됩니다.
 
-## 🤝 기여
+> [!IMPORTANT]
+> - 모든 방송 콘텐츠의 저작권은 원 저작자(**이리온**)에게 있습니다.
+> - 본 사이트는 **비공식 팬사이트**이며 원 저작자와 직접적인 관련이 없습니다.
+> - chzzk · YouTube · X 등의 로고와 브랜드는 각 사의 상표입니다.
 
-이 프로젝트는 개인 학습 및 팬 활동 목적으로 제작되었습니다.
-버그 제보나 개선 사항은 [Issues](https://github.com/yourusername/YETI-125/issues)에 등록해주세요.
+<br>
 
-## 📜 라이선스 및 저작권
+## 개발자
 
-### 저작권 고지
-- 모든 방송 콘텐츠의 저작권은 원 저작자(이리온)에게 있습니다.
-- 이 프로젝트는 비공식 팬사이트이며, 원 저작자와 직접적인 관련이 없습니다.
-- chzzk, YouTube, Discord 등의 로고 및 브랜드는 각 회사의 상표입니다.
+**sooindev** &nbsp;·&nbsp; [GitHub](https://github.com/sooindev)
 
-### 프로젝트 라이선스
-이 프로젝트의 코드는 MIT 라이선스 하에 배포됩니다.
+<br>
 
-## 👨‍💻 개발자
+<div align="center">
 
-**sooindev**
-- GitHub: [@sooindev](https://github.com/sooindev)
+⭐ 이 프로젝트가 마음에 드셨다면 Star를 눌러주세요!
 
----
+<sub>Made with ❄️ for IRION</sub>
 
-⭐ 이 프로젝트가 도움이 되었다면 Star를 눌러주세요!
+</div>
