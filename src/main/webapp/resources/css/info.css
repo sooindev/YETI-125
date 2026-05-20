@@ -1,681 +1,356 @@
-/* ================================================
-   Irion Fansite - Profile Page ❄️
-   Simple & Clean with Snowfall
-   ================================================ */
+/* ============================================================
+   YETI-125 — Profile page
+   ============================================================ */
 
-/* Soft Pink Background for Profile Page 🌸 */
-body {
-    background: linear-gradient(180deg,
-        #FFF5F8 0%,     /* Very light pink */
-        #FFE4EB 30%,    /* Soft pink */
-        #FFD6E3 60%,    /* Light rose */
-        #FFC9DC 100%    /* Gentle pink */
-    );
-    background-attachment: fixed;
-    color: #4A4A4A;
-}
+main { padding-top: var(--head-h); }
 
-/* ================================================
-   Elegant Snowflakes Animation
-   ================================================ */
-.snowflakes {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    pointer-events: none;
-    overflow: hidden;
-    z-index: 0;
-}
-
-.snowflake {
-    position: absolute;
-    top: -20px;
-    color: rgba(255, 182, 193, 0.6);
-    font-size: 1.5rem;
-    animation: snowfall linear infinite;
-    text-shadow: 0 0 8px rgba(255, 182, 193, 0.8);
-}
-
-.snowflake:nth-child(1) { left: 5%; animation-duration: 12s; animation-delay: 0s; font-size: 1.2rem; }
-.snowflake:nth-child(2) { left: 15%; animation-duration: 15s; animation-delay: 2s; font-size: 1.8rem; }
-.snowflake:nth-child(3) { left: 30%; animation-duration: 10s; animation-delay: 4s; font-size: 1rem; }
-.snowflake:nth-child(4) { left: 45%; animation-duration: 18s; animation-delay: 1s; font-size: 1.5rem; }
-.snowflake:nth-child(5) { left: 60%; animation-duration: 14s; animation-delay: 5s; font-size: 1.3rem; }
-.snowflake:nth-child(6) { left: 75%; animation-duration: 11s; animation-delay: 3s; font-size: 1.7rem; }
-.snowflake:nth-child(7) { left: 85%; animation-duration: 16s; animation-delay: 6s; font-size: 1.1rem; }
-.snowflake:nth-child(8) { left: 95%; animation-duration: 13s; animation-delay: 2.5s; font-size: 1.4rem; }
-
-@keyframes snowfall {
-    0% {
-        transform: translateY(-20px) rotate(0deg);
-        opacity: 0;
-    }
-    10% {
-        opacity: 1;
-    }
-    90% {
-        opacity: 0.8;
-    }
-    100% {
-        transform: translateY(100vh) rotate(360deg);
-        opacity: 0;
-    }
-}
-
-/* ================================================
-   Profile Hero Section - Ice Crystal Style
-   ================================================ */
+/* ============================================================
+   Profile hero
+   asymmetric: portrait (5) + identity block (7)
+   ============================================================ */
 .profile-hero {
+    padding: clamp(48px, 8vw, 120px) 0 0;
+    border-bottom: 1px solid var(--ink-line);
+}
+
+.profile-hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: clamp(28px, 4vw, 64px);
+    align-items: end;
+    padding-bottom: clamp(40px, 6vw, 80px);
+}
+
+/* portrait */
+.profile-portrait {
     position: relative;
-    padding: 140px 20px 80px;
-    overflow: hidden;
-    background: transparent;
+    border: 1px solid var(--ink-line-2);
 }
-
-.profile-hero-bg {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: transparent;
-    z-index: 0;
-}
-
-.profile-hero-content {
-    position: relative;
-    z-index: 1;
-    max-width: 1000px;
-    margin: 0 auto;
-}
-
-/* Main Profile Card - Soft Pink Theme 🌸 */
-.profile-card-main {
-    display: flex;
-    align-items: center;
-    gap: 48px;
-    background: rgba(255, 255, 255, 0.7);
-    border: 2px solid rgba(255, 182, 193, 0.4);
-    border-radius: 32px;
-    padding: 48px;
-    margin-bottom: 40px;
-    box-shadow: 0 16px 40px rgba(255, 182, 193, 0.3);
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    will-change: transform;
-    transform: translateZ(0);
-}
-
-.profile-card-main:hover {
-    transform: translateY(-4px);
-    box-shadow:
-        0 20px 50px rgba(255, 182, 193, 0.4),
-        0 0 0 1px rgba(255, 182, 193, 0.3) inset;
-    border-color: rgba(255, 182, 193, 0.6);
-}
-
-/* Avatar - Ice Crystal Ring */
-.profile-avatar {
-    position: relative;
-    flex-shrink: 0;
-}
-
-.profile-avatar img {
-    width: 180px;
-    height: 180px;
-    border-radius: 50%;
+.profile-portrait img {
+    width: 100%;
+    aspect-ratio: 4 / 5;
     object-fit: cover;
-    border: 4px solid rgba(255, 182, 193, 0.5);
-    box-shadow:
-        0 8px 32px rgba(255, 182, 193, 0.4),
-        0 0 0 8px rgba(255, 255, 255, 0.6);
-    position: relative;
-    z-index: 2;
+    filter: grayscale(0.7) contrast(1.08);
+    transition: filter var(--t-slow);
 }
-
-.avatar-ring {
+.profile-portrait:hover img { filter: grayscale(0); }
+.portrait-tag {
     position: absolute;
-    top: -12px;
-    left: -12px;
-    right: -12px;
-    bottom: -12px;
-    border: 2px solid transparent;
-    border-radius: 50%;
-    background: linear-gradient(45deg, #FFB6C1, #FF85A1, #FFB6C1);
-    -webkit-mask:
-        linear-gradient(#fff 0 0) content-box,
-        linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    padding: 2px;
-    animation: rotate 8s linear infinite;
-    z-index: 1;
+    bottom: 0; left: 0;
+    background: var(--ink);
+    border-top: 1px solid var(--ink-line-2);
+    border-right: 1px solid var(--ink-line-2);
+    padding: 8px 14px;
 }
 
-.avatar-glow {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 200%;
-    height: 200%;
-    transform: translate(-50%, -50%);
-    background: rgba(255, 182, 193, 0.1);
-    border-radius: 50%;
-    animation: pulse 3s ease-in-out infinite;
-    z-index: 0;
-}
-
-@keyframes rotate {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-
-@keyframes pulse {
-    0%, 100% { opacity: 0.3; transform: translate(-50%, -50%) scale(1); }
-    50% { opacity: 0.6; transform: translate(-50%, -50%) scale(1.1); }
-}
-
-/* Profile Text */
-.profile-text {
-    flex: 1;
-}
-
-.profile-oshi {
-    font-size: 2.5rem;
-    margin-bottom: 12px;
-    filter: drop-shadow(0 0 12px rgba(255, 182, 193, 0.4));
-}
+/* identity */
+.profile-id .kicker { margin-bottom: clamp(16px, 2.5vw, 28px); }
 
 .profile-name {
-    font-size: 3rem;
-    font-weight: 800;
-    margin-bottom: 12px;
-    color: #4A4A4A;
-    letter-spacing: -0.02em;
-}
-
-.profile-tagline {
-    font-size: 1.25rem;
-    color: rgba(100, 100, 100, 0.9);
-    margin-bottom: 24px;
-    font-weight: 500;
-}
-
-.profile-meta {
+    font-size: clamp(3.6rem, 9vw, 8.5rem);
+    color: var(--bone);
     display: flex;
-    gap: 24px;
     flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.3em;
+    line-height: 0.88;
+}
+.profile-name-en {
+    font-size: 0.26em;
+    -webkit-text-stroke: 1px var(--frost);
+    color: transparent;
+    letter-spacing: 0.04em;
+}
+.profile-tagline {
+    font-family: var(--f-mono);
+    font-size: 0.92rem;
+    color: var(--bone-dim);
+    margin: 18px 0 28px;
 }
 
-.meta-item {
-    padding: 10px 18px;
-    background: rgba(255, 182, 193, 0.1);
-    border: 1px solid rgba(255, 182, 193, 0.25);
-    border-radius: 12px;
-    font-size: 0.95rem;
-    color: #D1829D;
-    font-weight: 600;
-    transition: all 0.3s ease;
-}
-
-.meta-item:hover {
-    background: rgba(255, 182, 193, 0.2);
-    border-color: rgba(255, 182, 193, 0.4);
-    transform: translateY(-2px);
-}
-
-/* D-Day Counter - Ice Cards */
-.dday-container {
-    display: flex;
-    gap: 20px;
-    margin-bottom: 32px;
-}
-
-.dday-card {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 24px 28px;
-    background: rgba(255, 255, 255, 0.5);
-    border: 1px solid rgba(255, 182, 193, 0.2);
-    border-radius: 20px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    transition: all 0.3s ease;
-}
-
-.dday-card:hover {
-    transform: translateY(-4px);
-    border-color: rgba(255, 182, 193, 0.4);
-    box-shadow: 0 12px 48px rgba(255, 182, 193, 0.2);
-}
-
-.dday-icon {
-    font-size: 2.5rem;
-    filter: drop-shadow(0 0 12px rgba(255, 182, 193, 0.5));
-}
-
-.dday-info {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.dday-label {
-    font-size: 0.85rem;
-    color: rgba(150, 120, 130, 0.9);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-}
-
-.dday-count {
-    font-size: 1.75rem;
-    font-weight: 800;
-    color: #FF85A1;
-}
-
-/* Quick Social Icons - Ice Crystals */
-.quick-social {
-    display: flex;
-    gap: 16px;
-    justify-content: center;
-}
-
-.quick-social-btn {
-    width: 56px;
-    height: 56px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255, 255, 255, 0.6);
-    border: 1px solid rgba(255, 182, 193, 0.25);
-    border-radius: 16px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-}
-
-.quick-social-btn:hover {
-    transform: translateY(-4px) scale(1.05);
-    border-color: rgba(255, 182, 193, 0.5);
-    box-shadow:
-        0 12px 32px rgba(255, 182, 193, 0.3),
-        0 0 0 1px rgba(255, 182, 193, 0.2) inset;
-}
-
-.social-favicon {
-    width: 28px;
-    height: 28px;
-    object-fit: contain;
-    filter: brightness(1.1);
-}
-
-/* ================================================
-   Profile Detail Section - Modern Cards
-   ================================================ */
-.profile-detail-section {
-    padding: 60px 20px;
-    background: transparent;
-}
-
-.section-title {
-    text-align: center;
-    font-size: 2.25rem;
-    font-weight: 800;
-    margin-bottom: 48px;
-    color: #4A4A4A;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-}
-
-.title-icon {
-    font-size: 2rem;
-    filter: drop-shadow(0 0 16px rgba(255, 182, 193, 0.5));
-}
-
-.detail-grid {
+/* vitals — 2x2 mono grid */
+.profile-vitals {
+    list-style: none;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 28px;
-    max-width: 1200px;
-    margin: 0 auto;
+    border-top: 1px solid var(--ink-line);
+    border-left: 1px solid var(--ink-line);
 }
-
-/* Detail Card - Ice Crystal Design */
-.detail-card {
-    background: rgba(255, 255, 255, 0.5);
-    border: 1px solid rgba(255, 182, 193, 0.2);
-    border-radius: 24px;
-    padding: 32px;
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3);
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
+.profile-vitals li {
+    border-right: 1px solid var(--ink-line);
+    border-bottom: 1px solid var(--ink-line);
+    padding: 16px 18px;
     display: flex;
     flex-direction: column;
+    gap: 6px;
+}
+.vital-k {
+    font-family: var(--f-mono);
+    font-size: 0.64rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--bone-faint);
+}
+.vital-v {
+    font-family: var(--f-mono);
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--bone);
 }
 
-.detail-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 100px;
-    background: linear-gradient(180deg,
-        rgba(255, 182, 193, 0.08) 0%,
-        transparent 100%);
-    pointer-events: none;
+/* ============================================================
+   D-Day row
+   ============================================================ */
+.dday-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.2fr);
+    border-top: 1px solid var(--ink-line);
 }
-
-.detail-card:hover {
-    transform: translateY(-8px);
-    border-color: rgba(255, 182, 193, 0.4);
-    box-shadow:
-        0 24px 64px rgba(0, 0, 0, 0.4),
-        0 0 0 1px rgba(255, 182, 193, 0.15) inset,
-        0 0 80px rgba(255, 182, 193, 0.15);
+.dday-cell {
+    padding: clamp(24px, 3.5vw, 44px) clamp(16px, 2.5vw, 32px);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    border-right: 1px solid var(--ink-line);
 }
-
-.detail-card.card-highlight {
-    border-color: rgba(255, 182, 193, 0.4);
-    background: rgba(255, 255, 255, 0.7);
+.dday-cell:last-child { border-right: none; }
+.dday-count {
+    font-size: clamp(2.4rem, 5vw, 4.2rem);
+    color: var(--frost);
+    line-height: 1;
 }
+.dday-cell--social { justify-content: space-between; }
 
-.detail-card.card-highlight::before {
-    background: rgba(255, 182, 193, 0.08);
+.quick-social {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
 }
-
-.detail-card-header {
+.quick-social-btn {
+    width: 46px; height: 46px;
     display: flex;
     align-items: center;
-    gap: 14px;
-    margin-bottom: 28px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid rgba(255, 182, 193, 0.15);
-}
-
-.detail-card-icon {
-    font-size: 1.75rem;
-    filter: drop-shadow(0 0 12px rgba(255, 182, 193, 0.5));
-}
-
-.detail-card-header h3 {
-    font-size: 1.35rem;
-    font-weight: 700;
-    color: #4A4A4A;
-    letter-spacing: -0.01em;
-}
-
-.detail-card-body {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    flex: 1;
     justify-content: center;
+    border: 1px solid var(--ink-line-2);
+    transition: all var(--t-fast);
+}
+.quick-social-btn img {
+    width: 22px; height: 22px;
+    object-fit: contain;
+    filter: grayscale(1);
+    transition: filter var(--t-fast);
+}
+.quick-social-btn:hover {
+    border-color: var(--frost);
+    background: var(--ink-raise);
+}
+.quick-social-btn:hover img { filter: grayscale(0); }
+
+/* ============================================================
+   Spec sheet — 4 cards, asymmetric spans
+   ============================================================ */
+.spec-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 1px;
+    background: var(--ink-line);
+    border: 1px solid var(--ink-line);
+}
+.spec-card { grid-column: span 6; }
+.spec-card:nth-child(1) { grid-column: span 7; }
+.spec-card:nth-child(2) { grid-column: span 5; }
+.spec-card:nth-child(3) { grid-column: span 5; }
+.spec-card:nth-child(4) { grid-column: span 7; }
+
+.spec-card {
+    background: var(--ink-raise);
+    padding: clamp(24px, 3vw, 40px);
+    transition: background var(--t-fast);
+}
+.spec-card:hover { background: var(--frost-soft); }
+.spec-card--accent { background: var(--rose-soft); }
+.spec-card--accent:hover { background: var(--rose-soft); }
+
+.spec-card-head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    padding-bottom: 18px;
+    margin-bottom: 6px;
+    border-bottom: 1px solid var(--ink-line);
+}
+.spec-card-idx {
+    font-family: var(--f-mono);
+    font-size: 0.74rem;
+    color: var(--frost);
+}
+/* accent card uses the pink point colour throughout */
+.spec-card--accent .spec-card-idx,
+.spec-card--accent .spec-hl,
+.spec-card--accent .spec-link { color: var(--rose-deep) !important; }
+.spec-card--accent .spec-card-head { border-bottom-color: var(--rose-soft); }
+.spec-card-head h3 {
+    font-family: var(--f-display);
+    font-size: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    color: var(--bone);
 }
 
-.detail-row {
+.spec-rows { }
+.spec-row {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    padding: 14px 18px;
-    background: rgba(255, 240, 245, 0.6);
-    border: 1px solid rgba(255, 182, 193, 0.2);
-    border-radius: 14px;
-    transition: all 0.25s ease;
-}
-
-.detail-row:hover {
-    background: rgba(255, 230, 240, 0.8);
-    border-color: rgba(255, 182, 193, 0.4);
-    transform: translateX(4px);
-}
-
-.detail-label {
-    font-size: 0.95rem;
-    color: rgba(120, 100, 100, 0.8);
-    font-weight: 600;
-}
-
-.detail-value {
-    font-size: 1.05rem;
-    color: #5A5A5A;
-    font-weight: 600;
-}
-
-.detail-value.highlight {
-    color: #FFB6C1;
-    font-weight: 700;
-    text-shadow: 0 0 12px rgba(255, 182, 193, 0.4);
-}
-
-.detail-value.emoji-large {
-    font-size: 1.75rem;
-    filter: drop-shadow(0 0 8px rgba(255, 182, 193, 0.3));
-}
-
-.detail-link {
-    color: #FF85A1;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    cursor: pointer;
-}
-
-.detail-link:hover {
-    color: #FF6B8A;
-    text-shadow: 0 0 12px rgba(255, 182, 193, 0.5);
-    text-decoration: underline;
-}
-
-/* ================================================
-   Social Links Section - Ice Cards
-   ================================================ */
-.social-section {
-    padding: 60px 20px 80px;
-    background: transparent;
-}
-
-.social-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 24px;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-/* Social Card - Premium Glass */
-.social-card {
-    display: flex;
-    align-items: center;
+    align-items: baseline;
     gap: 20px;
-    padding: 28px 32px;
-    background: rgba(255, 255, 255, 0.5);
-    border: 1px solid rgba(255, 182, 193, 0.2);
-    border-radius: 20px;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--ink-line);
 }
-
-.social-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg,
-        rgba(255, 182, 193, 0.05) 0%,
-        transparent 100%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
+.spec-row:last-child { border-bottom: none; }
+.spec-row dt {
+    font-family: var(--f-mono);
+    font-size: 0.78rem;
+    color: var(--bone-faint);
+    white-space: nowrap;
 }
-
-.social-card:hover {
-    transform: translateX(8px) translateY(-4px);
-    border-color: rgba(255, 182, 193, 0.5);
-    box-shadow:
-        0 20px 60px rgba(0, 0, 0, 0.4),
-        0 0 80px rgba(255, 182, 193, 0.2);
-}
-
-.social-card:hover::before {
-    opacity: 1;
-}
-
-.social-icon {
-    width: 56px;
-    height: 56px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255, 182, 193, 0.1);
-    border: 1px solid rgba(255, 182, 193, 0.25);
-    border-radius: 16px;
-    flex-shrink: 0;
-    transition: all 0.3s ease;
-}
-
-.social-card:hover .social-icon {
-    background: rgba(255, 182, 193, 0.2);
-    border-color: rgba(255, 182, 193, 0.4);
-    transform: scale(1.1) rotate(5deg);
-}
-
-.social-favicon {
-    width: 32px;
-    height: 32px;
-    object-fit: contain;
-    filter: brightness(1.2);
-}
-
-.social-info {
-    flex: 1;
-}
-
-.social-info h3 {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: #4A4A4A;
-    margin-bottom: 6px;
-}
-
-.social-info p {
+.spec-row dd {
+    font-family: var(--f-mono);
     font-size: 0.9rem;
-    color: rgba(100, 100, 100, 0.7);
+    color: var(--bone);
+    text-align: right;
+}
+.spec-hl { color: var(--frost) !important; }
+.spec-link {
+    color: var(--frost);
+    transition: opacity var(--t-fast);
+}
+.spec-link:hover { opacity: 0.6; }
+
+/* ============================================================
+   Channel list
+   ============================================================ */
+.channel-list { list-style: none; }
+.channel-list li { border-top: 1px solid var(--ink-line); }
+.channel-list li:last-child { border-bottom: 1px solid var(--ink-line); }
+
+.channel-row {
+    display: grid;
+    grid-template-columns: 52px 40px minmax(0, 3fr) minmax(0, 5fr) 44px;
+    align-items: center;
+    gap: 18px;
+    padding: clamp(18px, 2.6vw, 30px) 8px;
+    transition: padding-left var(--t-fast), background var(--t-fast);
+}
+.channel-row:hover {
+    background: var(--ink-raise);
+    padding-left: 22px;
+}
+.channel-idx {
+    font-family: var(--f-mono);
+    font-size: 0.72rem;
+    color: var(--bone-faint);
+}
+.channel-ico {
+    width: 28px; height: 28px;
+    object-fit: contain;
+    filter: grayscale(1);
+    transition: filter var(--t-fast);
+}
+.channel-row:hover .channel-ico { filter: grayscale(0); }
+.channel-name {
+    font-family: var(--f-display);
+    font-size: clamp(1.3rem, 2.6vw, 2.1rem);
+    text-transform: uppercase;
+    color: var(--bone);
+    transition: color var(--t-fast);
+}
+.channel-row:hover .channel-name { color: var(--frost); }
+.channel-desc {
+    font-family: var(--f-mono);
+    font-size: 0.82rem;
+    color: var(--bone-dim);
+}
+.channel-arrow {
+    font-size: 1.15rem;
+    color: var(--bone-faint);
+    text-align: right;
+    transition: color var(--t-fast), transform var(--t-fast);
+}
+.channel-row:hover .channel-arrow {
+    color: var(--frost);
+    transform: translate(3px, -3px);
 }
 
-.social-arrow {
-    font-size: 1.5rem;
-    color: rgba(255, 182, 193, 0.5);
-    transition: all 0.3s ease;
-}
-
-.social-card:hover .social-arrow {
-    color: #FFB6C1;
-    transform: translateX(6px);
-}
-
-/* ================================================
-   About Section
-   ================================================ */
-.about-section {
-    padding: 40px 20px 60px;
-    background: transparent;
-}
-
-.about-card {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 36px 40px;
-    background: rgba(255, 255, 255, 0.5);
-    border: 1px solid rgba(255, 182, 193, 0.2);
-    border-radius: 24px;
+/* ============================================================
+   About slab
+   ============================================================ */
+.about-slab {
+    border: 1px solid var(--ink-line-2);
+    background: var(--ink-raise);
+    padding: clamp(40px, 7vw, 88px) clamp(28px, 6vw, 96px);
+    position: relative;
     text-align: center;
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3);
+}
+.about-quote {
+    font-family: var(--f-display);
+    font-size: clamp(4rem, 9vw, 8rem);
+    color: var(--rose);
+    line-height: 0.5;
+    display: block;
+    margin-bottom: 24px;
+}
+.about-text {
+    font-family: var(--f-kr);
+    font-size: clamp(1.1rem, 2.4vw, 1.6rem);
+    font-weight: 300;
+    line-height: 1.7;
+    color: var(--bone);
+    max-width: 30ch;
+    margin: 0 auto 24px;
+}
+.about-text strong {
+    font-weight: 500;
+    color: var(--frost);
+}
+.about-sign {
+    color: var(--bone-faint);
 }
 
-.about-icon {
-    font-size: 3rem;
-    margin-bottom: 16px;
-    filter: drop-shadow(0 0 16px rgba(255, 182, 193, 0.5));
+/* ============================================================
+   Responsive
+   ============================================================ */
+@media (max-width: 920px) {
+    .profile-hero-grid { grid-template-columns: 1fr; gap: 32px; }
+    .profile-portrait { max-width: 360px; }
+
+    .dday-row { grid-template-columns: 1fr 1fr; }
+    .dday-cell--social {
+        grid-column: 1 / -1;
+        border-right: none;
+        border-top: 1px solid var(--ink-line);
+    }
+
+    .spec-grid { grid-template-columns: repeat(6, 1fr); }
+    .spec-card,
+    .spec-card:nth-child(1),
+    .spec-card:nth-child(2),
+    .spec-card:nth-child(3),
+    .spec-card:nth-child(4) { grid-column: span 6; }
+
+    .sec-head--flip { direction: ltr; }
+
+    .channel-row {
+        grid-template-columns: 40px 28px 1fr 32px;
+    }
+    .channel-desc { display: none; }
 }
 
-.about-card p {
-    font-size: 1.1rem;
-    color: #5A5A5A;
-    line-height: 1.8;
-}
-
-.about-card strong {
-    color: #FFB6C1;
-    font-weight: 700;
-}
-
-/* ================================================
-   Responsive Design
-   ================================================ */
-@media (max-width: 768px) {
-    .profile-card-main {
-        flex-direction: column;
-        text-align: center;
-        padding: 36px 28px;
-        gap: 32px;
+@media (max-width: 560px) {
+    .profile-vitals { grid-template-columns: 1fr; }
+    .dday-row { grid-template-columns: 1fr; }
+    .dday-cell {
+        border-right: none;
+        border-bottom: 1px solid var(--ink-line);
     }
-
-    .profile-avatar img {
-        width: 140px;
-        height: 140px;
-    }
-
-    .profile-name {
-        font-size: 2.25rem;
-    }
-
-    .profile-tagline {
-        font-size: 1.05rem;
-    }
-
-    .profile-meta {
-        justify-content: center;
-    }
-
-    .dday-container {
-        flex-direction: column;
-        gap: 16px;
-    }
-
-    .detail-grid {
-        grid-template-columns: 1fr;
-        gap: 20px;
-    }
-
-    .social-grid {
-        grid-template-columns: 1fr;
-        gap: 16px;
-    }
-
-    .social-card {
-        padding: 24px;
-    }
-
-    .section-title {
-        font-size: 1.75rem;
-    }
-}
-
-/* ================================================
-   Footer - Info Page
-   ================================================ */
-.footer-text {
-    color: #1a3a52;
-}
-
-.footer-text a {
-    color: #2c5f7e !important;
+    .dday-cell:last-child { border-bottom: none; }
 }

@@ -3,313 +3,261 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>프로필 - YETI-125</title>
+  <title>Profile — YETI-125</title>
   <link rel="icon" type="image/svg+xml" href="/resources/images/snowflake.png">
   <script src="/resources/js/theme-init.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/resources/css/common.css">
   <link rel="stylesheet" href="/resources/css/info.css">
 </head>
 <body>
-<!-- Header -->
+
+<!-- ===== Header ===== -->
 <header class="header">
-  <div class="header-container">
+  <div class="header-inner">
     <a href="/" class="logo">
       <span class="logo-text">YETI</span>
       <span class="logo-sub">125</span>
     </a>
     <nav class="nav">
-      <a href="/" class="nav-link">홈</a>
-      <a href="/schedule.html" class="nav-link">일정</a>
-      <a href="/info.html" class="nav-link active">프로필</a>
+      <a href="/" class="nav-link">Index</a>
+      <a href="/schedule.html" class="nav-link">Schedule</a>
+      <a href="/info.html" class="nav-link active">Profile</a>
     </nav>
-    <button class="mobile-menu-btn">
-      <span></span>
-      <span></span>
-      <span></span>
+    <button class="mobile-menu-btn" aria-label="메뉴">
+      <span></span><span></span><span></span>
     </button>
   </div>
 </header>
 
-<!-- Profile Hero -->
-<section class="profile-hero">
-  <div class="profile-hero-bg"></div>
-  <div class="snowflakes" aria-hidden="true">
-    <div class="snowflake">❄</div>
-    <div class="snowflake">❅</div>
-    <div class="snowflake">❆</div>
-    <div class="snowflake">❄</div>
-    <div class="snowflake">❅</div>
-    <div class="snowflake">❆</div>
-    <div class="snowflake">❄</div>
-    <div class="snowflake">❅</div>
-  </div>
-  <div class="profile-hero-content">
-    <div class="profile-card-main">
-      <div class="profile-avatar">
-        <img src="/resources/images/Irion-profile.jpg" alt="이리온">
-        <div class="avatar-ring"></div>
-        <div class="avatar-glow"></div>
-      </div>
-      <div class="profile-text">
-        <div class="profile-oshi">❄️  🌸</div>
-        <h1 class="profile-name">이리온</h1>
-        <p class="profile-tagline">설녀 VTuber · 치지직 스트리머</p>
-        <div class="profile-meta">
-          <span class="meta-item">🎂 4월 10일</span>
-          <span class="meta-item">📏 165cm</span>
-          <span class="meta-item">🧠 INFJ</span>
-        </div>
-      </div>
-    </div>
+<main>
 
-    <!-- D-Day Counter -->
-    <div class="dday-container">
-      <div class="dday-card">
-        <div class="dday-icon">🎉</div>
-        <div class="dday-info">
-          <span class="dday-label">데뷔</span>
-          <span class="dday-count" id="debutDday">D+000</span>
-        </div>
-      </div>
-      <div class="dday-card">
-        <div class="dday-icon">🎂</div>
-        <div class="dday-info">
-          <span class="dday-label">생일</span>
-          <span class="dday-count" id="birthdayDday">D-000</span>
-        </div>
-      </div>
-    </div>
+  <!-- ===== Profile hero ===== -->
+  <section class="profile-hero">
+    <div class="shell">
+      <div class="profile-hero-grid">
 
-    <!-- Quick Social Icons -->
-    <div class="quick-social">
-      <a href="https://chzzk.naver.com/live/63368ec9081dc85e61d0e4310b7e1602" target="_blank" class="quick-social-btn social-chzzk" title="치지직">
-        <img src="/resources/images/chzzk.png" alt="치지직" class="social-favicon">
-      </a>
-      <a href="https://www.youtube.com/@2leon0809" target="_blank" class="quick-social-btn social-youtube" title="유튜브">
-        <img src="/resources/images/youtube.png" alt="유튜브" class="social-favicon">
-      </a>
-      <a href="https://x.com/lrion_125" target="_blank" class="quick-social-btn social-twitter" title="X">
-        <img src="/resources/images/x.jpg" alt="X" class="social-favicon">
-      </a>
-      <a href="https://cafe.naver.com/dlfldhs0809" target="_blank" class="quick-social-btn social-cafe" title="팬카페">
-        <img src="/resources/images/naver-cafe.png" alt="네이버 카페" class="social-favicon">
-      </a>
-    </div>
-  </div>
-</section>
+        <div class="profile-portrait">
+          <img src="/resources/images/Irion-profile.jpg" alt="이리온">
+          <span class="portrait-tag idx">FILE / IRION-125</span>
+        </div>
 
-<!-- Profile Detail Section -->
-<section class="profile-detail-section">
-  <div class="container">
-    <h2 class="section-title">
-      <span class="title-icon">✨</span>
-      프로필
-    </h2>
-    <div class="detail-grid">
-      <!-- 기본 정보 카드 -->
-      <div class="detail-card">
-        <div class="detail-card-header">
-          <span class="detail-card-icon">👤</span>
-          <h3>기본 정보</h3>
+        <div class="profile-id">
+          <span class="kicker">Profile / 설녀 VTuber</span>
+          <h1 class="profile-name display">이리온<span class="profile-name-en">IRION</span></h1>
+          <p class="profile-tagline">설녀 VTuber · 치지직 스트리머</p>
+
+          <ul class="profile-vitals">
+            <li><span class="vital-k">Birthday</span><span class="vital-v">04 / 10</span></li>
+            <li><span class="vital-k">Height</span><span class="vital-v">165 cm</span></li>
+            <li><span class="vital-k">MBTI</span><span class="vital-v">INFJ</span></li>
+            <li><span class="vital-k">Mark</span><span class="vital-v">❄ / 🌸</span></li>
+          </ul>
         </div>
-        <div class="detail-card-body">
-          <div class="detail-row">
-            <span class="detail-label">이름</span>
-            <span class="detail-value">이리온</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">성별</span>
-            <span class="detail-value">여성</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">종족</span>
-            <span class="detail-value">설녀</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">나이</span>
-            <span class="detail-value">500살</span>
-          </div>
-        </div>
+
       </div>
 
-      <!-- 상세 정보 카드 -->
-      <div class="detail-card">
-        <div class="detail-card-header">
-          <span class="detail-card-icon">📋</span>
-          <h3>상세 정보</h3>
+      <!-- D-Day counters -->
+      <div class="dday-row">
+        <div class="dday-cell">
+          <span class="dday-label idx">데뷔 — Debut</span>
+          <span class="dday-count display" id="debutDday">D+000</span>
         </div>
-        <div class="detail-card-body">
-          <div class="detail-row">
-            <span class="detail-label">생일</span>
-            <span class="detail-value">4월 10일</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">신장</span>
-            <span class="detail-value">165cm</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">MBTI</span>
-            <span class="detail-value highlight">INFJ</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">데뷔일</span>
-            <span class="detail-value">2023. 09. 12</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">오시마크</span>
-            <span class="detail-value emoji-large">❄️🌸</span>
-          </div>
+        <div class="dday-cell">
+          <span class="dday-label idx">생일 — Birthday</span>
+          <span class="dday-count display" id="birthdayDday">D-000</span>
         </div>
-      </div>
-
-      <!-- 크레딧 카드 -->
-      <div class="detail-card">
-        <div class="detail-card-header">
-          <span class="detail-card-icon">🎨</span>
-          <h3>크레딧</h3>
-        </div>
-        <div class="detail-card-body">
-          <div class="detail-row">
-            <span class="detail-label">캐릭터 디자인</span>
-            <span class="detail-value">Hisiya</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Live2D</span>
-            <span class="detail-value">Doha</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- 팬 정보 카드 -->
-      <div class="detail-card card-highlight">
-        <div class="detail-card-header">
-          <span class="detail-card-icon">💜</span>
-          <h3>팬 정보</h3>
-        </div>
-        <div class="detail-card-body">
-          <div class="detail-row">
-            <span class="detail-label">팬네임</span>
-            <span class="detail-value highlight">예티</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">팬카페</span>
-            <a href="https://cafe.naver.com/dlfldhs0809" target="_blank" class="detail-value detail-link">이리온 공식 팬카페</a>
+        <div class="dday-cell dday-cell--social">
+          <span class="dday-label idx">Channels</span>
+          <div class="quick-social">
+            <a href="https://chzzk.naver.com/live/63368ec9081dc85e61d0e4310b7e1602" target="_blank" class="quick-social-btn" title="치지직">
+              <img src="/resources/images/chzzk.png" alt="치지직">
+            </a>
+            <a href="https://www.youtube.com/@2leon0809" target="_blank" class="quick-social-btn" title="유튜브">
+              <img src="/resources/images/youtube.png" alt="유튜브">
+            </a>
+            <a href="https://x.com/lrion_125" target="_blank" class="quick-social-btn" title="X">
+              <img src="/resources/images/x.jpg" alt="X">
+            </a>
+            <a href="https://cafe.naver.com/dlfldhs0809" target="_blank" class="quick-social-btn" title="팬카페">
+              <img src="/resources/images/naver-cafe.png" alt="네이버 카페">
+            </a>
           </div>
         </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- Social Links -->
-<section class="social-section">
-  <div class="container">
-    <h2 class="section-title">
-      <span class="title-icon">📺</span>
-      채널 & SNS
-    </h2>
-    <div class="social-grid">
-      <!-- 치지직 -->
-      <a href="https://chzzk.naver.com/live/63368ec9081dc85e61d0e4310b7e1602" target="_blank" class="social-card social-chzzk">
-        <div class="social-icon">
-          <img src="https://ssl.pstatic.net/static/nng/glive/icon/favicon.png" alt="치지직" class="social-favicon">
-        </div>
-        <div class="social-info">
-          <h3>치지직</h3>
-          <p>메인 방송 플랫폼</p>
-        </div>
-        <span class="social-arrow">→</span>
-      </a>
+  <!-- ===== Detail spec sheet ===== -->
+  <section class="section spec-section">
+    <div class="shell">
+      <div class="sec-head scroll-animate fade-in">
+        <h2 class="sec-head__title">프로필<br><em>명세</em></h2>
+        <p class="sec-head__aside aside--nowrap">
+          캐릭터 설정과 제작 크레딧. 이리온이라는 설녀에 대한 기록.
+        </p>
+      </div>
 
-      <!-- 유튜브 본채널 -->
-      <a href="https://www.youtube.com/@2leon0809" target="_blank" class="social-card social-youtube">
-        <div class="social-icon">
-          <img src="/resources/images/youtube.png" alt="유튜브" class="social-favicon">
-        </div>
-        <div class="social-info">
-          <h3>유튜브</h3>
-          <p>메인 유튜브 채널</p>
-        </div>
-        <span class="social-arrow">→</span>
-      </a>
+      <div class="spec-grid">
 
-      <!-- 유튜브 다시보기 -->
-      <a href="https://www.youtube.com/@2reon" target="_blank" class="social-card social-youtube-vod">
-        <div class="social-icon">
-          <img src="/resources/images/youtube.png" alt="유튜브" class="social-favicon">
-        </div>
-        <div class="social-info">
-          <h3>다시보기</h3>
-          <p>방송 다시보기 채널</p>
-        </div>
-        <span class="social-arrow">→</span>
-      </a>
+        <article class="spec-card">
+          <header class="spec-card-head">
+            <span class="spec-card-idx">01</span>
+            <h3>기본 정보</h3>
+          </header>
+          <dl class="spec-rows">
+            <div class="spec-row"><dt>이름</dt><dd>이리온</dd></div>
+            <div class="spec-row"><dt>성별</dt><dd>여성</dd></div>
+            <div class="spec-row"><dt>종족</dt><dd>설녀</dd></div>
+            <div class="spec-row"><dt>나이</dt><dd>500살</dd></div>
+          </dl>
+        </article>
 
-      <!-- X (트위터) -->
-      <a href="https://x.com/lrion_125" target="_blank" class="social-card social-twitter">
-        <div class="social-icon">
-          <img src="/resources/images/x.jpg" alt="X" class="social-favicon">
-        </div>
-        <div class="social-info">
-          <h3>X</h3>
-          <p>공지 및 소통</p>
-        </div>
-        <span class="social-arrow">→</span>
-      </a>
+        <article class="spec-card">
+          <header class="spec-card-head">
+            <span class="spec-card-idx">02</span>
+            <h3>상세 정보</h3>
+          </header>
+          <dl class="spec-rows">
+            <div class="spec-row"><dt>생일</dt><dd>4월 10일</dd></div>
+            <div class="spec-row"><dt>신장</dt><dd>165cm</dd></div>
+            <div class="spec-row"><dt>MBTI</dt><dd class="spec-hl">INFJ</dd></div>
+            <div class="spec-row"><dt>데뷔일</dt><dd>2023. 09. 12</dd></div>
+            <div class="spec-row"><dt>오시마크</dt><dd>❄️ 🌸</dd></div>
+          </dl>
+        </article>
 
-      <!-- 팬카페 -->
-      <a href="https://cafe.naver.com/dlfldhs0809" target="_blank" class="social-card social-cafe">
-        <div class="social-icon">
-          <img src="/resources/images/naver-cafe.png" alt="네이버 카페" class="social-favicon">
-        </div>
-        <div class="social-info">
-          <h3>팬카페</h3>
-          <p>네이버 팬카페</p>
-        </div>
-        <span class="social-arrow">→</span>
-      </a>
+        <article class="spec-card">
+          <header class="spec-card-head">
+            <span class="spec-card-idx">03</span>
+            <h3>크레딧</h3>
+          </header>
+          <dl class="spec-rows">
+            <div class="spec-row"><dt>캐릭터 디자인</dt><dd>Hisiya</dd></div>
+            <div class="spec-row"><dt>Live2D</dt><dd>Doha</dd></div>
+          </dl>
+        </article>
+
+        <article class="spec-card spec-card--accent">
+          <header class="spec-card-head">
+            <span class="spec-card-idx">04</span>
+            <h3>팬 정보</h3>
+          </header>
+          <dl class="spec-rows">
+            <div class="spec-row"><dt>팬네임</dt><dd class="spec-hl">예티</dd></div>
+            <div class="spec-row">
+              <dt>팬카페</dt>
+              <dd><a href="https://cafe.naver.com/dlfldhs0809" target="_blank" class="spec-link">이리온 공식 팬카페 ↗</a></dd>
+            </div>
+          </dl>
+        </article>
+
+      </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- About Section -->
-<section class="about-section">
-  <div class="container">
-    <div class="about-card">
-      <div class="about-icon">🌸</div>
-      <p>
-        이 사이트는 이리온을 응원하는 예티가 만든 <strong>비공식 팬사이트</strong>입니다.
-      </p>
+  <!-- ===== Channels ===== -->
+  <section class="section channel-section">
+    <div class="shell">
+      <div class="sec-head sec-head--flip scroll-animate fade-in">
+        <h2 class="sec-head__title">채널 <em>&amp;</em><br>SNS</h2>
+        <p class="sec-head__aside">방송과 소통이 이루어지는 모든 채널.</p>
+      </div>
+
+      <ul class="channel-list stagger-container">
+        <li>
+          <a href="https://chzzk.naver.com/live/63368ec9081dc85e61d0e4310b7e1602" target="_blank" class="channel-row">
+            <span class="channel-idx">01</span>
+            <img src="https://ssl.pstatic.net/static/nng/glive/icon/favicon.png" alt="치지직" class="channel-ico">
+            <span class="channel-name">치지직</span>
+            <span class="channel-desc">메인 방송 플랫폼</span>
+            <span class="channel-arrow">↗</span>
+          </a>
+        </li>
+        <li>
+          <a href="https://www.youtube.com/@2leon0809" target="_blank" class="channel-row">
+            <span class="channel-idx">02</span>
+            <img src="/resources/images/youtube.png" alt="유튜브" class="channel-ico">
+            <span class="channel-name">유튜브</span>
+            <span class="channel-desc">메인 유튜브 채널</span>
+            <span class="channel-arrow">↗</span>
+          </a>
+        </li>
+        <li>
+          <a href="https://www.youtube.com/@2reon" target="_blank" class="channel-row">
+            <span class="channel-idx">03</span>
+            <img src="/resources/images/youtube.png" alt="유튜브" class="channel-ico">
+            <span class="channel-name">다시보기</span>
+            <span class="channel-desc">방송 다시보기 채널</span>
+            <span class="channel-arrow">↗</span>
+          </a>
+        </li>
+        <li>
+          <a href="https://x.com/lrion_125" target="_blank" class="channel-row">
+            <span class="channel-idx">04</span>
+            <img src="/resources/images/x.jpg" alt="X" class="channel-ico">
+            <span class="channel-name">X / Twitter</span>
+            <span class="channel-desc">공지 및 소통</span>
+            <span class="channel-arrow">↗</span>
+          </a>
+        </li>
+        <li>
+          <a href="https://cafe.naver.com/dlfldhs0809" target="_blank" class="channel-row">
+            <span class="channel-idx">05</span>
+            <img src="/resources/images/naver-cafe.png" alt="네이버 카페" class="channel-ico">
+            <span class="channel-name">팬카페</span>
+            <span class="channel-desc">네이버 팬카페</span>
+            <span class="channel-arrow">↗</span>
+          </a>
+        </li>
+      </ul>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- Footer -->
+  <!-- ===== About note ===== -->
+  <section class="section about-section">
+    <div class="shell">
+      <div class="about-slab scroll-animate fade-in">
+        <span class="about-quote">“</span>
+        <p class="about-text">
+          이 사이트는 이리온을 응원하는 예티가 만든 <strong>비공식 팬사이트</strong>입니다.
+        </p>
+        <span class="about-sign idx">— Yeti / Fan Archive</span>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ===== Footer ===== -->
 <footer class="footer">
-  <div class="container">
-    <div class="footer-disclaimer">
-      <div class="disclaimer-badge">
-        <span class="badge-icon">ⓘ</span>
-        <span class="badge-text">Non-Commercial Project</span>
+  <div class="shell">
+    <div class="footer-grid">
+      <div class="footer-mark">IRION<br><em>YETI-125</em></div>
+      <div class="footer-disclaimer">
+        <span class="disclaimer-badge">
+          <span class="badge-icon">ⓘ</span> Non-Commercial
+        </span>
+        <p class="disclaimer-text">
+          이 프로젝트는 순수한 팬 활동의 일환으로 제작된 비상업적 웹사이트입니다.
+          어떠한 상업적 목적이나 수익 창출을 의도하지 않으며, 오직 정보 제공 및
+          아카이빙 목적으로 운영됩니다.
+        </p>
       </div>
-      <p class="disclaimer-text">
-        이 프로젝트는 순수한 팬 활동의 일환으로 제작된 비상업적 웹사이트입니다.<br>
-        어떠한 상업적 목적이나 수익 창출을 의도하지 않으며, 오직 정보 제공 및 아카이빙 목적으로 운영됩니다.
+      <div class="footer-divider"></div>
+      <p class="footer-text">
+        © 2025 Irion Fansite — 비공식 팬사이트. 모든 콘텐츠의 저작권은 원 저작자에게 있습니다.<br>
+        Developed by <a href="https://github.com/sooindev" target="_blank">sooindev</a>
       </p>
     </div>
-    <div class="footer-divider"></div>
-    <p class="footer-text">
-      © 2025 Irion Fansite. 비공식 팬사이트입니다. 모든 콘텐츠의 저작권은 원 저작자에게 있습니다.<br>
-      Developed by <a href="https://github.com/SooinDev" target="_blank" style="color: var(--primary); text-decoration: none;">SooinDev</a>
-    </p>
   </div>
 </footer>
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="/resources/js/common.js"></script>
+<script src="/resources/js/scroll-animations.js"></script>
 <script src="/resources/js/info.js"></script>
 </body>
 </html>

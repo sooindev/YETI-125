@@ -68,12 +68,12 @@ function initEventHandlers() {
     $('#scheduleType').on('change', function() {
         const type = $(this).val();
         const colors = {
-            'COLLAB': '#EC4899',
-            'JUSTCHAT': '#10B981',
-            'GAME': '#6366F1',
-            'KARAOKE': '#FFC107'
+            'COLLAB': '#d68fb0',
+            'JUSTCHAT': '#7fb58a',
+            'GAME': '#8c8fd6',
+            'KARAOKE': '#d6c07f'
         };
-        $('#color').val(colors[type] || '#6366F1');
+        $('#color').val(colors[type] || '#8c8fd6');
     });
 
     // 새 일정 추가 버튼
@@ -181,7 +181,7 @@ function resetForm() {
     $('#scheduleForm')[0].reset();
     $('#scheduleId').val('');
     $('#scheduleType').val('JUSTCHAT');  // 기본값을 저스트채팅으로 설정
-    $('#color').val('#10B981');  // 초록색 (저스트채팅)
+    $('#color').val('#7fb58a');  // 저스트채팅
     $('#displayYn').prop('checked', true);
 }
 

@@ -385,7 +385,8 @@ public class LiveController {
         for (int i = start; i < json.length(); i++) {
             char c = json.charAt(i);
 
-            if (c == '"' && (i == 0 || json.charAt(i - 1) != '\\')) {
+            // 따옴표 escape 판정: 앞쪽 연속 백슬래시 개수가 홀수면 escape된 따옴표
+            if (c == '"' && !isEscaped(json, i)) {
                 inString = !inString;
             }
 
@@ -397,5 +398,14 @@ public class LiveController {
         }
 
         return -1;
+    }
+
+    /** 해당 위치의 문자가 escape 되었는지 (앞쪽 연속 백슬래시 홀수 개) */
+    private boolean isEscaped(String str, int index) {
+        int backslashes = 0;
+        for (int i = index - 1; i >= 0 && str.charAt(i) == '\\'; i--) {
+            backslashes++;
+        }
+        return (backslashes % 2) == 1;
     }
 }
