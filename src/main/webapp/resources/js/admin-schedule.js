@@ -278,12 +278,13 @@ function deleteSchedule() {
 
 // 드래그로 일정 날짜 변경
 function updateScheduleDate(event) {
-    // 로컬 타임존을 유지하면서 ISO 형식으로 변환
+    // Date 객체의 로컬 시각을 "yyyy-MM-dd'T'HH:mm:ss" 형식으로 추출.
+    // 서버(ScheduleVO)가 Asia/Seoul 기준으로 해석하므로 화면의 시각이 그대로 저장된다.
     const formatEventDate = (dateObj) => {
         if (!dateObj) return null;
-        const offset = dateObj.getTimezoneOffset();
-        const localDate = new Date(dateObj.getTime() - (offset * 60 * 1000));
-        return localDate.toISOString();
+        const p = (n) => String(n).padStart(2, '0');
+        return dateObj.getFullYear() + '-' + p(dateObj.getMonth() + 1) + '-' + p(dateObj.getDate())
+            + 'T' + p(dateObj.getHours()) + ':' + p(dateObj.getMinutes()) + ':' + p(dateObj.getSeconds());
     };
 
     const data = {
@@ -319,19 +320,16 @@ function updateScheduleDate(event) {
     });
 }
 
-// 날짜를 서버로 전송할 형식으로 변환 (로컬 타임존 유지)
+// 날짜를 서버로 전송할 형식으로 변환
+// datetime-local 입력값("2026-05-21T08:00")을 타임존 변환 없이 그대로 전송한다.
+// 서버(ScheduleVO)가 이 값을 Asia/Seoul 기준으로 해석하므로 입력 시각이 그대로 저장된다.
 function formatDateForServer(dateTimeLocalString) {
     if (!dateTimeLocalString) return null;
 
-    // datetime-local input 값: "2024-01-01T18:00"
-    // 로컬 시간을 유지하면서 ISO 형식으로 변환
-    const date = new Date(dateTimeLocalString);
-
-    // 타임존 오프셋을 고려하여 로컬 시간 유지
-    const offset = date.getTimezoneOffset();
-    const localDate = new Date(date.getTime() - (offset * 60 * 1000));
-
-    return localDate.toISOString();
+    // 초가 없으면 ":00"을 붙여 "yyyy-MM-dd'T'HH:mm:ss" 형식을 맞춘다.
+    return dateTimeLocalString.length === 16
+        ? dateTimeLocalString + ':00'
+        : dateTimeLocalString;
 }
 
 // 로그아웃
