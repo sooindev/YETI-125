@@ -174,8 +174,8 @@ YETI-125/
 
 ## 👨‍💻 개발자
 
-**SooinDev**
-- GitHub: [@SooinDev](https://github.com/SooinDev)
+**sooindev**
+- GitHub: [@sooindev](https://github.com/sooindev)
 
 ---
 
