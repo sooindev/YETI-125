@@ -3,128 +3,136 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>방송 일정 - YETI-125</title>
+  <title>Schedule — YETI-125</title>
   <link rel="icon" type="image/svg+xml" href="/resources/images/snowflake.png">
   <script src="/resources/js/theme-init.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css" rel="stylesheet">
   <link rel="stylesheet" href="/resources/css/common.css">
   <link rel="stylesheet" href="/resources/css/schedule.css">
 </head>
 <body>
-<!-- Header -->
+
+<!-- ===== Header ===== -->
 <header class="header">
-  <div class="header-container">
+  <div class="header-inner">
     <a href="/" class="logo">
       <span class="logo-text">YETI</span>
       <span class="logo-sub">125</span>
     </a>
     <nav class="nav">
-      <a href="/" class="nav-link">홈</a>
-      <a href="/schedule.html" class="nav-link active">일정</a>
-      <a href="/info.html" class="nav-link">프로필</a>
+      <a href="/" class="nav-link">Index</a>
+      <a href="/schedule.html" class="nav-link active">Schedule</a>
+      <a href="/info.html" class="nav-link">Profile</a>
     </nav>
-    <button class="mobile-menu-btn">
-      <span></span>
-      <span></span>
-      <span></span>
+    <button class="mobile-menu-btn" aria-label="메뉴">
+      <span></span><span></span><span></span>
     </button>
   </div>
 </header>
 
-<!-- Schedule Header -->
-<section class="schedule-header">
-  <div class="schedule-header-content">
-    <div class="schedule-icon">📅</div>
-    <h1>방송 일정</h1>
-    <p>이리온의 방송 일정을 확인하세요</p>
-  </div>
-  <div class="schedule-header-decoration">
-    <div class="decoration-circle circle-1"></div>
-    <div class="decoration-circle circle-2"></div>
-    <div class="decoration-circle circle-3"></div>
-  </div>
-</section>
+<main>
 
-<!-- Calendar Section -->
-<section class="calendar-section">
-  <div class="container">
-    <!-- Legend -->
-    <div class="calendar-legend">
-      <div class="legend-item">
-        <span class="legend-color" style="background: #10B981;"></span>
-        <span>저스트 채팅</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-color" style="background: #6366F1;"></span>
-        <span>종합게임</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-color" style="background: #FFC107;"></span>
-        <span>노래방송</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-color" style="background: #EC4899;"></span>
-        <span>합방</span>
+  <!-- ===== Page masthead ===== -->
+  <section class="page-masthead">
+    <div class="shell">
+      <div class="masthead-grid">
+        <div class="masthead-lead">
+          <span class="kicker">Archive / No.125</span>
+          <h1 class="masthead-title display">방송<br><em>일정</em></h1>
+        </div>
+        <div class="masthead-aside">
+          <p class="masthead-copy">
+            이리온의 라이브 스케줄. 캘린더에서 날짜를 선택하면 상세 정보를 볼 수 있습니다.
+          </p>
+          <span class="idx">002 — Schedule</span>
+        </div>
       </div>
     </div>
+  </section>
 
-    <!-- Calendar -->
-    <div class="calendar-wrapper">
-      <div id="calendar"></div>
-    </div>
+  <!-- ===== Calendar + upcoming, asymmetric split ===== -->
+  <section class="section sched-section">
+    <div class="shell">
+      <div class="sched-grid">
 
-    <!-- Upcoming Events -->
-    <div class="upcoming-section">
-      <h2 class="upcoming-title">
-        <span class="upcoming-icon">🔔</span>
-        다가오는 일정
-      </h2>
-      <div id="upcomingEvents" class="upcoming-list">
-        <!-- 일정이 여기에 로드됨 -->
+        <!-- calendar column -->
+        <div class="sched-cal">
+          <div class="legend">
+            <span class="legend-head idx">Legend</span>
+            <div class="legend-items">
+              <span class="legend-item">
+                <span class="legend-swatch" style="background:#7fb58a;"></span>저스트 채팅
+              </span>
+              <span class="legend-item">
+                <span class="legend-swatch" style="background:#8c8fd6;"></span>종합게임
+              </span>
+              <span class="legend-item">
+                <span class="legend-swatch" style="background:#d6c07f;"></span>노래방송
+              </span>
+              <span class="legend-item">
+                <span class="legend-swatch" style="background:#d68fb0;"></span>합방
+              </span>
+            </div>
+          </div>
+          <div class="calendar-wrapper">
+            <div id="calendar"></div>
+          </div>
+        </div>
+
+        <!-- upcoming column -->
+        <aside class="sched-upcoming">
+          <div class="upcoming-head">
+            <span class="kicker">Next Up</span>
+            <h2 class="upcoming-title display">다가오는<br>일정</h2>
+          </div>
+          <div id="upcomingEvents" class="upcoming-list"></div>
+          <div id="upcomingEmpty" class="upcoming-empty" style="display: none;">
+            <span class="upcoming-empty-mark">∅</span>
+            <p>예정된 일정이 없습니다</p>
+          </div>
+        </aside>
+
       </div>
-      <div id="upcomingEmpty" class="upcoming-empty" style="display: none;">
-        <span>😴</span>
-        <p>예정된 일정이 없습니다</p>
-      </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- Schedule Detail Modal -->
+</main>
+
+<!-- ===== Detail Modal ===== -->
 <div id="scheduleModal" class="modal">
   <div class="modal-content">
     <button class="modal-close" onclick="closeModal('scheduleModal')">&times;</button>
-    <div id="scheduleDetail">
-      <!-- 일정 상세 내용이 여기에 로드됨 -->
-    </div>
+    <div id="scheduleDetail"></div>
   </div>
 </div>
 
-<!-- Footer -->
+<!-- ===== Footer ===== -->
 <footer class="footer">
-  <div class="container">
-    <div class="footer-disclaimer">
-      <div class="disclaimer-badge">
-        <span class="badge-icon">ⓘ</span>
-        <span class="badge-text">Non-Commercial Project</span>
+  <div class="shell">
+    <div class="footer-grid">
+      <div class="footer-mark">IRION<br><em>YETI-125</em></div>
+      <div class="footer-disclaimer">
+        <span class="disclaimer-badge">
+          <span class="badge-icon">ⓘ</span> Non-Commercial
+        </span>
+        <p class="disclaimer-text">
+          이 프로젝트는 순수한 팬 활동의 일환으로 제작된 비상업적 웹사이트입니다.
+          어떠한 상업적 목적이나 수익 창출을 의도하지 않으며, 오직 정보 제공 및
+          아카이빙 목적으로 운영됩니다.
+        </p>
       </div>
-      <p class="disclaimer-text">
-        이 프로젝트는 순수한 팬 활동의 일환으로 제작된 비상업적 웹사이트입니다.<br>
-        어떠한 상업적 목적이나 수익 창출을 의도하지 않으며, 오직 정보 제공 및 아카이빙 목적으로 운영됩니다.
+      <div class="footer-divider"></div>
+      <p class="footer-text">
+        © 2025 Irion Fansite — 비공식 팬사이트. 모든 콘텐츠의 저작권은 원 저작자에게 있습니다.<br>
+        Developed by <a href="https://github.com/sooindev" target="_blank">sooindev</a>
       </p>
     </div>
-    <div class="footer-divider"></div>
-    <p class="footer-text">
-      © 2025 Irion Fansite. 비공식 팬사이트입니다. 모든 콘텐츠의 저작권은 원 저작자에게 있습니다.<br>
-      Developed by <a href="https://github.com/SooinDev" target="_blank" style="color: var(--primary); text-decoration: none;">SooinDev</a>
-    </p>
   </div>
 </footer>
 
-<!-- Scripts -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
 <script src="/resources/js/common.js"></script>

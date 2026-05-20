@@ -3,289 +3,293 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>YETI-125</title>
+  <title>YETI-125 — IRION ARCHIVE</title>
   <link rel="icon" type="image/svg+xml" href="/resources/images/snowflake.png">
   <script src="/resources/js/theme-init.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/resources/css/common.css">
   <link rel="stylesheet" href="/resources/css/index.css">
   <link rel="stylesheet" href="/resources/css/door-intro.css">
   <link rel="stylesheet" href="/resources/css/scroll-animations.css">
 </head>
 <body>
-<!-- Door Opening Intro -->
+
+<!-- ===== Door Intro ===== -->
 <div class="door-intro">
   <div class="door-container">
-    <!-- Left Door -->
     <div class="door-panel door-left">
+      <span class="door-panel-tag">N 37°</span>
       <div class="door-handle"></div>
     </div>
-
-    <!-- Right Door -->
     <div class="door-panel door-right">
+      <span class="door-panel-tag">E 127°</span>
       <div class="door-handle"></div>
     </div>
   </div>
-
-  <!-- Center Content -->
   <div class="door-content">
-    <span class="door-icon">❄️</span>
-    <h1 class="door-title">I R I O N</h1>
-    <p class="door-subtitle">W E L C O M E</p>
+    <span class="door-index">ARCHIVE / 125</span>
+    <h1 class="door-title">IRION</h1>
+    <p class="door-subtitle">설녀 · 빙하 아카이브</p>
     <div class="door-enter">
-      <span>E N T E R</span>
+      <span>ENTER</span>
+      <span class="door-enter-arrow">↘</span>
     </div>
   </div>
-
-  <!-- Decorative Snowflakes -->
-  <div class="door-snowflakes">
-    <span class="door-snowflake">❄️</span>
-    <span class="door-snowflake">❄️</span>
-    <span class="door-snowflake">❄️</span>
-    <span class="door-snowflake">❄️</span>
-    <span class="door-snowflake">❄️</span>
-    <span class="door-snowflake">❄️</span>
-  </div>
+  <div class="door-meta door-meta-tl">FROST INDEX</div>
+  <div class="door-meta door-meta-br">EST. 2023.09.12</div>
 </div>
 
-<!-- Header -->
+<!-- ===== Header ===== -->
 <header class="header">
-  <div class="header-container">
+  <div class="header-inner">
     <a href="/" class="logo">
       <span class="logo-text">YETI</span>
       <span class="logo-sub">125</span>
     </a>
     <nav class="nav">
-      <a href="/" class="nav-link active">홈</a>
-      <a href="/schedule.html" class="nav-link">일정</a>
-      <a href="/info.html" class="nav-link">프로필</a>
+      <a href="/" class="nav-link active">Index</a>
+      <a href="/schedule.html" class="nav-link">Schedule</a>
+      <a href="/info.html" class="nav-link">Profile</a>
     </nav>
-    <button class="mobile-menu-btn">
-      <span></span>
-      <span></span>
-      <span></span>
+    <button class="mobile-menu-btn" aria-label="메뉴">
+      <span></span><span></span><span></span>
     </button>
   </div>
 </header>
 
-<!-- Live Hero Section (방송 중일 때만 표시) -->
-<section id="liveHero" class="live-hero" style="display: none;">
-  <div class="live-hero-bg"></div>
-  <div class="live-hero-content">
-    <div class="live-status scroll-animate fade-in delay-100">
-      <span class="live-badge-large">🔴 LIVE</span>
-      <span id="liveViewers" class="live-viewers-large"></span>
-    </div>
-    <h1 id="liveTitle" class="live-title-large scroll-animate slide-up delay-200">방송 중!</h1>
-    <div class="live-thumbnail-large scroll-animate scale-in delay-300">
-      <a id="liveLink" href="#" target="_blank">
-        <img id="liveThumbnail" src="" alt="방송 썸네일">
-        <div class="thumbnail-overlay">
-          <span class="play-icon">▶</span>
-          <span>시청하기</span>
-        </div>
-      </a>
-    </div>
-  </div>
-</section>
+<main>
 
-<!-- Hero Section (방송 안 할 때) -->
-<section id="defaultHero" class="hero">
-  <div class="hero-bg"></div>
-  <div class="hero-particles">
-    <div class="particle"></div>
-    <div class="particle"></div>
-    <div class="particle"></div>
-    <div class="particle"></div>
-    <div class="particle"></div>
-  </div>
-  <div class="hero-content">
-    <div class="offline-status scroll-animate fade-in delay-100">
-      <div class="offline-icon">
-        <div class="offline-circle"></div>
-        <span>📡</span>
-      </div>
-      <span class="offline-badge">OFFLINE</span>
-    </div>
-    <h1 class="hero-title scroll-animate slide-up delay-200">
-      <span class="hero-name">IRION</span>
-      <span class="hero-fansite">FANSITE</span>
-    </h1>
-    <p class="hero-desc scroll-animate fade-in delay-300">현재 채널이 오프라인 상태입니다</p>
-    <p class="hero-subdesc scroll-animate fade-in delay-400">다음 라이브를 기대해주세요! ❄️ 🌸</p>
-    <div class="hero-buttons scroll-animate slide-up delay-500">
-      <a href="/schedule.html" class="btn btn-primary">
-        <span class="btn-icon">📅</span>
-        방송 일정 확인
-      </a>
-      <a href="https://chzzk.naver.com/63368ec9081dc85e61d0e4310b7e1602" target="_blank" class="btn btn-secondary">
-        <span class="btn-icon">🔔</span>
-        채널 방문하기
-      </a>
-    </div>
-    <div class="hero-profile-preview scroll-animate scale-in delay-600">
-      <img src="/resources/images/Irion-profile.jpg" alt="이리온" class="preview-avatar">
-      <div class="preview-info">
-        <span class="preview-name">이리온</span>
-        <span class="preview-status">치지직 스트리머</span>
+  <!-- ===== Live Hero (방송 중) ===== -->
+  <section id="liveHero" class="live-hero" style="display: none;">
+    <div class="shell">
+      <div class="live-hero-grid">
+        <div class="live-hero-text">
+          <span class="kicker live-kicker">
+            <span class="live-dot"></span> On Air — Live
+          </span>
+          <h1 id="liveTitle" class="live-title display">방송 중</h1>
+          <div class="live-stat">
+            <span class="idx">VIEWERS</span>
+            <span id="liveViewers" class="live-viewers"></span>
+          </div>
+        </div>
+        <a id="liveLink" href="#" target="_blank" class="live-thumb">
+          <img id="liveThumbnail" src="" alt="방송 썸네일">
+          <span class="live-thumb-cta">
+            <span class="play-icon">▶</span> Watch Stream
+          </span>
+        </a>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- Clips Section -->
-<section class="clips-section">
-  <div class="container">
-    <h2 class="section-title scroll-animate slide-up">
-      <span class="title-icon">🎬</span>
-      인기 클립
-    </h2>
-    <div id="clipsContainer" class="clips-grid">
-      <!-- 클립은 JavaScript로 동적 로드됩니다 -->
-    </div>
-    <div id="clipsLoading" class="clips-loading" style="display: none;">
-      <span>클립을 불러오는 중...</span>
-    </div>
-    <div id="clipsEmpty" class="clips-empty" style="display: none;">
-      <span>😢 클립이 없습니다</span>
-    </div>
-    <div class="clips-more" id="clipsMore" style="display: none;">
-      <button id="loadMoreBtn" class="btn btn-secondary">더보기</button>
-    </div>
-  </div>
-</section>
+  <!-- ===== Default Hero (오프라인) ===== -->
+  <section id="defaultHero" class="hero">
+    <div class="hero-noise-line">FROST INDEX · 125 · IRION · NON-COMMERCIAL FAN ARCHIVE · </div>
+    <div class="shell hero-shell">
+      <div class="hero-grid">
 
-<!-- Videos Section (다시보기) -->
-<section class="videos-section">
-  <div class="container">
-    <h2 class="section-title scroll-animate slide-up">
-      <span class="title-icon">📺</span>
-      다시보기
-    </h2>
-    <div id="videosContainer" class="videos-grid">
-      <!-- 다시보기는 JavaScript로 동적 로드됩니다 -->
-    </div>
-    <div id="videosLoading" class="videos-loading" style="display: none;">
-      <span>다시보기를 불러오는 중...</span>
-    </div>
-    <div id="videosEmpty" class="videos-empty" style="display: none;">
-      <span>😢 다시보기가 없습니다</span>
-    </div>
-    <div class="videos-more" id="videosMore" style="display: none;">
-      <button id="loadMoreVideosBtn" class="btn btn-secondary">더보기</button>
-    </div>
-  </div>
-</section>
+        <div class="hero-lead">
+          <span class="kicker">Archive / No.125</span>
+          <h1 class="hero-title display">
+            <span class="hero-line">IRION</span>
+            <span class="hero-line hero-line--stroke">FAN</span>
+            <span class="hero-line">SITE</span>
+          </h1>
+        </div>
 
-<!-- Community Section -->
-<section class="community-section">
-  <div class="container">
-    <h2 class="section-title scroll-animate slide-up">
-      <span class="title-icon">💬</span>
-      커뮤니티
-    </h2>
-    <a href="https://chzzk.naver.com/63368ec9081dc85e61d0e4310b7e1602/community" target="_blank" class="community-card scroll-animate scale-in">
-      <div class="community-card-bg"></div>
-      <div class="community-card-content">
-        <div class="community-icon">
-          <img src="/resources/images/chzzk.png" alt="치지직" class="community-favicon">
-        </div>
-        <div class="community-info">
-          <h3>이리온 커뮤니티</h3>
-          <p>치지직에서 이리온의 공지사항을 확인하세요!</p>
-          <span class="community-link">
-                        바로가기
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M5 12h14M12 5l7 7-7 7"/>
-                        </svg>
-                    </span>
-        </div>
-        <div class="community-decoration">
-          <span>❄️</span>
-          <span>💬</span>
-          <span>🌸</span>
-        </div>
+        <aside class="hero-side">
+          <div class="status-block">
+            <span class="status-tag" id="heroStatusTag">
+              <span class="status-led"></span> Offline
+            </span>
+            <p class="status-copy">
+              현재 채널이 오프라인 상태입니다. 다음 라이브를 기다려 주세요.
+            </p>
+          </div>
+
+          <div class="hero-actions">
+            <a href="/schedule.html" class="btn btn-primary">
+              방송 일정 <span class="btn-arrow">→</span>
+            </a>
+            <a href="https://chzzk.naver.com/63368ec9081dc85e61d0e4310b7e1602" target="_blank" class="btn">
+              채널 방문 <span class="btn-arrow">↗</span>
+            </a>
+          </div>
+
+          <div class="hero-id">
+            <img src="/resources/images/Irion-profile.jpg" alt="이리온" class="hero-id-avatar">
+            <div class="hero-id-text">
+              <span class="hero-id-name">이리온 / IRION</span>
+              <span class="hero-id-role">치지직 스트리머 · 설녀 VTuber</span>
+            </div>
+          </div>
+        </aside>
+
       </div>
-    </a>
-  </div>
-</section>
+    </div>
+    <div class="hero-baseline">
+      <span class="idx">001 — Home</span>
+      <span class="idx">Scroll ↓</span>
+    </div>
+  </section>
 
-<!-- Quick Info Section -->
-<section class="quick-info">
-  <div class="container">
-    <div class="info-cards stagger-container">
-      <a href="https://chzzk.naver.com/live/63368ec9081dc85e61d0e4310b7e1602" target="_blank" class="info-card">
-        <div class="card-icon">
-          <img src="https://ssl.pstatic.net/static/nng/glive/icon/favicon.png" alt="치지직" class="card-favicon">
+  <!-- ===== Clips ===== -->
+  <section class="section media-section">
+    <div class="shell">
+      <div class="sec-head scroll-animate fade-in">
+        <h2 class="sec-head__title">인기<br><em>클립</em></h2>
+        <p class="sec-head__aside">
+          시청자들이 가장 많이 돌려본 순간들. 치지직 클립 아카이브에서 자동 수집됩니다.
+        </p>
+      </div>
+
+      <div id="clipsContainer" class="card-grid"></div>
+
+      <div id="clipsLoading" class="feed-state" style="display: none;">
+        <span class="feed-state-mark">↻</span> 클립을 불러오는 중
+      </div>
+      <div id="clipsEmpty" class="feed-state" style="display: none;">
+        <span class="feed-state-mark">∅</span> 클립이 없습니다
+      </div>
+      <div class="feed-more" id="clipsMore" style="display: none;">
+        <button id="loadMoreBtn" class="btn">더 불러오기 <span class="btn-arrow">↓</span></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Videos / 다시보기 ===== -->
+  <section class="section media-section media-section--alt">
+    <div class="shell">
+      <div class="sec-head sec-head--flip scroll-animate fade-in">
+        <h2 class="sec-head__title">다시<br><em>보기</em></h2>
+        <p class="sec-head__aside">
+          놓친 방송 전체 회차. 풀 VOD 라이브러리.
+        </p>
+      </div>
+
+      <div id="videosContainer" class="card-grid"></div>
+
+      <div id="videosLoading" class="feed-state" style="display: none;">
+        <span class="feed-state-mark">↻</span> 다시보기를 불러오는 중
+      </div>
+      <div id="videosEmpty" class="feed-state" style="display: none;">
+        <span class="feed-state-mark">∅</span> 다시보기가 없습니다
+      </div>
+      <div class="feed-more" id="videosMore" style="display: none;">
+        <button id="loadMoreVideosBtn" class="btn">더 불러오기 <span class="btn-arrow">↓</span></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Community ===== -->
+  <section class="section community-section">
+    <div class="shell">
+      <a href="https://chzzk.naver.com/63368ec9081dc85e61d0e4310b7e1602/community" target="_blank" class="community-slab scroll-animate fade-in">
+        <div class="community-slab-left">
+          <span class="kicker">Community</span>
+          <h3 class="community-slab-title display">이리온<br>커뮤니티</h3>
         </div>
-        <h3>치지직</h3>
-        <p>메인 방송 플랫폼</p>
-        <span class="card-link">바로가기 →</span>
-      </a>
-      <a href="https://www.youtube.com/@2leon0809" target="_blank" class="info-card">
-        <div class="card-icon">
-          <img src="https://www.youtube.com/s/desktop/c01ea7e3/img/favicon_32x32.png" alt="유튜브" class="card-favicon">
+        <div class="community-slab-right">
+          <img src="/resources/images/chzzk.png" alt="치지직" class="community-slab-icon">
+          <p class="community-slab-copy">치지직에서 이리온의 공지사항을 확인하세요.</p>
+          <span class="community-slab-cta">바로가기 <span class="btn-arrow">↗</span></span>
         </div>
-        <h3>유튜브</h3>
-        <p>메인 유튜브 채널</p>
-        <span class="card-link">바로가기 →</span>
-      </a>
-      <a href="https://x.com/lrion_125" target="_blank" class="info-card">
-        <div class="card-icon">
-          <img src="/resources/images/x.jpg" alt="X" class="card-favicon">
-        </div>
-        <h3>X</h3>
-        <p>공지 및 소통</p>
-        <span class="card-link">바로가기 →</span>
-      </a>
-      <a href="/schedule.html" class="info-card">
-        <div class="card-icon">📅</div>
-        <h3>방송 일정</h3>
-        <p>다가오는 방송을 확인하세요</p>
-        <span class="card-link">일정 보기 →</span>
-      </a>
-      <a href="/info.html" class="info-card">
-        <div class="card-icon">❄️</div>
-        <h3>프로필 정보</h3>
-        <p>이리온의 프로필입니다</p>
-        <span class="card-link">더 알아보기 →</span>
-      </a>
-      <a href="https://cafe.naver.com/dlfldhs0809" target="_blank" class="info-card">
-        <div class="card-icon">
-          <img src="/resources/images/naver-cafe.png" alt="네이버 카페" class="card-favicon">
-        </div>
-        <h3>예티24</h3>
-        <p>네이버 팬카페</p>
-        <span class="card-link">바로가기 →</span>
       </a>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- Footer -->
+  <!-- ===== Quick Index / 채널 ===== -->
+  <section class="section index-section">
+    <div class="shell">
+      <div class="sec-head scroll-animate fade-in">
+        <h2 class="sec-head__title">채널 <em>&amp;</em><br>링크</h2>
+        <p class="sec-head__aside aside--nowrap">
+          이리온이 활동하는 모든 플랫폼. 아래에서 바로 이동할 수 있습니다.
+        </p>
+      </div>
+
+      <ul class="link-list stagger-container">
+        <li>
+          <a href="https://chzzk.naver.com/live/63368ec9081dc85e61d0e4310b7e1602" target="_blank" class="link-row">
+            <span class="link-row-idx">01</span>
+            <span class="link-row-name">치지직</span>
+            <span class="link-row-desc">메인 방송 플랫폼</span>
+            <span class="link-row-arrow">↗</span>
+          </a>
+        </li>
+        <li>
+          <a href="https://www.youtube.com/@2leon0809" target="_blank" class="link-row">
+            <span class="link-row-idx">02</span>
+            <span class="link-row-name">유튜브</span>
+            <span class="link-row-desc">메인 유튜브 채널</span>
+            <span class="link-row-arrow">↗</span>
+          </a>
+        </li>
+        <li>
+          <a href="https://x.com/lrion_125" target="_blank" class="link-row">
+            <span class="link-row-idx">03</span>
+            <span class="link-row-name">X / Twitter</span>
+            <span class="link-row-desc">공지 및 소통</span>
+            <span class="link-row-arrow">↗</span>
+          </a>
+        </li>
+        <li>
+          <a href="/schedule.html" class="link-row">
+            <span class="link-row-idx">04</span>
+            <span class="link-row-name">방송 일정</span>
+            <span class="link-row-desc">다가오는 방송을 확인하세요</span>
+            <span class="link-row-arrow">→</span>
+          </a>
+        </li>
+        <li>
+          <a href="/info.html" class="link-row">
+            <span class="link-row-idx">05</span>
+            <span class="link-row-name">프로필 정보</span>
+            <span class="link-row-desc">이리온의 프로필</span>
+            <span class="link-row-arrow">→</span>
+          </a>
+        </li>
+        <li>
+          <a href="https://cafe.naver.com/dlfldhs0809" target="_blank" class="link-row">
+            <span class="link-row-idx">06</span>
+            <span class="link-row-name">예티24</span>
+            <span class="link-row-desc">네이버 팬카페</span>
+            <span class="link-row-arrow">↗</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+</main>
+
+<!-- ===== Footer ===== -->
 <footer class="footer">
-  <div class="container">
-    <div class="footer-disclaimer">
-      <div class="disclaimer-badge">
-        <span class="badge-icon">ⓘ</span>
-        <span class="badge-text">Non-Commercial Project</span>
+  <div class="shell">
+    <div class="footer-grid">
+      <div class="footer-mark">IRION<br><em>YETI-125</em></div>
+      <div class="footer-disclaimer">
+        <span class="disclaimer-badge">
+          <span class="badge-icon">ⓘ</span> Non-Commercial
+        </span>
+        <p class="disclaimer-text">
+          이 프로젝트는 순수한 팬 활동의 일환으로 제작된 비상업적 웹사이트입니다.
+          어떠한 상업적 목적이나 수익 창출을 의도하지 않으며, 오직 정보 제공 및
+          아카이빙 목적으로 운영됩니다.
+        </p>
       </div>
-      <p class="disclaimer-text">
-        이 프로젝트는 순수한 팬 활동의 일환으로 제작된 비상업적 웹사이트입니다.<br>
-        어떠한 상업적 목적이나 수익 창출을 의도하지 않으며, 오직 정보 제공 및 아카이빙 목적으로 운영됩니다.
+      <div class="footer-divider"></div>
+      <p class="footer-text">
+        © 2025 Irion Fansite — 비공식 팬사이트. 모든 콘텐츠의 저작권은 원 저작자에게 있습니다.<br>
+        Developed by <a href="https://github.com/sooindev" target="_blank">sooindev</a>
       </p>
     </div>
-    <div class="footer-divider"></div>
-    <p class="footer-text">
-      © 2025 Irion Fansite. 비공식 팬사이트입니다. 모든 콘텐츠의 저작권은 원 저작자에게 있습니다.<br>
-      Developed by <a href="https://github.com/SooinDev" target="_blank" style="color: var(--primary); text-decoration: none;">SooinDev</a>
-    </p>
   </div>
 </footer>
 
-<!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="/resources/js/door-intro.js"></script>
 <script src="/resources/js/common.js"></script>

@@ -3,66 +3,76 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>일정 관리 - YETI-125</title>
+  <title>Schedule Admin — YETI-125</title>
   <link rel="icon" type="image/svg+xml" href="/resources/images/snowflake.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css" rel="stylesheet">
   <link rel="stylesheet" href="/resources/css/common.css">
   <link rel="stylesheet" href="/resources/css/admin.css">
 </head>
 <body>
-<!-- Admin Header -->
-<header class="admin-header">
-  <div class="header-container">
-    <a href="/admin/admin-schedule.html" class="admin-logo">
-      <span>🔧</span> 관리자
+
+<!-- ===== Admin Header ===== -->
+<header class="header admin-header">
+  <div class="header-inner">
+    <a href="/admin/admin-schedule.html" class="logo">
+      <span class="logo-text">YETI</span>
+      <span class="logo-sub">ADMIN</span>
     </a>
-    <nav class="admin-nav">
-      <a href="/admin/admin-schedule.html" class="active">일정 관리</a>
-      <a href="/" target="_blank">사이트 보기</a>
-      <a href="#" id="logoutBtn" class="logout-btn">로그아웃</a>
+    <nav class="nav admin-nav">
+      <a href="/admin/admin-schedule.html" class="nav-link active">일정 관리</a>
+      <a href="/" target="_blank" class="nav-link">사이트 보기</a>
+      <a href="#" id="logoutBtn" class="nav-link logout-btn">로그아웃</a>
     </nav>
+    <button class="mobile-menu-btn" aria-label="메뉴">
+      <span></span><span></span><span></span>
+    </button>
   </div>
 </header>
 
-<!-- Main Content -->
 <main class="admin-main">
-  <div class="admin-container">
-    <div class="page-header">
-      <h1>📅 일정 관리</h1>
+  <div class="shell">
+
+    <!-- page header -->
+    <div class="admin-pagehead">
+      <div class="admin-pagehead-lead">
+        <span class="kicker">Admin / Schedule</span>
+        <h1 class="admin-pagehead-title display">일정 <em>관리</em></h1>
+      </div>
       <button class="btn btn-primary" data-action="add">
-        + 새 일정 추가
+        새 일정 추가 <span class="btn-arrow">+</span>
       </button>
     </div>
 
-    <!-- Calendar -->
-    <div class="calendar-wrapper">
-      <div id="calendar"></div>
+    <!-- calendar -->
+    <div class="admin-cal-wrap">
+      <div class="calendar-wrapper">
+        <div id="calendar"></div>
+      </div>
     </div>
+
   </div>
 </main>
 
-<!-- Add/Edit Modal -->
+<!-- ===== Add/Edit Modal ===== -->
 <div id="scheduleModal" class="modal">
   <div class="modal-content modal-large">
     <div class="modal-header">
-      <h2 id="modalTitle">일정 추가</h2>
+      <h2 id="modalTitle" class="display">일정 추가</h2>
       <button class="modal-close">&times;</button>
     </div>
     <form id="scheduleForm" class="modal-body">
       <input type="hidden" id="scheduleId" name="scheduleId">
 
-      <div class="form-row">
-        <div class="form-group full-width">
-          <label for="title">제목 *</label>
-          <input type="text" id="title" name="title" required placeholder="일정 제목">
-        </div>
+      <div class="field">
+        <label for="title">제목 *</label>
+        <input type="text" id="title" name="title" required placeholder="일정 제목">
       </div>
 
-      <div class="form-row">
-        <div class="form-group full-width">
+      <div class="field-row">
+        <div class="field">
           <label for="scheduleType">유형</label>
           <select id="scheduleType" name="scheduleType">
             <option value="JUSTCHAT">저스트 채팅</option>
@@ -71,42 +81,39 @@
             <option value="COLLAB">합방</option>
           </select>
         </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group full-width">
+        <div class="field">
           <label for="color">색상</label>
-          <input type="color" id="color" name="color" value="#6366F1">
+          <input type="color" id="color" name="color" value="#8c8fd6">
         </div>
       </div>
 
-      <div class="form-row">
-        <div class="form-group">
+      <div class="field-row">
+        <div class="field">
           <label for="startDate">시작 일시 *</label>
           <input type="datetime-local" id="startDate" name="startDate" required>
         </div>
-        <div class="form-group">
+        <div class="field">
           <label for="endDate">종료 일시</label>
           <input type="datetime-local" id="endDate" name="endDate">
         </div>
       </div>
 
-      <div class="form-row checkbox-row">
-        <label class="checkbox-label">
+      <div class="check-row">
+        <label class="check">
           <input type="checkbox" id="allDayYn" name="allDayYn">
-          <span>종일 일정</span>
+          <span class="check-box"></span>
+          <span class="check-text">종일 일정</span>
         </label>
-        <label class="checkbox-label">
+        <label class="check">
           <input type="checkbox" id="displayYn" name="displayYn" checked>
-          <span>사용자에게 표시</span>
+          <span class="check-box"></span>
+          <span class="check-text">사용자에게 표시</span>
         </label>
       </div>
 
-      <div class="form-row">
-        <div class="form-group full-width">
-          <label for="description">설명</label>
-          <textarea id="description" name="description" rows="3" placeholder="일정에 대한 설명"></textarea>
-        </div>
+      <div class="field">
+        <label for="description">설명</label>
+        <textarea id="description" name="description" rows="3" placeholder="일정에 대한 설명"></textarea>
       </div>
 
       <div class="modal-footer">
@@ -118,10 +125,9 @@
   </div>
 </div>
 
-<!-- Toast Message -->
+<!-- Toast -->
 <div id="toast" class="toast"></div>
 
-<!-- FullCalendar JS -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
 <script src="/resources/js/common.js"></script>
