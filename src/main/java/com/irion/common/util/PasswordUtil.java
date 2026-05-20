@@ -53,14 +53,17 @@ public class PasswordUtil {
         return Base64.getEncoder().encodeToString(hashedBytes);
     }
 
-    // 비밀번호 생성용 메인 메서드
-    // 실행하면 암호화된 비밀번호 출력됨
+    // 비밀번호 해시 생성용 메인 메서드
+    // 사용법: java PasswordUtil "원하는비밀번호"
+    // 인자로 받은 비밀번호의 해시값을 출력 (DB tb_admin.admin_password 에 사용)
     public static void main(String[] args) {
-        String password = "1234";  // 원하는 비밀번호로 변경
+        if (args.length < 1) {
+            System.out.println("사용법: java PasswordUtil \"비밀번호\"");
+            return;
+        }
+        String password = args[0];
         String encoded = encode(password);
-        System.out.println("Password: " + password);
-        System.out.println("Encoded: " + encoded);
-        System.out.println("Verify: " + matches(password, encoded));
+        System.out.println(encoded);
     }
 
 }
