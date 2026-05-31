@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /WEB-INF/
+
+Sitemap: https://yeti-125.com/sitemap.xml
