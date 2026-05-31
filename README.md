@@ -61,7 +61,7 @@ chzzk API와 연동해 실시간 방송 상태를 보여주고,
 |------|---|
 | 백엔드 | Java 8 · Spring Framework 5.3 · MyBatis |
 | 데이터베이스 | MariaDB · HikariCP |
-| 프런트엔드 | HTML5 · CSS3 · JavaScript · jQuery 3.7 |
+| 프론트엔드 | HTML5 · CSS3 · JavaScript · jQuery 3.7 |
 | 라이브러리 | FullCalendar 6.1 |
 | 외부 API | [chzzk API](https://chzzk.naver.com/) |
 | 빌드 / 서버 | Maven · Apache Tomcat 9 |
@@ -158,12 +158,12 @@ YETI-125/
 입력한 모든 시각이 정확히 9시간씩 어긋났습니다.
 
 원인은 타임존 변환의 중복이었습니다.
-프런트엔드가 오프셋(KST +9h)을 더해 UTC 형식으로 보냈고,
+프론트엔드가 오프셋(KST +9h)을 더해 UTC 형식으로 보냈고,
 백엔드 `ScheduleVO`가 그 값을 다시 UTC 기준으로 해석하면서
 KST 시각에 9시간이 한 번 더 더해진 것입니다.
 
 변환 지점을 하나로 모았습니다.
-프런트는 `datetime-local` 입력값을 변환 없이 그대로 보내고,
+프론트는 `datetime-local` 입력값을 변환 없이 그대로 보내고,
 백엔드의 `@JsonFormat`을 `Asia/Seoul` 기준으로 해석하도록 변경했습니다.
 입력·저장·표시 전 구간이 KST로 일관되게 맞춰졌습니다.
 
