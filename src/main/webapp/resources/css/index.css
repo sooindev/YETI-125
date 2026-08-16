@@ -244,7 +244,7 @@ main { padding-top: var(--head-h); }
     flex-direction: column;
     background: var(--ink-raise);
     border: 1px solid var(--ink-line);
-    box-shadow: 0 4px 14px -8px rgba(28, 43, 56, 0.18);
+    box-shadow: 0 4px 14px -8px rgba(var(--shadow-rgb), 0.18);
     transition: transform var(--t-fast),
                 box-shadow var(--t-fast),
                 border-color var(--t-fast);
@@ -283,7 +283,7 @@ main { padding-top: var(--head-h); }
     font-size: 0.7rem;
     letter-spacing: 0.06em;
     color: var(--bone);
-    background: rgba(255, 255, 255, 0.92);
+    background: var(--surface-blur-2);
     border: 1px solid var(--ink-line-2);
     padding: 4px 8px;
 }
@@ -295,7 +295,7 @@ main { padding-top: var(--head-h); }
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(28, 43, 56, 0.32);
+    background: var(--scrim-soft);
     opacity: 0;
     transition: opacity var(--t-fast);
 }

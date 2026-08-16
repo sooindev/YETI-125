@@ -53,7 +53,7 @@ main { padding-top: var(--head-h); }
     gap: 0;
     border: 1px solid var(--ink-line);
     background: var(--ink-raise);
-    box-shadow: 0 10px 30px -16px rgba(28, 43, 56, 0.22);
+    box-shadow: 0 10px 30px -16px rgba(var(--shadow-rgb), 0.22);
 }
 .sched-cal {
     padding: clamp(20px, 3vw, 36px);

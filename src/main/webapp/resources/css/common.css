@@ -42,6 +42,18 @@
     --t-song:   #e0a94f;
     --t-collab: #ec7fa9;
 
+    /* compositing surfaces — blurred header, overlays, rules */
+    --surface-blur:   rgba(255, 255, 255, 0.78);
+    --surface-blur-2: rgba(255, 255, 255, 0.92);
+    --scrim:          rgba(28, 43, 56, 0.4);
+    --scrim-soft:     rgba(28, 43, 56, 0.32);
+    --rule-tint:      rgba(28, 43, 56, 0.04);
+    --shadow-rgb:     28, 43, 56;
+
+    /* grain overlay — multiply darkens on a light ground */
+    --grain-blend:   multiply;
+    --grain-opacity: 0.5;
+
     /* fonts */
     --f-display: 'Anton', 'Noto Sans KR', sans-serif;
     --f-mono:    'JetBrains Mono', 'Noto Sans KR', monospace;
@@ -54,6 +66,101 @@
     --ease:     cubic-bezier(0.16, 1, 0.3, 1);
     --t-fast:   0.32s var(--ease);
     --t-slow:   0.7s var(--ease);
+
+    color-scheme: light;
+}
+
+/* ---- Dark theme --------------------------------------------
+   Same token names, night values. The palette keeps the sky /
+   pink pairing but lifts the accents so they stay legible on a
+   deep ground, and inverts the surface ramp (ink → raise).
+   ------------------------------------------------------------ */
+:root[data-theme="dark"] {
+    /* surfaces — deep to raised */
+    --ink:        #0e161d;
+    --ink-raise:  #16222c;
+    --ink-line:   #24333f;
+    --ink-line-2: #35485a;
+
+    /* type — bone on night */
+    --bone:       #e6eef5;
+    --bone-dim:   #9fb2c2;
+    --bone-faint: #7d90a0;
+
+    /* main accent — sky blue, lifted */
+    --frost:      #5cb8e8;
+    --frost-deep: #8ed3f5;
+    --frost-soft: #12303f;
+    --frost-glow: rgba(92, 184, 232, 0.22);
+
+    /* point accent — pink, lifted */
+    --rose:       #f08fb6;
+    --rose-deep:  #f7b1cd;
+    --rose-soft:  #35202b;
+    --rose-glow:  rgba(240, 143, 182, 0.2);
+
+    /* schedule type accents */
+    --t-chat:   #63c79b;
+    --t-game:   #9599ea;
+    --t-song:   #edbc6a;
+    --t-collab: #f08fb6;
+
+    --surface-blur:   rgba(14, 22, 29, 0.8);
+    --surface-blur-2: rgba(22, 34, 44, 0.94);
+    --scrim:          rgba(0, 0, 0, 0.62);
+    --scrim-soft:     rgba(0, 0, 0, 0.5);
+    --rule-tint:      rgba(230, 238, 245, 0.05);
+    --shadow-rgb:     0, 0, 0;
+
+    /* on a dark ground multiply would erase the grain; overlay
+       washes the page grey. screen adds a faint light speckle. */
+    --grain-blend:   screen;
+    --grain-opacity: 0.07;
+
+    color-scheme: dark;
+}
+
+/* No-JS fallback: follow the OS when no explicit choice is stored.
+   theme-init.js normally stamps data-theme before first paint, so
+   this only applies when scripting is off. */
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --ink:        #0e161d;
+        --ink-raise:  #16222c;
+        --ink-line:   #24333f;
+        --ink-line-2: #35485a;
+
+        --bone:       #e6eef5;
+        --bone-dim:   #9fb2c2;
+        --bone-faint: #7d90a0;
+
+        --frost:      #5cb8e8;
+        --frost-deep: #8ed3f5;
+        --frost-soft: #12303f;
+        --frost-glow: rgba(92, 184, 232, 0.22);
+
+        --rose:       #f08fb6;
+        --rose-deep:  #f7b1cd;
+        --rose-soft:  #35202b;
+        --rose-glow:  rgba(240, 143, 182, 0.2);
+
+        --t-chat:   #63c79b;
+        --t-game:   #9599ea;
+        --t-song:   #edbc6a;
+        --t-collab: #f08fb6;
+
+        --surface-blur:   rgba(14, 22, 29, 0.8);
+        --surface-blur-2: rgba(22, 34, 44, 0.94);
+        --scrim:          rgba(0, 0, 0, 0.62);
+        --scrim-soft:     rgba(0, 0, 0, 0.5);
+        --rule-tint:      rgba(230, 238, 245, 0.05);
+        --shadow-rgb:     0, 0, 0;
+
+        --grain-blend:   screen;
+        --grain-opacity: 0.07;
+
+        color-scheme: dark;
+    }
 }
 
 /* ---- Reset ------------------------------------------------- */
@@ -70,6 +177,7 @@ body {
     font-family: var(--f-mono);
     background: var(--ink);
     color: var(--bone);
+    transition: background-color var(--t-fast), color var(--t-fast);
     line-height: 1.65;
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
@@ -86,8 +194,8 @@ body::after {
     inset: 0;
     z-index: 9000;
     pointer-events: none;
-    opacity: 0.5;
-    mix-blend-mode: multiply;
+    opacity: var(--grain-opacity);
+    mix-blend-mode: var(--grain-blend);
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.86' numOctaves='3' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/></svg>");
     background-size: 150px 150px;
     animation: grain-shift 0.7s steps(2) infinite;
@@ -207,7 +315,7 @@ img { display: block; max-width: 100%; }
     top: 0; left: 0; right: 0;
     height: var(--head-h);
     z-index: 1000;
-    background: rgba(255, 255, 255, 0.78);
+    background: var(--surface-blur);
     backdrop-filter: blur(14px) saturate(150%);
     -webkit-backdrop-filter: blur(14px) saturate(150%);
     border-bottom: 1px solid var(--ink-line);
@@ -279,6 +387,51 @@ img { display: block; max-width: 100%; }
 .nav-link:hover::after,
 .nav-link.active::after { transform: scaleX(1); }
 .nav-link.active { color: var(--frost); }
+
+/* ---- Theme toggle ------------------------------------------
+   Squared hairline button matching the editorial button style.
+   Both icons live in the DOM; the inactive one is hidden so the
+   swap costs no layout and needs no JS beyond the attribute. */
+.theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px; height: 38px;
+    flex: none;
+    margin-left: 1.4rem;
+    border: 1px solid var(--ink-line-2);
+    background: transparent;
+    color: var(--bone-dim);
+    cursor: pointer;
+    transition: color var(--t-fast), border-color var(--t-fast);
+}
+.theme-toggle:hover {
+    color: var(--frost);
+    border-color: var(--frost);
+}
+.theme-toggle:focus-visible {
+    outline: 2px solid var(--frost);
+    outline-offset: 2px;
+}
+.theme-toggle svg {
+    width: 17px; height: 17px;
+    display: block;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+/* light theme shows the moon (what a click switches you to) */
+.theme-toggle .icon-sun  { display: none; }
+.theme-toggle .icon-moon { display: block; }
+:root[data-theme="dark"] .theme-toggle .icon-sun  { display: block; }
+:root[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .theme-toggle .icon-sun  { display: block; }
+    :root:not([data-theme="light"]) .theme-toggle .icon-moon { display: none; }
+}
 
 /* mobile burger */
 .mobile-menu-btn {
@@ -416,7 +569,7 @@ img { display: block; max-width: 100%; }
     position: fixed;
     inset: 0;
     z-index: 9500;
-    background: rgba(28, 43, 56, 0.4);
+    background: var(--scrim);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
     overflow-y: auto;
@@ -432,7 +585,7 @@ img { display: block; max-width: 100%; }
     margin: auto;
     background: var(--ink-raise);
     border: 1px solid var(--ink-line-2);
-    box-shadow: 0 30px 70px -20px rgba(28, 43, 56, 0.35);
+    box-shadow: 0 30px 70px -20px rgba(var(--shadow-rgb), 0.35);
     width: 100%;
     max-width: 540px;
     animation: modal-rise 0.5s var(--ease);
@@ -471,7 +624,7 @@ img { display: block; max-width: 100%; }
     background: var(--ink-raise);
     border: 1px solid var(--ink-line-2);
     border-left: 3px solid var(--frost);
-    box-shadow: 0 14px 36px -10px rgba(28, 43, 56, 0.3);
+    box-shadow: 0 14px 36px -10px rgba(var(--shadow-rgb), 0.3);
     color: var(--bone);
     font-family: var(--f-mono);
     font-size: 0.82rem;
@@ -573,6 +726,14 @@ img { display: block; max-width: 100%; }
     .aside--nowrap { white-space: normal; }
 
     .mobile-menu-btn { display: flex; }
+
+    /* nav collapses into the drawer, so pin the toggle beside the
+       burger instead of letting space-between strand it mid-header */
+    .theme-toggle {
+        margin-left: auto;
+        margin-right: 1rem;
+        width: 34px; height: 34px;
+    }
 
     .nav {
         position: fixed;

@@ -157,7 +157,7 @@
     inset: 0;
     background-image: repeating-linear-gradient(
         0deg, transparent 0, transparent 46px,
-        rgba(28, 43, 56, 0.04) 46px, rgba(28, 43, 56, 0.04) 47px);
+        var(--rule-tint) 46px, var(--rule-tint) 47px);
     pointer-events: none;
 }
 .login-aside-top {
@@ -257,7 +257,7 @@
 .admin-cal-wrap {
     border: 1px solid var(--ink-line);
     background: var(--ink-raise);
-    box-shadow: 0 10px 30px -16px rgba(28, 43, 56, 0.22);
+    box-shadow: 0 10px 30px -16px rgba(var(--shadow-rgb), 0.22);
     padding: clamp(18px, 3vw, 34px);
 }
 

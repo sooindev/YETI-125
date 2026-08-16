@@ -78,3 +78,5 @@ logs/
 ### OS ###
 Thumbs.db
 ehthumbs.db
+### IntelliJ 아티팩트 출력 (DB 설정이 포함되므로 반드시 제외)
+out/
