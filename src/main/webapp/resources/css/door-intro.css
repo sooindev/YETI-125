@@ -42,8 +42,8 @@
         0deg,
         transparent 0,
         transparent 38px,
-        rgba(28, 43, 56, 0.05) 38px,
-        rgba(28, 43, 56, 0.05) 39px
+        var(--rule-tint) 38px,
+        var(--rule-tint) 39px
     );
 }
 
