@@ -45,6 +45,16 @@
     <url-pattern>/resources/*</url-pattern>
   </filter-mapping>
 
+  <!-- Static Resource Cache Filter (배포 후 낡은 CSS/JS 방지) -->
+  <filter>
+    <filter-name>staticResourceCacheFilter</filter-name>
+    <filter-class>com.irion.common.filter.StaticResourceCacheFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>staticResourceCacheFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+
   <!-- Spring MVC DispatcherServlet -->
   <servlet>
     <servlet-name>dispatcher</servlet-name>
