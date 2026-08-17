@@ -452,6 +452,32 @@ main { padding-top: var(--head-h); }
 @media (max-width: 560px) {
     .page-masthead { padding: 36px 0 24px; }
 
+    /* 칸 폭이 40px 남짓이라 시간·제목이 칸 밖으로 새어나간다. 좁은 화면에서는
+       유형 색 막대로만 표시하고, 자세한 내용은 날짜를 눌러 모달에서 본다.
+       (색은 .fc-daygrid-event-dot 의 인라인 border-color 에 들어 있다) */
+    .fc-daygrid-event .fc-event-time,
+    .fc-daygrid-event .fc-event-title,
+    .fc-daygrid-event .fc-event-title-container { display: none; }
+    .fc .fc-daygrid-dot-event {
+        display: block;
+        background: transparent;
+        border: none;
+        /* 보이는 굵기는 5px 로 두고, 위아래 여백으로 탭 영역만 15px 로 넓힌다 */
+        padding: 5px 0;
+        margin: 0 3px;
+        min-height: 0;
+        height: auto;
+    }
+    .fc .fc-daygrid-dot-event .fc-daygrid-event-dot {
+        display: block;
+        width: 100%;
+        height: 0;
+        margin: 0;
+        border-width: 5px 0 0 0;
+        border-radius: 3px;
+    }
+    .fc .fc-daygrid-day-events { min-height: 0; }
+
     .fc .fc-toolbar.fc-header-toolbar {
         flex-direction: column;
         align-items: flex-start;
