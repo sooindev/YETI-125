@@ -14,8 +14,13 @@ $(document).ready(function() {
 function initCalendar() {
     const calendarEl = document.getElementById('calendar');
 
+    // 좁은 화면에서 월간 격자는 칸 폭이 40px 남짓이라 제목이 들어가지 않는다.
+    // 일정을 확인하고 수정하는 화면이므로 모바일에서는 목록으로 시작한다.
+    // (상단 월간/목록 토글로 언제든 바꿀 수 있다)
+    const isNarrow = window.matchMedia('(max-width: 720px)').matches;
+
     calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'dayGridMonth',
+        initialView: isNarrow ? 'listMonth' : 'dayGridMonth',
         locale: 'ko',
         headerToolbar: {
             left: 'prev,next today',
