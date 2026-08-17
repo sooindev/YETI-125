@@ -63,6 +63,13 @@
     --shell:    1320px;
     --gutter:   clamp(20px, 4vw, 56px);
     --head-h:   76px;
+
+    /* 노치·다이나믹 아일랜드 영역.
+       HTML 의 viewport-fit=cover 와 짝을 이룬다. 이게 없으면 사파리가
+       안전 영역을 레터박스로 남겨, 헤더 위에 배경이 닿지 않는 빈 띠가
+       생긴다. 지원하지 않는 브라우저에서는 0px 로 떨어진다. */
+    --safe-top:   env(safe-area-inset-top, 0px);
+    --head-total: calc(var(--head-h) + var(--safe-top));
     --ease:     cubic-bezier(0.16, 1, 0.3, 1);
     --t-fast:   0.32s var(--ease);
     --t-slow:   0.7s var(--ease);
@@ -313,7 +320,11 @@ img { display: block; max-width: 100%; }
 .header {
     position: fixed;
     top: 0; left: 0; right: 0;
-    height: var(--head-h);
+    /* 안전 영역까지 배경이 닿도록 헤더를 그만큼 키우고, 안쪽 내용은
+       그 아래에서 시작하게 한다. 다이나믹 아일랜드 주변에 배경 없는
+       띠가 남지 않는다. */
+    height: var(--head-total);
+    padding-top: var(--safe-top);
     z-index: 1000;
 
     /* 최상단에서는 배경 없이 페이지에 묻혀 있다가, 스크롤이 시작되면
@@ -683,7 +694,9 @@ img { display: block; max-width: 100%; }
    ============================================================ */
 .footer {
     border-top: 1px solid var(--ink-line);
-    padding: clamp(56px, 8vw, 96px) 0 48px;
+    /* viewport-fit=cover 로 화면 끝까지 쓰게 되면서 아래쪽 홈 인디케이터
+       영역까지 콘텐츠가 내려간다. 그만큼 여백을 더 준다. */
+    padding: clamp(56px, 8vw, 96px) 0 calc(48px + env(safe-area-inset-bottom, 0px));
     position: relative;
 }
 .footer-grid {
@@ -800,7 +813,7 @@ img { display: block; max-width: 100%; }
 
     .nav {
         position: fixed;
-        top: var(--head-h);
+        top: var(--head-total);
         left: 0; right: 0;
         flex-direction: column;
         align-items: stretch;
