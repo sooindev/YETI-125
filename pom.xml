@@ -135,4 +135,90 @@
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <!--
+      배포용 빌드 프로파일.
+
+        mvn clean package          → 로컬 개발용 (src/main/resources 그대로)
+        mvn clean package -Pprod   → 운영 배포용
+
+      src/main/resources/properties/database.properties 는 항상 로컬 설정을
+      유지하고, 운영 설정은 src/main/resources-prod 에 따로 둔다. prod 로
+      빌드할 때만 그 디렉터리를 target/classes 위에 덮어써서 war 에 운영
+      설정이 들어가게 한다. 배포할 때 파일을 손으로 바꿔치기할 필요가 없다.
+
+      두 파일 모두 .gitignore 대상이라 저장소에는 올라가지 않는다.
+    -->
+    <profile>
+      <id>prod</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-resources-plugin</artifactId>
+            <version>3.3.1</version>
+            <executions>
+              <execution>
+                <id>override-config-for-prod</id>
+                <!-- 기본 리소스 복사가 끝난 뒤 덮어써야 하므로 prepare-package -->
+                <phase>prepare-package</phase>
+                <goals>
+                  <goal>copy-resources</goal>
+                </goals>
+                <configuration>
+                  <outputDirectory>${project.build.outputDirectory}</outputDirectory>
+                  <overwrite>true</overwrite>
+                  <resources>
+                    <resource>
+                      <directory>${project.basedir}/src/main/resources-prod</directory>
+                    </resource>
+                  </resources>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+          <!--
+            안전장치: 자리표시자가 남은 채로 배포용 war 가 만들어지면
+            운영에서 DB 접속이 실패한다. 그런 war 는 아예 만들어지지
+            않도록 빌드를 중단시킨다.
+          -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <version>3.1.0</version>
+            <executions>
+              <execution>
+                <id>verify-prod-config</id>
+                <phase>prepare-package</phase>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+                <configuration>
+                  <target>
+                    <loadfile property="db.config"
+                              srcFile="${project.build.outputDirectory}/properties/database.properties"
+                              encoding="UTF-8"/>
+                    <fail message="운영 DB 설정이 채워지지 않았습니다. src/main/resources-prod/properties/database.properties 의 DB_USERNAME / DB_PASSWORD (CHANGE_ME_) 를 실제 값으로 바꾸세요.">
+                      <condition>
+                        <contains string="${db.config}" substring="CHANGE_ME"/>
+                      </condition>
+                    </fail>
+                    <fail message="운영 빌드인데 db.url 이 운영 주소가 아닙니다. src/main/resources-prod 설정을 확인하세요.">
+                      <condition>
+                        <not>
+                          <contains string="${db.config}" substring="localhost:3306"/>
+                        </not>
+                      </condition>
+                    </fail>
+                  </target>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
