@@ -8,7 +8,65 @@ $(document).ready(function() {
         $('.nav').toggleClass('active');
         $(this).toggleClass('active');
     });
+
+    initHeaderAutoHide();
 });
+
+/**
+ * 상단바 자동 접힘 (모바일·데스크톱 공통)
+ *
+ * 아래로 읽어 내려갈 때는 접고, 위로 올리면 곧바로 다시 꺼낸다.
+ * 모바일 메뉴가 열려 있는 동안에는 접지 않는다 — 드로어가 헤더에
+ * 붙어 있어 같이 사라지면 안 되기 때문이다.
+ */
+function initHeaderAutoHide() {
+    var header = document.querySelector('.header');
+    if (!header) return;
+
+    var lastY = window.scrollY;
+    var ticking = false;
+    // 이만큼은 움직여야 반응한다 (모바일 주소창 여닫힘 등에 흔들리지 않도록)
+    var THRESHOLD = 8;
+
+    function update() {
+        ticking = false;
+
+        // 드로어가 열려 있으면 헤더를 고정해 둔다
+        if (document.querySelector('.nav.active')) {
+            header.classList.remove('is-hidden');
+            lastY = window.scrollY;
+            return;
+        }
+
+        var y = window.scrollY;
+        var delta = y - lastY;
+
+        if (Math.abs(delta) < THRESHOLD) return;
+
+        // 최상단 근처에서는 항상 보이게 둔다
+        if (y <= header.offsetHeight) {
+            header.classList.remove('is-hidden');
+        } else if (delta > 0) {
+            header.classList.add('is-hidden');
+        } else {
+            header.classList.remove('is-hidden');
+        }
+        lastY = y;
+    }
+
+    window.addEventListener('scroll', function () {
+        if (!ticking) {
+            ticking = true;
+            window.requestAnimationFrame(update);
+        }
+    }, { passive: true });
+
+    // 창 크기가 바뀌면(회전·리사이즈) 접힘 상태를 초기화한다
+    window.addEventListener('resize', function () {
+        header.classList.remove('is-hidden');
+        lastY = window.scrollY;
+    });
+}
 
 // Modal Functions
 function openModal(modalId) {
