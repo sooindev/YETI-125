@@ -315,22 +315,52 @@ img { display: block; max-width: 100%; }
     top: 0; left: 0; right: 0;
     height: var(--head-h);
     z-index: 1000;
+
+    /* 최상단에서는 배경 없이 페이지에 묻혀 있다가, 스크롤이 시작되면
+       흐린 배경과 hairline 이 배어 나온다 (is-stuck). 바가 처음부터
+       띠처럼 얹혀 있는 것보다 자연스럽게 읽힌다. */
+    background: transparent;
+    border-bottom: 1px solid transparent;
+
+    /* 움직임은 transform·opacity 로만 준다. top 을 움직이면 매 프레임
+       레이아웃이 다시 잡혀 모바일에서 눈에 띄게 끊긴다. */
+    transition:
+        transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+        opacity   0.24s cubic-bezier(0.4, 0, 0.2, 1),
+        background-color 0.3s ease,
+        border-color     0.3s ease,
+        backdrop-filter  0.3s ease;
+    will-change: transform;
+}
+
+/* 스크롤이 시작되면 배경이 배어 나온다 */
+.header.is-stuck {
     background: var(--surface-blur);
     backdrop-filter: blur(14px) saturate(150%);
     -webkit-backdrop-filter: blur(14px) saturate(150%);
-    border-bottom: 1px solid var(--ink-line);
-    transition: transform var(--t-fast);
+    border-bottom-color: var(--ink-line);
 }
 
-/* 반투명 헤더는 뒤를 흐리게 만드는 backdrop-filter 가 있어야 성립한다.
+/* 반투명 배경은 뒤를 흐리게 만드는 backdrop-filter 가 있어야 성립한다.
    카카오톡·네이버 인앱 브라우저 등 미지원 환경에서는 스크롤한 본문이
    헤더 글자와 겹쳐 보이므로, 그런 곳에서는 불투명 배경으로 떨어뜨린다. */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-    .header { background: var(--ink); }
+    .header.is-stuck { background: var(--ink); }
 }
 
-/* 아래로 읽어 내려갈 때 접힌다 (initHeaderAutoHide) */
-.header.is-hidden { transform: translateY(-100%); }
+/* 접힘 규칙 — 현재는 사용하지 않는다.
+   상단바는 항상 고정이며, 이 클래스를 붙이는 코드는 없다. 자동 접힘을
+   되살리고 싶을 때를 위해 남겨둔다 (common.js 의 initHeaderScrollState 참고).
+
+   opacity 를 함께 떨어뜨리는 이유: iOS 사파리는 backdrop-filter 가 걸린
+   요소를 transform 으로 밀어내면 흐림 레이어가 제자리에 남아 상단에 얇게
+   비쳐 보인다. 요소 전체가 투명해지면 그 잔상까지 같이 사라진다.
+   노치 영역(safe-area)과 테두리·반올림 오차만큼 조금 더 올린다. */
+.header.is-hidden {
+    transform: translateY(calc(-100% - env(safe-area-inset-top, 0px) - 3px));
+    opacity: 0;
+    pointer-events: none;
+}
 
 .header-inner,
 .header-container {
