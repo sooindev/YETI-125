@@ -2,7 +2,7 @@
    YETI-125 — Profile page
    ============================================================ */
 
-main { padding-top: var(--head-h); }
+main { padding-top: var(--head-total); }
 
 /* ============================================================
    Profile hero

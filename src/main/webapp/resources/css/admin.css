@@ -232,7 +232,7 @@
 .admin-header .logout-btn:hover { color: var(--t-collab); }
 
 .admin-main {
-    padding-top: calc(var(--head-h) + clamp(40px, 6vw, 80px));
+    padding-top: calc(var(--head-total) + clamp(40px, 6vw, 80px));
     padding-bottom: clamp(56px, 8vw, 110px);
     min-height: 100vh;
 }

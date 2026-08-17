@@ -2,7 +2,7 @@
    YETI-125 — Index page
    ============================================================ */
 
-main { padding-top: var(--head-h); }
+main { padding-top: var(--head-total); }
 
 /* ============================================================
    Hero — offline state
@@ -10,7 +10,7 @@ main { padding-top: var(--head-h); }
    ============================================================ */
 .hero {
     position: relative;
-    min-height: calc(100vh - var(--head-h));
+    min-height: calc(100vh - var(--head-total));
     display: flex;
     flex-direction: column;
     justify-content: center;
