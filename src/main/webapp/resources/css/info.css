@@ -345,6 +345,7 @@ main { padding-top: var(--head-h); }
 }
 
 @media (max-width: 560px) {
+    .profile-hero { padding: 32px 0 0; }
     .profile-vitals { grid-template-columns: 1fr; }
     .dday-row { grid-template-columns: 1fr; }
     .dday-cell {
