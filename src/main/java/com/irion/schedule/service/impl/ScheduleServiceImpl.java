@@ -68,5 +68,4 @@ public class ScheduleServiceImpl implements ScheduleService {
         if (schedule.getColor() == null)
             schedule.setColor("#6366F1");
     }
-
 }
