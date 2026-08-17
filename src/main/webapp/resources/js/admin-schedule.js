@@ -30,6 +30,12 @@ function initCalendar() {
         height: 'auto',
         editable: true,
         selectable: true,
+        // ko 로케일은 날짜를 "26일"로 렌더링한다. 좁은 화면에서는 칸 안에서
+        // "26 / 일"로 줄바꿈되어 행 높이가 늘어나므로 숫자만 표시한다.
+        // (공개 페이지 schedule.js 와 동일한 처리)
+        dayCellContent: function(arg) {
+            return arg.date.getDate();
+        },
         events: function(info, successCallback, failureCallback) {
             loadSchedules(info.startStr, info.endStr, successCallback);
         },

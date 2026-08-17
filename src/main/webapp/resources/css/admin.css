@@ -64,7 +64,10 @@
 
 .field-row {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    /* datetime-local 은 내부 UI 때문에 최소 폭이 크다. 1fr 로 두면 그리드
+       트랙이 그 max-content 폭까지 늘어나 모달 밖으로 삐져나가므로
+       minmax(0, 1fr) 로 트랙을 묶어둔다. */
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 16px;
 }
 
@@ -472,7 +475,11 @@
 }
 
 @media (max-width: 560px) {
-    .field-row { grid-template-columns: 1fr; }
+    .field-row { grid-template-columns: minmax(0, 1fr); }
+
+    /* 체크박스 라벨이 22px라 손가락으로 누르기 어렵다. 체크 표시는
+       그대로 두고 라벨 전체의 세로 탭 영역만 넓힌다. */
+    .check { min-height: 44px; }
     .modal-footer { flex-direction: column-reverse; }
     .modal-footer .btn { width: 100%; }
     .fc .fc-toolbar.fc-header-toolbar {
