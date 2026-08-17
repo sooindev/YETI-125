@@ -459,6 +459,16 @@
         border-bottom: 1px solid var(--ink-line);
         min-height: 38vh;
     }
+
+    /* iOS 사파리는 16px 미만 입력창에 포커스하면 화면을 자동 확대한다.
+       common.css 의 동일 규칙보다 이 선택자가 우선하므로 여기서 다시 지정 */
+    .field input[type="text"],
+    .field input[type="password"],
+    .field input[type="datetime-local"],
+    .field select,
+    .field textarea {
+        font-size: 16px;
+    }
 }
 
 @media (max-width: 560px) {
@@ -468,6 +478,12 @@
     .fc .fc-toolbar.fc-header-toolbar {
         flex-direction: column;
         align-items: flex-start;
+        gap: 14px;
+    }
+    .fc .fc-button,
+    .fc .fc-button-primary {
+        min-height: 44px;
+        padding: 0 14px;
     }
     .fc .fc-daygrid-day-frame { min-height: 64px; }
 }

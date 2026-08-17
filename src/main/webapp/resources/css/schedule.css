@@ -450,9 +450,22 @@ main { padding-top: var(--head-h); }
 }
 
 @media (max-width: 560px) {
+    .page-masthead { padding: 36px 0 24px; }
+
     .fc .fc-toolbar.fc-header-toolbar {
         flex-direction: column;
         align-items: flex-start;
+        gap: 14px;
     }
+    /* 세로로 쌓인 툴바가 화면을 잡아먹지 않도록 간격을 좁힌다 */
+    .fc .fc-toolbar-chunk { margin: 0; }
+
+    /* 손가락으로 누르는 화면이므로 최소 44px를 확보한다 */
+    .fc .fc-button,
+    .fc .fc-button-primary {
+        min-height: 44px;
+        padding: 0 14px;
+    }
+
     .fc .fc-daygrid-day-frame { min-height: 64px; }
 }
