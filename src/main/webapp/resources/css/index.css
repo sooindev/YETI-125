@@ -558,7 +558,80 @@ main { padding-top: var(--head-total); }
 .clip-modal-origin:hover { color: var(--frost-deep); }
 .clip-modal-origin:hover .btn-arrow { transform: translateX(4px); }
 
-@media (max-width: 560px) {
-    .clip-modal-content { padding: 12px; gap: 10px; }
-    .clip-modal-title { font-size: 0.86rem; }
+/* ---- 터치 기기 -------------------------------------------------
+   폭이 아니라 포인터로 가른다. 가로로 눕힌 폰은 폭이 800px을 넘어
+   좁은 화면 쿼리를 벗어나지만, 누르는 것은 여전히 손가락이다.
+   ----------------------------------------------------------------- */
+@media (pointer: coarse) {
+    .clip-modal-title {
+        /* 긴 제목은 두 줄에서 자른다 — 세 줄이 되면 플레이어가 밀려난다 */
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        /* orient가 vertical이라 box-pack이 세로 정렬을 맡는다.
+           한 줄짜리 제목이 위로 붙지 않고 닫기 버튼과 눈높이가 맞는다. */
+        -webkit-box-pack: center;
+        overflow: hidden;
+        min-height: 38px;
+    }
+
+    /* 텍스트 링크는 높이가 20px뿐이라 손가락으로 누르기 어렵다.
+       구분선을 둔 한 줄로 만들어 44px 탭 영역을 확보한다. */
+    .clip-modal-origin {
+        align-self: stretch;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        min-height: 44px;
+        /* flex 컨테이너가 되면서 텍스트와 화살표 사이 공백 노드가 사라진다 */
+        gap: 6px;
+        margin-top: -6px;
+        border-top: 1px solid var(--ink-line);
+    }
+}
+
+/* ---- 좁은 화면 --------------------------------------------------
+   데스크톱 대화상자를 그대로 줄이면 여백만 남고 플레이어가 손톱만
+   해진다. 여백보다 화면 크기를 우선한다.
+   ----------------------------------------------------------------- */
+@media (max-width: 720px) {
+    /* 바깥 거터(--gutter 최소 20px)를 줄여 폭을 플레이어에 몰아준다 */
+    #clipModal { padding: 10px; }
+
+    .clip-modal-content {
+        padding: 12px;
+        gap: 12px;
+    }
+    .clip-modal-title {
+        font-size: 0.92rem;
+        /* 닫기 버튼(8px + 42px) 아래로 플레이어가 시작하도록 비워둔다 */
+        padding-right: 50px;
+    }
+    #clipModal .modal-close { top: 8px; right: 8px; }
+}
+
+/* ---- 눕힌 화면 --------------------------------------------------
+   16:9 슬롯에 제목과 링크까지 얹으면 세로를 넘긴다. 비율을 풀고
+   높이를 화면에 맞춘다. 남는 폭은 플레이어가 레터박스한다.
+   ----------------------------------------------------------------- */
+@media (max-height: 520px) and (orientation: landscape) {
+    #clipModal { padding: 8px; }
+    .clip-modal-content { padding: 10px; gap: 8px; }
+
+    .clip-modal-frame {
+        aspect-ratio: auto;
+        height: 58vh;
+        height: 58dvh;
+    }
+    .clip-modal-title {
+        font-size: 0.86rem;
+        /* 세로가 좁으니 한 줄로 줄인다 */
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        -webkit-box-pack: center;
+        overflow: hidden;
+        /* 닫기 버튼(8 + 42)을 넘겨야 플레이어를 침범하지 않는다 */
+        min-height: 40px;
+    }
 }
