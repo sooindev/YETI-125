@@ -31,6 +31,18 @@ public class LiveController {
     private static final int VIDEO_PAGE_SIZE = 50;
     private static final int VIDEO_MAX_PAGES = 20;
 
+    /**
+     * 다시보기 목록에서 감출 항목 (videoNo).
+     *
+     * 제목이 아니라 번호로 거른다. 제목은 나중에 바뀔 수 있지만
+     * 번호는 그대로다. 지운 것이 아니라 이 사이트에서만 안 보이게
+     * 하는 것이라, 치지직에는 그대로 남아 있다.
+     */
+    private static final Set<String> HIDDEN_VIDEO_NOS = Collections.unmodifiableSet(
+            new HashSet<String>(Arrays.asList(
+                    "319019" // 이리온의 재채기.mp4 (2024-02-29)
+            )));
+
     // 캐시
     // 컨트롤러는 싱글턴이라 여러 요청 스레드가 동시에 접근한다.
     // 값과 적재 시각을 스냅샷 하나로 묶어 참조만 교체하고, 갱신은
@@ -266,7 +278,9 @@ public class LiveController {
 
             for (Map<String, Object> video : batch) {
                 String no = (String) video.get("videoNo");
-                if (no != null && ids.add(no)) {
+                if (no == null || HIDDEN_VIDEO_NOS.contains(no))
+                    continue;
+                if (ids.add(no)) {
                     videos.add(video);
                 }
             }
