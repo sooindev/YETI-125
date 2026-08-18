@@ -290,6 +290,23 @@
 
 </main>
 
+<!-- ===== Clip Modal ===== -->
+<div id="clipModal" class="modal">
+  <div class="modal-content clip-modal-content">
+    <button class="modal-close" onclick="closeClipModal()">&times;</button>
+    <h3 id="clipModalTitle" class="clip-modal-title"></h3>
+    <div class="clip-modal-frame">
+      <iframe id="clipModalFrame" src="" title="치지직 클립 플레이어"
+              frameborder="0" scrolling="no"
+              allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+              allowfullscreen></iframe>
+    </div>
+    <a id="clipModalOrigin" class="clip-modal-origin" href="https://chzzk.naver.com/" target="_blank" rel="noopener">
+      치지직에서 원본 보기 <span class="btn-arrow">↗</span>
+    </a>
+  </div>
+</div>
+
 <!-- ===== Footer ===== -->
 <footer class="footer">
   <div class="shell">
