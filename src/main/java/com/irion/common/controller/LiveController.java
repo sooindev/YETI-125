@@ -21,12 +21,22 @@ public class LiveController {
     private static final long CACHE_DURATION = 10 * 60 * 1000; // 10분 (클립/비디오)
     private static final long LIVE_CACHE_DURATION = 1 * 60 * 1000; // 1분 (방송 상태)
 
+    // 클립 수집 — chzzk 는 size 가 50 을 넘으면 400 을 준다
+    private static final int CLIP_PAGE_SIZE = 50;
+    private static final int CLIP_INITIAL_PAGES = 2;   // 첫 요청에 미리 담아둘 분량
+    private static final int CLIP_MAX = 3000;          // 메모리 상한
+    private static final int CLIP_PAGES_PER_REQUEST = 10; // 한 요청이 외부에 낼 수 있는 최대 호출
+
+    // 다시보기 — 현재 18개뿐이지만 쌓이면 한 페이지를 넘는다
+    private static final int VIDEO_PAGE_SIZE = 50;
+    private static final int VIDEO_MAX_PAGES = 20;
+
     // 캐시
     // 컨트롤러는 싱글턴이라 여러 요청 스레드가 동시에 접근한다.
     // 값과 적재 시각을 스냅샷 하나로 묶어 참조만 교체하고, 갱신은
     // 락으로 한 스레드에만 맡긴다. (아래 cached() 참고)
     private final AtomicReference<Snapshot<Map<String, Object>>> liveStatusCache = new AtomicReference<>();
-    private final AtomicReference<Snapshot<List<Map<String, Object>>>> clipsCache = new AtomicReference<>();
+    private final AtomicReference<Snapshot<ClipFeed>> clipsCache = new AtomicReference<>();
     private final AtomicReference<Snapshot<List<Map<String, Object>>>> videosCache = new AtomicReference<>();
 
     private final Object liveStatusLock = new Object();
@@ -54,13 +64,22 @@ public class LiveController {
     @GetMapping("/clips")
     @ResponseBody
     public JsonResult getClips(@RequestParam(defaultValue = "6") int limit, @RequestParam(defaultValue = "0") int offset) {
-        List<Map<String, Object>> all = cached(clipsCache, clipsLock,
-                CACHE_DURATION, this::loadClips);
+        ClipFeed feed = cached(clipsCache, clipsLock, CACHE_DURATION, this::loadClips);
 
-        if (all == null) {
+        if (feed == null) {
             return JsonResult.fail("클립 조회 중 오류 발생");
         }
-        return JsonResult.success("조회 성공", paginate(all, "clips", offset, limit));
+
+        // 모아둔 것보다 뒤를 달라고 하면 그만큼 더 받아온다.
+        // 더보기를 누르는 만큼 목록이 뒤로 자란다.
+        feed = extendClips(feed, offset + limit);
+
+        Map<String, Object> result = paginate(feed.clips, "clips", offset, limit);
+        // 아직 커서가 남아 있으면 지금 다 보여줬어도 더 있는 것이다
+        if (feed.hasNext() && feed.clips.size() < CLIP_MAX) {
+            result.put("hasMore", true);
+        }
+        return JsonResult.success("조회 성공", result);
     }
 
     /** 다시보기 목록 조회 */
@@ -102,54 +121,163 @@ public class LiveController {
         return data;
     }
 
-    /** 인기 클립 로드 (최대 100개) */
-    private List<Map<String, Object>> loadClips() {
-        List<Map<String, Object>> clips = new ArrayList<>();
-        Set<String> ids = new HashSet<>();
-        String next = null;
+    /**
+     * 클립 목록의 한 조각과 다음 커서를 함께 들고 다니는 스냅샷.
+     *
+     * chzzk 의 클립 페이징은 offset 이 아니라 커서다. 응답의
+     * page.next 에 담긴 clipUID 와 readCount 를 다음 요청에
+     * 같은 이름의 파라미터로 되돌려줘야 그 다음 50개가 온다.
+     * (이전 구현은 next 라는 이름으로 clipUID 만 보냈는데,
+     *  chzzk 가 그 파라미터를 무시해서 1페이지만 반복해 받았다.
+     *  중복을 걸러내고 나면 늘 20개에서 멈췄다.)
+     */
+    private static final class ClipFeed {
+        final List<Map<String, Object>> clips;
+        final String nextClipUID;
+        final String nextReadCount;
 
-        for (int page = 0; page < 10 && clips.size() < 100; page++) {
+        ClipFeed(List<Map<String, Object>> clips, String nextClipUID, String nextReadCount) {
+            this.clips = clips;
+            this.nextClipUID = nextClipUID;
+            this.nextReadCount = nextReadCount;
+        }
+
+        boolean hasNext() {
+            return nextClipUID != null && !nextClipUID.isEmpty();
+        }
+    }
+
+    /** 인기 클립 첫 묶음 로드 */
+    private ClipFeed loadClips() {
+        ClipFeed feed = new ClipFeed(new ArrayList<Map<String, Object>>(), null, null);
+        feed = fetchMoreClips(feed, CLIP_INITIAL_PAGES);
+
+        // 한 건도 못 모았으면 API 장애로 보고 실패를 알린다.
+        // (빈 목록을 캐시해 두면 장애가 10분간 굳어버린다)
+        return feed.clips.isEmpty() ? null : feed;
+    }
+
+    /**
+     * 캐시에 담긴 목록을 need 개까지 늘린다.
+     *
+     * 늘리는 동안 적재 시각을 새로 찍는다. 더보기를 누르며 보고 있는
+     * 사이에 TTL 이 끝나 목록이 처음부터 다시 쌓이는 일을 막는다.
+     * 손을 놓으면 10분 뒤 평소대로 만료된다.
+     */
+    private ClipFeed extendClips(ClipFeed feed, int need) {
+        if (feed.clips.size() >= need || !feed.hasNext() || feed.clips.size() >= CLIP_MAX) {
+            return feed;
+        }
+
+        synchronized (clipsLock) {
+            Snapshot<ClipFeed> snapshot = clipsCache.get();
+            ClipFeed current = (snapshot != null && snapshot.value != null) ? snapshot.value : feed;
+
+            // 락을 기다리는 동안 다른 스레드가 이미 채웠을 수 있다
+            if (current.clips.size() >= need || !current.hasNext()) {
+                return current;
+            }
+
+            int shortfall = need - current.clips.size();
+            int pages = Math.min((shortfall + CLIP_PAGE_SIZE - 1) / CLIP_PAGE_SIZE, CLIP_PAGES_PER_REQUEST);
+
+            ClipFeed grown = fetchMoreClips(current, pages);
+            clipsCache.set(new Snapshot<ClipFeed>(grown, System.currentTimeMillis()));
+            return grown;
+        }
+    }
+
+    /** 커서를 따라 pages 만큼 이어 받아 뒤에 붙인다 */
+    private ClipFeed fetchMoreClips(ClipFeed feed, int pages) {
+        List<Map<String, Object>> clips = new ArrayList<Map<String, Object>>(feed.clips);
+
+        Set<String> ids = new HashSet<String>();
+        for (Map<String, Object> clip : clips) {
+            ids.add((String) clip.get("clipId"));
+        }
+
+        String uid = feed.nextClipUID;
+        String readCount = feed.nextReadCount;
+        boolean first = clips.isEmpty();
+
+        for (int page = 0; page < pages && clips.size() < CLIP_MAX; page++) {
+            if (!first && (uid == null || uid.isEmpty()))
+                break;
+
+            StringBuilder apiUrl = new StringBuilder()
+                    .append("https://api.chzzk.naver.com/service/v1/channels/").append(CHANNEL_ID)
+                    .append("/clips?filterType=ALL&orderType=POPULAR&size=").append(CLIP_PAGE_SIZE);
+            if (uid != null && !uid.isEmpty()) {
+                apiUrl.append("&clipUID=").append(uid);
+                if (readCount != null && !readCount.isEmpty())
+                    apiUrl.append("&readCount=").append(readCount);
+            }
+
+            String json = fetchApi(apiUrl.toString());
+            if (json == null)
+                break;
+
+            int before = clips.size();
+            for (Map<String, Object> clip : parseArray(json, "clipUID", this::parseClip)) {
+                String id = (String) clip.get("clipId");
+                if (id != null && ids.add(id)) {
+                    clips.add(clip);
+                }
+            }
+
+            String[] cursor = extractNextCursor(json);
+            uid = (cursor != null) ? cursor[0] : null;
+            readCount = (cursor != null) ? cursor[1] : null;
+            first = false;
+
+            // 커서가 돌지 않아 같은 페이지가 또 오면 무한 루프가 된다
+            if (clips.size() == before)
+                break;
+        }
+
+        if (clips.size() > CLIP_MAX)
+            clips = new ArrayList<Map<String, Object>>(clips.subList(0, CLIP_MAX));
+
+        return new ClipFeed(clips, uid, readCount);
+    }
+
+    /**
+     * 다시보기 로드.
+     *
+     * 지금 이 채널의 다시보기는 18개뿐이라 한 번이면 끝나지만,
+     * 한 페이지(50개)에 맞춰두면 쌓였을 때 조용히 잘려나간다.
+     * 페이지가 빌 때까지 이어 받는다.
+     */
+    private List<Map<String, Object>> loadVideos() {
+        List<Map<String, Object>> videos = new ArrayList<Map<String, Object>>();
+        Set<String> ids = new HashSet<String>();
+
+        for (int page = 0; page < VIDEO_MAX_PAGES; page++) {
             String apiUrl = "https://api.chzzk.naver.com/service/v1/channels/" + CHANNEL_ID
-                    + "/clips?filterType=ALL&orderType=POPULAR&size=20"
-                    + (next != null ? "&next=" + next : "");
+                    + "/videos?sortType=LATEST&pagingType=PAGE&page=" + page + "&size=" + VIDEO_PAGE_SIZE;
 
             String json = fetchApi(apiUrl);
             if (json == null)
                 break;
 
-            // 클립 파싱
-            for (Map<String, Object> clip : parseArray(json, "clipUID", this::parseClip)) {
-                String id = (String) clip.get("clipId");
-                if (id != null && !ids.contains(id)) {
-                    ids.add(id);
-                    clips.add(clip);
+            List<Map<String, Object>> batch = parseArray(json, "videoNo", this::parseVideo);
+            if (batch.isEmpty())
+                break;
+
+            for (Map<String, Object> video : batch) {
+                String no = (String) video.get("videoNo");
+                if (no != null && ids.add(no)) {
+                    videos.add(video);
                 }
             }
 
-            // 다음 페이지
-            next = extractNextPage(json);
-            if (next == null)
+            // 마지막 페이지
+            if (batch.size() < VIDEO_PAGE_SIZE)
                 break;
         }
 
-        // 한 건도 못 모았으면 API 장애로 보고 실패를 알린다.
-        // (빈 목록을 캐시해 두면 장애가 10분간 굳어버린다)
-        if (clips.isEmpty())
-            return null;
-
-        return clips.size() > 100 ? clips.subList(0, 100) : clips;
-    }
-
-    /** 다시보기 로드 */
-    private List<Map<String, Object>> loadVideos() {
-        String apiUrl = "https://api.chzzk.naver.com/service/v1/channels/" + CHANNEL_ID
-                + "/videos?sortType=LATEST&pagingType=PAGE&page=0&size=50";
-
-        String json = fetchApi(apiUrl);
-        if (json == null)
-            return null;
-
-        return parseArray(json, "videoNo", this::parseVideo);
+        // 첫 페이지부터 실패했으면 만료된 캐시로 폴백시킨다
+        return videos.isEmpty() ? null : videos;
     }
 
     // ========================================
@@ -232,8 +360,10 @@ public class LiveController {
             return result;
         }
 
-        int endIndex = Math.min(offset + limit, list.size());
-        result.put(key, list.subList(offset, endIndex));
+        // offset 이 목록을 넘으면 subList 가 예외를 던진다. 빈 페이지로 받는다.
+        int start = Math.max(0, Math.min(offset, list.size()));
+        int endIndex = Math.min(start + Math.max(0, limit), list.size());
+        result.put(key, new ArrayList<Map<String, Object>>(list.subList(start, endIndex)));
         result.put("hasMore", endIndex < list.size());
         result.put("nextOffset", endIndex);
 
@@ -338,20 +468,26 @@ public class LiveController {
         return list;
     }
 
-    /** 다음 페이지 토큰 추출 */
-    private String extractNextPage(String json) {
+    /**
+     * 다음 페이지 커서 추출 — {clipUID, readCount} 두 값이 모두 필요하다.
+     * 둘 다 같은 이름의 쿼리 파라미터로 되돌려줘야 다음 묶음이 온다.
+     */
+    private String[] extractNextCursor(String json) {
         int nextStart = json.indexOf("\"next\":{");
         if (nextStart == -1)
             return null;
 
-        int clipStart = json.indexOf("\"clipUID\":\"", nextStart);
-        if (clipStart == -1)
+        int nextEnd = findBracket(json, json.indexOf("{", nextStart), '{', '}');
+        if (nextEnd == -1)
             return null;
 
-        int valueStart = clipStart + 11;
-        int valueEnd = json.indexOf("\"", valueStart);
+        String cursor = json.substring(nextStart, nextEnd + 1);
 
-        return (valueEnd > valueStart) ? json.substring(valueStart, valueEnd) : null;
+        String uid = extractString(cursor, "clipUID");
+        if (uid == null || uid.isEmpty())
+            return null;
+
+        return new String[] { uid, extractNumber(cursor, "readCount") };
     }
 
     /** 문자열 값 추출 */
