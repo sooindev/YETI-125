@@ -20,6 +20,7 @@ $(document).ready(function() {
     });
 
     initClipModal();
+    initVideoModal();
 });
 
 function checkLiveStatus() {
@@ -360,6 +361,82 @@ function loadMoreVideos() {
     });
 }
 
+/* ------------------------------------------------
+   다시보기 이동 확인 모달
+   치지직이 VOD 임베드를 지원하지 않아 사이트 안에서
+   재생할 수 없다. 나가기 전에 한 번 알린다.
+   ------------------------------------------------ */
+const VIDEO_SKIP_KEY = 'yeti-video-leave';
+
+// 사파리 프라이빗 모드 등에서 localStorage 접근이 막힐 수 있다.
+// 읽기가 막히면 "묻는다"로, 쓰기가 막히면 조용히 넘어간다.
+function skipVideoConfirm() {
+    try {
+        return localStorage.getItem(VIDEO_SKIP_KEY) === 'skip';
+    } catch (e) {
+        return false;
+    }
+}
+
+function rememberVideoSkip() {
+    try {
+        localStorage.setItem(VIDEO_SKIP_KEY, 'skip');
+    } catch (e) {}
+}
+
+function forgetVideoSkip() {
+    try {
+        localStorage.removeItem(VIDEO_SKIP_KEY);
+    } catch (e) {}
+}
+
+// 되돌릴 길은 꺼져 있을 때만 보여준다.
+// 평소에는 섹션 머리말에 군더더기를 남기지 않는다.
+function syncVideoRestoreLink() {
+    $('#videoConfirmRestore').prop('hidden', !skipVideoConfirm());
+}
+
+function initVideoModal() {
+    $(document).on('click', '.video-card', function(e) {
+        const url = $(this).attr('href');
+        if (!url) return;
+        // 새 탭 열기(⌘/Ctrl/Shift/휠 클릭)는 묻지 않고 그대로 보낸다
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.which === 2) return;
+        // 다시 묻지 않기를 고른 사람도 그대로 보낸다
+        if (skipVideoConfirm()) return;
+
+        e.preventDefault();
+        $('#videoModalTitle').text($(this).attr('data-video-title') || '다시보기');
+        $('#videoModalGo').attr('href', url);
+        // 체크는 매번 풀린 상태로 시작한다 — 켜져 있었다면 여기까지 오지 않는다
+        $('#videoModalSkip').prop('checked', false);
+        openModal('videoModal');
+    });
+
+    // 이동을 누르면 새 탭이 열리고 모달은 닫아둔다.
+    // (링크의 기본 동작을 그대로 쓰므로 팝업 차단에 걸리지 않는다)
+    //
+    // 기억은 실제로 이동할 때만 한다. 체크만 하고 취소를 누른 것은
+    // "이번엔 안 간다"는 뜻이지 "앞으로 묻지 말라"는 뜻이 아니다.
+    $(document).on('click', '#videoModalGo', function() {
+        if ($('#videoModalSkip').prop('checked')) {
+            rememberVideoSkip();
+            syncVideoRestoreLink();
+        }
+        closeModal('videoModal');
+    });
+
+    $(document).on('click', '#videoConfirmRestore', function() {
+        forgetVideoSkip();
+        syncVideoRestoreLink();
+        if (typeof showToast === 'function') {
+            showToast('이동 확인을 다시 켰습니다', 'success');
+        }
+    });
+
+    syncVideoRestoreLink();
+}
+
 // 다시보기 렌더링
 function renderVideos(videos, append) {
     const $container = $('#videosContainer');
@@ -374,7 +451,9 @@ function renderVideos(videos, append) {
         const date = formatDate(video.publishDate);
 
         const videoHtml =
-            '<a href="' + video.videoUrl + '" target="_blank" class="video-card scroll-animate scale-in">' +
+            '<a href="' + video.videoUrl + '" target="_blank" rel="noopener"' +
+            ' class="video-card scroll-animate scale-in"' +
+            ' data-video-title="' + escapeHtml(video.videoTitle) + '">' +
             '<div class="video-thumbnail">' +
             '<img src="' + (video.thumbnailUrl || '') + '" alt="' + escapeHtml(video.videoTitle) + '">' +
             '<span class="video-duration">' + duration + '</span>' +

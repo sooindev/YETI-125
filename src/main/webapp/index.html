@@ -191,6 +191,9 @@
         <h2 class="sec-head__title">다시<br><em>보기</em></h2>
         <p class="sec-head__aside">
           놓친 방송 전체 회차. 풀 VOD 라이브러리.
+          <button type="button" id="videoConfirmRestore" class="aside-restore" hidden>
+            이동 확인 다시 켜기
+          </button>
         </p>
       </div>
 
@@ -306,6 +309,31 @@
     </a>
   </div>
 </div>
+
+<!-- ===== Video Leave Modal ===== -->
+<div id="videoModal" class="modal">
+  <div class="modal-content leave-modal-content">
+    <button class="modal-close" onclick="closeModal('videoModal')">&times;</button>
+    <p class="leave-modal-kicker">외부 사이트로 이동</p>
+    <h3 id="videoModalTitle" class="leave-modal-title"></h3>
+    <p class="leave-modal-desc">
+      다시보기는 치지직이 외부 재생을 지원하지 않아 이 사이트 안에서 볼 수 없습니다.
+      새 탭에서 치지직으로 열립니다.
+    </p>
+    <label class="leave-modal-skip">
+      <input type="checkbox" id="videoModalSkip">
+      <span>다시 묻지 않기</span>
+    </label>
+    <div class="leave-modal-actions">
+      <button type="button" class="btn" onclick="closeModal('videoModal')">취소</button>
+      <a id="videoModalGo" class="btn btn-primary" href="https://chzzk.naver.com/" target="_blank" rel="noopener">
+        치지직에서 보기 <span class="btn-arrow">↗</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
 
 <!-- ===== Footer ===== -->
 <footer class="footer">
