@@ -508,3 +508,57 @@ main { padding-top: var(--head-total); }
 @media (max-width: 560px) {
     .card-grid { grid-template-columns: 1fr; }
 }
+
+/* ============================================================
+   Clip modal — 치지직 공식 임베드 플레이어
+   카드를 누르면 치지직으로 나가지 않고 이 안에서 재생한다.
+   iframe은 16:9 슬롯을 그대로 채우고, 원본 링크만 밖으로 남긴다.
+   ============================================================ */
+.clip-modal-content {
+    max-width: 880px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+.clip-modal-title {
+    font-family: var(--f-kr);
+    font-size: 0.95rem;
+    font-weight: 700;
+    line-height: 1.4;
+    color: var(--bone);
+    /* 닫기 버튼(42px + 여백)을 피해 앉힌다 */
+    min-height: 42px;
+    padding-right: 56px;
+    display: flex;
+    align-items: center;
+}
+.clip-modal-frame {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: #000;
+    border: 1px solid var(--ink-line);
+}
+.clip-modal-frame iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+}
+.clip-modal-origin {
+    align-self: flex-end;
+    font-family: var(--f-mono);
+    font-size: 0.76rem;
+    color: var(--bone-dim);
+    transition: color var(--t-fast);
+}
+.clip-modal-origin:hover { color: var(--frost-deep); }
+.clip-modal-origin:hover .btn-arrow { transform: translateX(4px); }
+
+@media (max-width: 560px) {
+    .clip-modal-content { padding: 12px; gap: 10px; }
+    .clip-modal-title { font-size: 0.86rem; }
+}

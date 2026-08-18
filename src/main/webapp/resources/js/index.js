@@ -18,6 +18,8 @@ $(document).ready(function() {
     $('#loadMoreVideosBtn').on('click', function() {
         loadMoreVideos();
     });
+
+    initClipModal();
 });
 
 function checkLiveStatus() {
@@ -151,6 +153,48 @@ function loadMoreClips() {
     });
 }
 
+/* ------------------------------------------------
+   클립 모달 — 치지직 공식 임베드로 사이트 안에서 재생
+   ------------------------------------------------ */
+function initClipModal() {
+    // 카드 클릭은 모달로 가로챈다. 새 탭 열기(⌘/Ctrl/Shift/휠 클릭)는
+    // 원래대로 치지직 원본으로 보낸다.
+    $(document).on('click', '.clip-card', function(e) {
+        const clipId = $(this).attr('data-clip-id');
+        if (!clipId) return;
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.which === 2) return;
+
+        e.preventDefault();
+        openClipModal(clipId, $(this).attr('data-clip-title'), $(this).attr('href'));
+    });
+
+    // 배경 클릭과 ESC는 common.js가 닫아주지만 iframe은 그대로 남아
+    // 소리가 계속 난다. 같은 신호를 받아 src를 거둔다.
+    $(document).on('click', '#clipModal', function(e) {
+        if ($(e.target).is('#clipModal')) clearClipFrame();
+    });
+    $(document).on('keydown', function(e) {
+        if (e.key === 'Escape') clearClipFrame();
+    });
+}
+
+function openClipModal(clipId, title, originUrl) {
+    $('#clipModalTitle').text(title || '클립');
+    $('#clipModalOrigin').attr('href', originUrl || 'https://chzzk.naver.com/clips/' + clipId);
+    $('#clipModalFrame').attr('src', 'https://chzzk.naver.com/embed/clip/' + encodeURIComponent(clipId));
+    openModal('clipModal');
+}
+
+function closeClipModal() {
+    clearClipFrame();
+    closeModal('clipModal');
+}
+
+// src를 비워 플레이어를 완전히 내린다 (재생 중단)
+function clearClipFrame() {
+    $('#clipModalFrame').attr('src', '');
+}
+
 function renderClips(clips, append) {
     const $container = $('#clipsContainer');
 
@@ -164,7 +208,10 @@ function renderClips(clips, append) {
         const date = formatDate(clip.createdAt);
 
         const clipHtml =
-            '<a href="' + clip.clipUrl + '" target="_blank" class="clip-card scroll-animate scale-in">' +
+            '<a href="' + clip.clipUrl + '" target="_blank" rel="noopener"' +
+            ' class="clip-card scroll-animate scale-in"' +
+            ' data-clip-id="' + escapeHtml(clip.clipId) + '"' +
+            ' data-clip-title="' + escapeHtml(clip.clipTitle) + '">' +
             '<div class="clip-thumbnail">' +
             '<img src="' + (clip.thumbnailUrl || '') + '" alt="' + escapeHtml(clip.clipTitle) + '">' +
             '<span class="clip-duration">' + duration + '</span>' +
