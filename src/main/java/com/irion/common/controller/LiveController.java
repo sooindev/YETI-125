@@ -9,6 +9,8 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
 @Controller
 @RequestMapping("/live")
@@ -20,12 +22,16 @@ public class LiveController {
     private static final long LIVE_CACHE_DURATION = 1 * 60 * 1000; // 1분 (방송 상태)
 
     // 캐시
-    private Map<String, Object> cachedLiveStatus = null;
-    private long liveStatusCacheTime = 0;
-    private List<Map<String, Object>> cachedClips = null;
-    private List<Map<String, Object>> cachedVideos = null;
-    private long clipsCacheTime = 0;
-    private long videosCacheTime = 0;
+    // 컨트롤러는 싱글턴이라 여러 요청 스레드가 동시에 접근한다.
+    // 값과 적재 시각을 스냅샷 하나로 묶어 참조만 교체하고, 갱신은
+    // 락으로 한 스레드에만 맡긴다. (아래 cached() 참고)
+    private final AtomicReference<Snapshot<Map<String, Object>>> liveStatusCache = new AtomicReference<>();
+    private final AtomicReference<Snapshot<List<Map<String, Object>>>> clipsCache = new AtomicReference<>();
+    private final AtomicReference<Snapshot<List<Map<String, Object>>>> videosCache = new AtomicReference<>();
+
+    private final Object liveStatusLock = new Object();
+    private final Object clipsLock = new Object();
+    private final Object videosLock = new Object();
 
     // ========================================
     // API 엔드포인트
@@ -35,88 +41,66 @@ public class LiveController {
     @GetMapping("/status")
     @ResponseBody
     public JsonResult getLiveStatus() {
-        // 캐시 확인 (1분 이내면 캐시 반환)
-        if (cachedLiveStatus != null && !isExpired(liveStatusCacheTime, LIVE_CACHE_DURATION)) {
-            return JsonResult.success("조회 성공 (캐시)", cachedLiveStatus);
-        }
+        Map<String, Object> data = cached(liveStatusCache, liveStatusLock,
+                LIVE_CACHE_DURATION, this::loadLiveStatus);
 
-        try {
-            String json = fetchApi(CHZZK_API);
-            if (json == null) {
-                // API 실패 시 캐시가 있으면 그것이라도 반환
-                if (cachedLiveStatus != null) {
-                    return JsonResult.success("조회 성공 (캐시)", cachedLiveStatus);
-                }
-                return JsonResult.fail("API 호출 실패");
-            }
-
-            boolean isLive = json.contains("\"status\":\"OPEN\"");
-
-            Map<String, Object> data = new HashMap<>();
-            data.put("isLive", isLive);
-            data.put("channelId", CHANNEL_ID);
-            data.put("channelUrl", "https://chzzk.naver.com/live/" + CHANNEL_ID);
-
-            if (isLive) {
-                data.put("liveTitle", extractString(json, "liveTitle"));
-                data.put("thumbnail", extractString(json, "liveImageUrl").replace("{type}", "480"));
-                data.put("viewerCount", extractNumber(json, "concurrentUserCount"));
-            }
-
-            // 캐시 업데이트
-            cachedLiveStatus = data;
-            liveStatusCacheTime = System.currentTimeMillis();
-
-            return JsonResult.success("조회 성공", data);
-
-        } catch (Exception e) {
-            // 오류 발생 시 캐시가 있으면 그것이라도 반환
-            if (cachedLiveStatus != null) {
-                return JsonResult.success("조회 성공 (캐시)", cachedLiveStatus);
-            }
+        if (data == null) {
             return JsonResult.fail("방송 상태 확인 중 오류 발생");
         }
+        return JsonResult.success("조회 성공", data);
     }
 
     /** 클립 목록 조회 (인기순) */
     @GetMapping("/clips")
     @ResponseBody
     public JsonResult getClips(@RequestParam(defaultValue = "6") int limit, @RequestParam(defaultValue = "0") int offset) {
-        try {
-            // 캐시 갱신
-            if (cachedClips == null || isExpired(clipsCacheTime)) {
-                cachedClips = loadClips();
-                clipsCacheTime = System.currentTimeMillis();
-            }
+        List<Map<String, Object>> all = cached(clipsCache, clipsLock,
+                CACHE_DURATION, this::loadClips);
 
-            return JsonResult.success("조회 성공", paginate(cachedClips, "clips", offset, limit));
-
-        } catch (Exception e) {
+        if (all == null) {
             return JsonResult.fail("클립 조회 중 오류 발생");
         }
+        return JsonResult.success("조회 성공", paginate(all, "clips", offset, limit));
     }
 
     /** 다시보기 목록 조회 */
     @GetMapping("/videos")
     @ResponseBody
     public JsonResult getVideos(@RequestParam(defaultValue = "6") int limit, @RequestParam(defaultValue = "0") int offset) {
-        try {
-            // 캐시 갱신
-            if (cachedVideos == null || isExpired(videosCacheTime)) {
-                cachedVideos = loadVideos();
-                videosCacheTime = System.currentTimeMillis();
-            }
+        List<Map<String, Object>> all = cached(videosCache, videosLock,
+                CACHE_DURATION, this::loadVideos);
 
-            return JsonResult.success("조회 성공", paginate(cachedVideos, "videos", offset, limit));
-
-        } catch (Exception e) {
+        if (all == null) {
             return JsonResult.fail("다시보기 조회 중 오류 발생");
         }
+        return JsonResult.success("조회 성공", paginate(all, "videos", offset, limit));
     }
 
     // ========================================
     // 데이터 로드
     // ========================================
+
+    /** 방송 상태 로드. 실패하면 null 을 돌려 만료된 캐시로 폴백시킨다. */
+    private Map<String, Object> loadLiveStatus() {
+        String json = fetchApi(CHZZK_API);
+        if (json == null)
+            return null;
+
+        boolean isLive = json.contains("\"status\":\"OPEN\"");
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("isLive", isLive);
+        data.put("channelId", CHANNEL_ID);
+        data.put("channelUrl", "https://chzzk.naver.com/live/" + CHANNEL_ID);
+
+        if (isLive) {
+            data.put("liveTitle", extractString(json, "liveTitle"));
+            data.put("thumbnail", extractString(json, "liveImageUrl").replace("{type}", "480"));
+            data.put("viewerCount", extractNumber(json, "concurrentUserCount"));
+        }
+
+        return data;
+    }
 
     /** 인기 클립 로드 (최대 100개) */
     private List<Map<String, Object>> loadClips() {
@@ -148,6 +132,11 @@ public class LiveController {
                 break;
         }
 
+        // 한 건도 못 모았으면 API 장애로 보고 실패를 알린다.
+        // (빈 목록을 캐시해 두면 장애가 10분간 굳어버린다)
+        if (clips.isEmpty())
+            return null;
+
         return clips.size() > 100 ? clips.subList(0, 100) : clips;
     }
 
@@ -158,7 +147,7 @@ public class LiveController {
 
         String json = fetchApi(apiUrl);
         if (json == null)
-            return new ArrayList<>();
+            return null;
 
         return parseArray(json, "videoNo", this::parseVideo);
     }
@@ -251,14 +240,67 @@ public class LiveController {
         return result;
     }
 
-    /** 캐시 만료 확인 (기본 10분) */
-    private boolean isExpired(long cacheTime) {
-        return System.currentTimeMillis() - cacheTime > CACHE_DURATION;
+    // ========================================
+    // 캐시
+    // ========================================
+
+    /**
+     * 값과 적재 시각을 함께 담는 불변 스냅샷.
+     * 둘을 각각 필드로 두면 "새 값 + 옛 시각" 같은 어긋난 조합이 잠깐
+     * 보일 수 있다. 참조 하나만 통째로 바꾸면 그런 틈이 생기지 않는다.
+     */
+    private static final class Snapshot<T> {
+        final T value;
+        final long loadedAt;
+
+        Snapshot(T value, long loadedAt) {
+            this.value = value;
+            this.loadedAt = loadedAt;
+        }
+
+        boolean isFresh(long ttl) {
+            return System.currentTimeMillis() - loadedAt <= ttl;
+        }
     }
 
-    /** 캐시 만료 확인 (커스텀 duration) */
-    private boolean isExpired(long cacheTime, long duration) {
-        return System.currentTimeMillis() - cacheTime > duration;
+    /**
+     * 캐시에서 읽되, 만료됐으면 갱신한다.
+     *
+     * 갱신은 락으로 묶어 한 스레드만 수행한다. 캐시가 만료되는 순간
+     * 요청이 몰려도 외부 API 는 한 번만 호출된다. 나머지 스레드는
+     * 잠깐 기다렸다가 갱신된 값을 그대로 받는다.
+     *
+     * 갱신에 실패하면(로더가 null 을 주거나 예외를 던지면) 만료된 값이라도
+     * 돌려준다. 외부 API 가 흔들려도 화면이 비지 않게 하기 위해서다.
+     * 값이 아예 없고 적재도 실패한 경우에만 null 이다.
+     */
+    private <T> T cached(AtomicReference<Snapshot<T>> ref, Object lock,
+                         long ttl, Supplier<T> loader) {
+
+        Snapshot<T> snapshot = ref.get();
+        if (snapshot != null && snapshot.isFresh(ttl)) {
+            return snapshot.value;
+        }
+
+        synchronized (lock) {
+            // 락을 기다리는 동안 다른 스레드가 이미 갱신했을 수 있다
+            snapshot = ref.get();
+            if (snapshot != null && snapshot.isFresh(ttl)) {
+                return snapshot.value;
+            }
+
+            try {
+                T loaded = loader.get();
+                if (loaded != null) {
+                    ref.set(new Snapshot<>(loaded, System.currentTimeMillis()));
+                    return loaded;
+                }
+            } catch (Exception ignored) {
+                // 아래에서 만료된 값으로 폴백한다
+            }
+
+            return snapshot != null ? snapshot.value : null;
+        }
     }
 
     /** JSON 배열 파싱 */

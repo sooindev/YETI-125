@@ -1,0 +1,72 @@
+/* ============================================================
+   YETI-125 — Error pages (404 / 500)
+   헤더·푸터 없이 한 화면으로 끝내는 단순한 구성
+   ============================================================ */
+
+.error-stage {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: clamp(40px, 8vw, 96px) 0;
+}
+
+.error-shell {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+}
+
+.error-shell .kicker { margin-bottom: clamp(20px, 3vw, 32px); }
+
+.error-code {
+    font-size: clamp(5.5rem, 20vw, 14rem);
+    line-height: 0.82;
+    color: var(--frost);
+    letter-spacing: -0.02em;
+}
+.error-code--warn { color: var(--rose); }
+
+.error-title {
+    font-family: var(--f-display);
+    font-size: clamp(1.5rem, 4vw, 2.6rem);
+    text-transform: none;
+    color: var(--bone);
+    margin-top: clamp(18px, 2.5vw, 28px);
+}
+
+.error-desc {
+    font-family: var(--f-mono);
+    font-size: 0.9rem;
+    line-height: 1.9;
+    color: var(--bone-dim);
+    max-width: 46ch;
+    margin-top: 14px;
+    /* 한글 단어가 중간에서 끊기지 않도록 */
+    word-break: keep-all;
+}
+
+.error-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: clamp(28px, 4vw, 44px);
+}
+
+.error-meta {
+    margin-top: clamp(36px, 6vw, 64px);
+    padding-top: 20px;
+    border-top: 1px solid var(--ink-line);
+    width: 100%;
+    color: var(--bone-faint);
+}
+
+@media (max-width: 720px) {
+    /* common.css 가 모바일에서 .btn 을 전체 폭으로 만든다.
+       에러 페이지에서는 버튼이 여러 개 나란히 서므로 되돌린다. */
+    .error-actions .btn {
+        width: auto;
+        flex: 1 1 auto;
+        justify-content: center;
+    }
+}
