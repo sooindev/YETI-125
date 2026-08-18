@@ -635,3 +635,128 @@ main { padding-top: var(--head-total); }
         min-height: 40px;
     }
 }
+
+/* ============================================================
+   Leave modal — 다시보기는 치지직으로 나간다
+   클립과 달리 임베드 경로가 없어 사이트 안에서 재생할 수 없다.
+   나가기 전에 어디로 가는지 알리고 한 번 물어본다.
+   ============================================================ */
+.leave-modal-content {
+    max-width: 460px;
+    padding: 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.leave-modal-kicker {
+    font-family: var(--f-mono);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--frost-deep);
+    /* 닫기 버튼(42px + 여백)을 피한다 */
+    padding-right: 50px;
+}
+.leave-modal-title {
+    font-family: var(--f-kr);
+    font-size: 1.02rem;
+    font-weight: 700;
+    line-height: 1.45;
+    color: var(--bone);
+    /* 긴 제목이 모달을 세로로 늘리지 않게 세 줄에서 자른다 */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.leave-modal-desc {
+    font-family: var(--f-kr);
+    font-size: 0.82rem;
+    line-height: 1.7;
+    color: var(--bone-dim);
+    padding-top: 4px;
+    border-top: 1px solid var(--ink-line);
+}
+/* 다시 묻지 않기 — 체크박스는 기본 크기가 13px이라 손가락으로
+   누르기 어렵다. 라벨 전체를 탭 영역으로 쓰고 44px을 확보한다. */
+.leave-modal-skip {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-height: 44px;
+    margin-top: 2px;
+    font-family: var(--f-mono);
+    font-size: 0.74rem;
+    color: var(--bone-dim);
+    cursor: pointer;
+    user-select: none;
+    transition: color var(--t-fast);
+}
+.leave-modal-skip:hover { color: var(--bone); }
+.leave-modal-skip input {
+    width: 17px;
+    height: 17px;
+    flex: none;
+    accent-color: var(--frost);
+    cursor: pointer;
+}
+
+.leave-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 6px;
+}
+.leave-modal-actions .btn {
+    padding: 14px 20px;
+    justify-content: center;
+}
+
+@media (max-width: 720px) {
+    .leave-modal-content { padding: 18px; }
+    .leave-modal-title { font-size: 0.95rem; }
+    /* 좁은 화면에서는 나란히 두면 둘 다 좁아진다. 쌓고 폭을 채운다.
+       기본 동작(이동)이 위로, 취소가 아래로 간다. */
+    .leave-modal-actions {
+        flex-direction: column-reverse;
+        gap: 8px;
+    }
+    .leave-modal-actions .btn { width: 100%; }
+}
+
+/* 이동 확인 되돌리기 — "다시 묻지 않기"를 켠 사람에게만 보인다.
+   머리말 보조 문구에 딸린 각주라 본문보다 한 단계 작고 흐리다. */
+.aside-restore {
+    display: block;
+    margin-top: 8px;
+    padding: 0;
+    font-family: var(--f-mono);
+    font-size: 0.72rem;
+    color: var(--bone-faint);
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--ink-line-2);
+    cursor: pointer;
+    transition: color var(--t-fast), border-color var(--t-fast);
+}
+.aside-restore:hover {
+    color: var(--frost-deep);
+    border-color: var(--frost);
+}
+/* hidden 속성은 브라우저 기본 스타일시트의 [hidden]{display:none} 으로
+   동작한다. 위에서 display 를 지정하는 순간 작성자 규칙이 이겨서
+   숨김이 풀린다. 여기서 명시적으로 다시 눌러준다. */
+.aside-restore[hidden] { display: none; }
+/* 머리말이 우측 정렬이라 각주도 같은 모서리에 붙인다 */
+.sec-head__aside .aside-restore { margin-left: auto; }
+.sec-head--flip .sec-head__aside .aside-restore { margin-left: 0; margin-right: auto; }
+
+@media (max-width: 900px) {
+    /* 이 폭부터 머리말이 좌측 정렬로 바뀐다 */
+    .sec-head__aside .aside-restore { margin-left: 0; margin-right: auto; }
+}
+@media (pointer: coarse) {
+    /* 손가락으로 누를 수 있게 세로 여유를 준다 */
+    .aside-restore { padding: 8px 0; margin-top: 4px; }
+}
