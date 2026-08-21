@@ -118,6 +118,10 @@
 
 .door-title {
     font-family: var(--f-display);
+    /* Anton 은 400 만 있다. .display 규칙과 같게 못박아, 태그가 h1 이든
+       p 든 브라우저 기본 굵기에 끌려가지 않게 한다.
+       (문서당 h1 하나 원칙에 맞춰 이 요소는 p 로 바꿨다) */
+    font-weight: 400;
     font-size: clamp(5rem, 22vw, 19rem);
     line-height: 0.86;
     letter-spacing: 0.02em;
