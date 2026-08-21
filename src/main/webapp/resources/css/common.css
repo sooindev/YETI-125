@@ -668,11 +668,27 @@ img { display: block; max-width: 100%; }
 /* ============================================================
    Toast
    ============================================================ */
+/*
+   토스트
+
+   숨김 상태에서도 상자가 화면에 남아 있었다. translateY(140%) 로만
+   내렸는데, 글자가 없을 때 높이가 30px 남짓이라 42px 밖에 내려가지
+   않는다. bottom: 32px 을 감안하면 상자 윗부분 20px 과 그림자가 화면
+   하단 가운데에 늘 떠 있었고, position: fixed 라 그 띠의 클릭도 가로챘다.
+
+   높이에 기대지 않고 "제 높이 + 아래 여백" 만큼 내려 화면 밖으로 완전히
+   뺀다. 글자 길이에 따라 높이가 두 줄로 늘어나도 그대로 성립한다.
+   opacity 와 pointer-events 로 한 번 더 눌러둔다. */
 .toast {
+    /* 아이폰 홈 인디케이터 영역을 피한다 (footer 와 같은 처리) */
+    --toast-offset: calc(32px + env(safe-area-inset-bottom, 0px));
+
     position: fixed;
     left: 50%;
-    bottom: 32px;
-    transform: translate(-50%, 140%);
+    bottom: var(--toast-offset);
+    transform: translate(-50%, calc(100% + var(--toast-offset)));
+    opacity: 0;
+    pointer-events: none;
     background: var(--ink-raise);
     border: 1px solid var(--ink-line-2);
     border-left: 3px solid var(--frost);
@@ -682,10 +698,19 @@ img { display: block; max-width: 100%; }
     font-size: 0.82rem;
     padding: 14px 22px;
     z-index: 9600;
-    transition: transform var(--t-slow);
+    transition: transform var(--t-slow), opacity var(--t-slow);
     max-width: 90vw;
 }
-.toast.show { transform: translate(-50%, 0); }
+.toast.show {
+    transform: translate(-50%, 0);
+    opacity: 1;
+}
+
+/* 움직임을 줄이도록 설정한 사용자에게는 미끄러지지 않고 나타나기만 한다 */
+@media (prefers-reduced-motion: reduce) {
+    .toast { transition: opacity var(--t-fast); transform: translate(-50%, 0); }
+    .toast:not(.show) { transform: translate(-50%, calc(100% + var(--toast-offset))); }
+}
 .toast.error { border-left-color: var(--t-collab); }
 .toast.success { border-left-color: var(--t-chat); }
 
