@@ -21,7 +21,7 @@
   <title>일시적인 오류 — YETI-125</title>
   <meta name="robots" content="noindex">
 
-  <link rel="icon" type="image/svg+xml" href="/resources/images/snowflake.png">
+  <link rel="icon" type="image/png" href="/resources/images/snowflake.png">
   <script src="/resources/js/theme-init.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

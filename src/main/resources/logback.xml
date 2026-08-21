@@ -3,6 +3,15 @@
 
     <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"/>
 
+    <!--
+      로그 디렉터리.
+
+      상대경로로 두면 톰캣의 작업 디렉터리(보통 $CATALINA_HOME/bin) 기준으로
+      떨어져 어디에 쌓이는지 알 수 없다. catalina.base 아래로 고정한다.
+      톰캣 밖에서 실행할 때(예: PasswordUtil main)는 현재 디렉터리로 떨어진다.
+    -->
+    <property name="LOG_DIR" value="${catalina.base:-.}/logs"/>
+
     <!-- Console Appender -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
@@ -11,12 +20,19 @@
         </encoder>
     </appender>
 
-    <!-- File Appender -->
+    <!--
+      File Appender
+
+      날짜로만 나누면 트래픽이 몰린 날 하루치 파일이 무한정 커진다.
+      크기까지 함께 보고 잘라내고, 전체 보관량에도 상한을 둔다.
+    -->
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>logs/yeti-125.log</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>logs/yeti-125.%d{yyyy-MM-dd}.log</fileNamePattern>
+        <file>${LOG_DIR}/yeti-125.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_DIR}/yeti-125.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
             <maxHistory>30</maxHistory>
+            <totalSizeCap>1GB</totalSizeCap>
         </rollingPolicy>
         <encoder>
             <pattern>${LOG_PATTERN}</pattern>
@@ -24,10 +40,19 @@
         </encoder>
     </appender>
 
-    <!-- Logger Levels -->
-    <logger name="com.irion" level="DEBUG"/>
+    <!--
+      Logger Levels
+
+      기본은 운영 기준인 INFO 다. DEBUG 로 두면 실행되는 SQL 전부와 요청
+      파라미터가 파일에 그대로 쌓인다. 로컬에서 잠깐 들여다볼 때는 파일을
+      고치지 말고 기동 옵션으로 올린다.
+
+        -Dyeti.log.level=DEBUG      애플리케이션 로그
+        -Dyeti.sql.log.level=DEBUG  MyBatis 가 날리는 SQL
+    -->
+    <logger name="com.irion" level="${yeti.log.level:-INFO}"/>
     <logger name="org.springframework" level="INFO"/>
-    <logger name="org.mybatis" level="DEBUG"/>
+    <logger name="org.mybatis" level="${yeti.sql.log.level:-INFO}"/>
 
     <!-- Root Logger -->
     <root level="INFO">

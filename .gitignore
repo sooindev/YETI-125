@@ -49,6 +49,9 @@ build/
 *.env.*.local
 .env.*
 **/database.properties
+**/database.properties.*
+*.bak
+*.orig
 **/application-*.properties
 **/application-*.yml
 **/application-*.yaml

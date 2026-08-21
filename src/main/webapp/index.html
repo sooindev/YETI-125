@@ -24,7 +24,7 @@
   <meta name="twitter:description" content="치지직 스트리머 이리온의 비공식 팬사이트. 실시간 방송 상태, 클립, 다시보기, 방송 일정을 한곳에서.">
   <meta name="twitter:image" content="https://yeti-125.com/resources/images/Irion-profile.jpg">
 
-  <link rel="icon" type="image/svg+xml" href="/resources/images/snowflake.png">
+  <link rel="icon" type="image/png" href="/resources/images/snowflake.png">
   <script src="/resources/js/theme-init.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -296,7 +296,7 @@
 <!-- ===== Clip Modal ===== -->
 <div id="clipModal" class="modal">
   <div class="modal-content clip-modal-content">
-    <button class="modal-close" onclick="closeClipModal()">&times;</button>
+    <button class="modal-close" data-close-modal="clipModal">&times;</button>
     <h3 id="clipModalTitle" class="clip-modal-title"></h3>
     <div class="clip-modal-frame">
       <iframe id="clipModalFrame" src="" title="치지직 클립 플레이어"
@@ -313,7 +313,7 @@
 <!-- ===== Video Leave Modal ===== -->
 <div id="videoModal" class="modal">
   <div class="modal-content leave-modal-content">
-    <button class="modal-close" onclick="closeModal('videoModal')">&times;</button>
+    <button class="modal-close" data-close-modal="videoModal">&times;</button>
     <p class="leave-modal-kicker">외부 사이트로 이동</p>
     <h3 id="videoModalTitle" class="leave-modal-title"></h3>
     <p class="leave-modal-desc">
@@ -325,7 +325,7 @@
       <span>다시 묻지 않기</span>
     </label>
     <div class="leave-modal-actions">
-      <button type="button" class="btn" onclick="closeModal('videoModal')">취소</button>
+      <button type="button" class="btn" data-close-modal="videoModal">취소</button>
       <a id="videoModalGo" class="btn btn-primary" href="https://chzzk.naver.com/" target="_blank" rel="noopener">
         치지직에서 보기 <span class="btn-arrow">↗</span>
       </a>
@@ -359,7 +359,9 @@
   </div>
 </footer>
 
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"
+        integrity="sha384-1H217gwSVyLSIfaLxHbE7dRb3v4mYCKbpQvzx0cegeju1MVsGrX5xXxAvs/HgeFs"
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="/resources/js/door-intro.js"></script>
 <script src="/resources/js/common.js"></script>
 <script src="/resources/js/scroll-animations.js"></script>

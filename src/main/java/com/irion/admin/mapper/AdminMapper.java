@@ -16,4 +16,8 @@ public interface AdminMapper {
     // 마지막 로그인 시간 업데이트
     int updateLastLoginDate(@Param("adminId") Long adminId);
 
+    // 비밀번호 해시 갱신 (옛 형식 → PBKDF2 재해시)
+    int updatePassword(@Param("adminId") Long adminId,
+                       @Param("adminPassword") String adminPassword);
+
 }

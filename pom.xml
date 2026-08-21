@@ -14,13 +14,14 @@
 
   <properties>
     <java.version>1.8</java.version>
-    <spring.version>5.3.30</spring.version>
+    <spring.version>5.3.39</spring.version>
     <mybatis.version>3.5.13</mybatis.version>
     <mybatis-spring.version>2.1.1</mybatis-spring.version>
     <mariadb.version>3.1.4</mariadb.version>
     <jackson.version>2.15.2</jackson.version>
+    <hibernate-validator.version>6.2.5.Final</hibernate-validator.version>
     <slf4j.version>1.7.36</slf4j.version>
-    <logback.version>1.2.12</logback.version>
+    <logback.version>1.2.13</logback.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
@@ -54,11 +55,25 @@
       <version>${mybatis-spring.version}</version>
     </dependency>
 
-    <!-- MariaDB -->
+    <!--
+      MariaDB
+
+      드라이버가 waffle-jna 를 딸려 온다. 윈도우 SSPI 통합 인증용이고,
+      그게 다시 jna / jna-platform / caffeine 을 끌고 온다. 합쳐서 4.5MB 인데
+      리눅스 톰캣 배포에서는 한 줄도 실행되지 않는다.
+
+      드라이버가 실제로 쓰는 것은 사용자명/비밀번호 인증뿐이다.
+    -->
     <dependency>
       <groupId>org.mariadb.jdbc</groupId>
       <artifactId>mariadb-java-client</artifactId>
       <version>${mariadb.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.github.waffle</groupId>
+          <artifactId>waffle-jna</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <!-- HikariCP Connection Pool -->
@@ -81,17 +96,32 @@
       <version>2.3.3</version>
       <scope>provided</scope>
     </dependency>
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>jstl</artifactId>
-      <version>1.2</version>
-    </dependency>
+    <!--
+      jstl 은 뺐다. WEB-INF/views 의 JSP 두 개(404, 500)가 taglib 를
+      하나도 쓰지 않는다. 다시 쓰게 되면 그때 되살릴 것.
+    -->
 
     <!-- Jackson JSON -->
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
       <version>${jackson.version}</version>
+    </dependency>
+
+    <!--
+      Bean Validation (javax.validation)
+
+      6.2.x 가 javax 네임스페이스를 쓰는 마지막 계열이다. 7.x 부터는
+      jakarta 로 넘어가 톰캣 9 / Spring 5.3 조합에서 쓸 수 없다.
+
+      메시지 보간에 EL 구현체가 필요하지만, servlet-context.xml 에서
+      ParameterMessageInterpolator 를 지정해 EL 없이 돌린다. 컨테이너의
+      EL 버전에 끌려다니지 않으려는 것이다.
+    -->
+    <dependency>
+      <groupId>org.hibernate.validator</groupId>
+      <artifactId>hibernate-validator</artifactId>
+      <version>${hibernate-validator.version}</version>
     </dependency>
 
     <!-- Logging -->

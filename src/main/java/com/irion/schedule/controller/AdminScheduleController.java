@@ -6,8 +6,11 @@ import com.irion.schedule.vo.ScheduleVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.*;
 
 @Controller
@@ -66,7 +69,11 @@ public class AdminScheduleController {
     /** 일정 등록 */
     @PostMapping("")
     @ResponseBody
-    public JsonResult createSchedule(@RequestBody ScheduleVO scheduleVO) {
+    public JsonResult createSchedule(@Valid @RequestBody ScheduleVO scheduleVO, BindingResult binding) {
+        if (binding.hasErrors()) {
+            return JsonResult.fail(firstMessage(binding));
+        }
+
         Long scheduleId = scheduleService.createSchedule(scheduleVO);
 
         if (scheduleId == null) {
@@ -79,7 +86,13 @@ public class AdminScheduleController {
     /** 일정 수정 */
     @PutMapping("/{scheduleId}")
     @ResponseBody
-    public JsonResult updateSchedule(@PathVariable Long scheduleId, @RequestBody ScheduleVO scheduleVO) {
+    public JsonResult updateSchedule(@PathVariable Long scheduleId,
+                                     @Valid @RequestBody ScheduleVO scheduleVO,
+                                     BindingResult binding) {
+        if (binding.hasErrors()) {
+            return JsonResult.fail(firstMessage(binding));
+        }
+
         scheduleVO.setScheduleId(scheduleId);
         boolean success = scheduleService.updateSchedule(scheduleVO);
 
@@ -101,5 +114,20 @@ public class AdminScheduleController {
         }
 
         return JsonResult.success("일정이 삭제되었습니다.");
+    }
+
+    /**
+     * 첫 번째 검증 오류 메시지.
+     *
+     * 화면은 토스트 한 줄로 보여주므로 하나만 골라 준다. 여기서 막지 않으면
+     * 길이 초과가 DB 제약에 걸려 500 이 나가고, 사용자는 무엇이 잘못됐는지
+     * 알 수 없다.
+     */
+    private String firstMessage(BindingResult binding) {
+        FieldError error = binding.getFieldError();
+        if (error != null && error.getDefaultMessage() != null) {
+            return error.getDefaultMessage();
+        }
+        return "입력값이 올바르지 않습니다.";
     }
 }

@@ -73,6 +73,22 @@
   <!-- Session Config (30분) -->
   <session-config>
     <session-timeout>30</session-timeout>
+
+    <!--
+      세션 쿠키 보호.
+
+        http-only : 스크립트가 document.cookie 로 세션 ID 를 읽지 못한다.
+        secure    : 평문 HTTP 로는 쿠키를 보내지 않는다. 운영은 HTTPS 다.
+                    로컬(http://localhost:8080)은 크롬/파이어폭스가 localhost 를
+                    신뢰할 수 있는 출처로 보아 그대로 동작하지만, 사파리에서는
+                    관리자 로그인이 유지되지 않는다.
+
+      SameSite 는 Servlet 4.0 스펙에 없어서 META-INF/context.xml 에 둔다.
+    -->
+    <cookie-config>
+      <http-only>true</http-only>
+      <secure>true</secure>
+    </cookie-config>
   </session-config>
 
   <!-- Error Pages -->
@@ -91,6 +107,21 @@
   </filter>
   <filter-mapping>
     <filter-name>adminLoginFilter</filter-name>
+    <url-pattern>/admin/*</url-pattern>
+  </filter-mapping>
+
+  <!--
+    CSRF 검사 (관리자 영역의 상태 변경 요청)
+
+    adminLoginFilter 다음에 매핑한다. 로그인 여부를 먼저 가린 뒤,
+    로그인한 요청에 대해서만 토큰을 따진다.
+  -->
+  <filter>
+    <filter-name>csrfFilter</filter-name>
+    <filter-class>com.irion.common.filter.CsrfFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>csrfFilter</filter-name>
     <url-pattern>/admin/*</url-pattern>
   </filter-mapping>
 

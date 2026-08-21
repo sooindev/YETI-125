@@ -90,7 +90,6 @@ function loadSchedules(start, end, callback) {
             callback(events);
         },
         error: function(xhr) {
-            console.error('Failed to load schedules:', xhr);
             callback([]);
         }
     });
@@ -158,17 +157,29 @@ function loadUpcomingEvents() {
             }
         },
         error: function(xhr) {
-            console.error('Failed to load upcoming events:', xhr);
             $('#upcomingEvents').empty();
             $('#upcomingEmpty').show();
         }
     });
 }
 
-// 다가오는 일정 렌더링
+/*
+ * 다가오는 일정 렌더링
+ *
+ * 인라인 onclick 에 값을 박아 넣지 않는다. 속성값은 브라우저가 HTML 을
+ * 디코드한 뒤에야 JS 로 파싱되므로, escapeHtml 이 만든 &#039; 가 그 시점에
+ * 아포스트로피로 되살아나 문자열 리터럴이 끊긴다. 제목에 ' 가 든 일정은
+ * onclick 자체가 SyntaxError 라 눌러도 아무 일도 일어나지 않았다.
+ *
+ * 원본 이벤트는 배열에 그대로 두고 카드에는 인덱스만 남긴다. 이스케이프는
+ * 화면에 글자를 찍는 순간 한 번만 한다.
+ */
+let upcomingEventsData = [];
+
 function renderUpcomingEvents(events) {
     const $container = $('#upcomingEvents');
     $container.empty();
+    upcomingEventsData = events.slice();
 
     $.each(events, function(index, event) {
         const startDate = new Date(event.start);
@@ -179,20 +190,47 @@ function renderUpcomingEvents(events) {
         const typeName = getScheduleTypeName(event.type);
 
         const html = `
-            <div class="upcoming-item" onclick="showScheduleDetailById('${event.id}', '${escapeHtml(event.title)}', '${event.start}', '${event.end || ''}', ${event.allDay}, '${event.color || '#6366F1'}', '${event.type || 'STREAM'}', '${escapeHtml(event.description || '')}')">
+            <div class="upcoming-item" role="button" tabindex="0" data-upcoming-index="${index}">
                 <div class="upcoming-date">
                     <span class="upcoming-month">${month}</span>
                     <span class="upcoming-day">${day}</span>
                 </div>
                 <div class="upcoming-info">
                     <span class="upcoming-type ${typeClass}">${typeName}</span>
-                    <h3 class="upcoming-item-title">${escapeHtml(event.title)}</h3>
+                    <h3 class="upcoming-item-title">${YetiUtil.escapeHtml(event.title)}</h3>
                     <span class="upcoming-time">🕐 ${time}</span>
                 </div>
             </div>
         `;
 
         $container.append(html);
+    });
+}
+
+// 카드 클릭 / 키보드(Enter, Space) — 인덱스로 원본을 되찾아 상세를 연다
+$(document).on('click', '.upcoming-item', function() {
+    openUpcomingDetail($(this).attr('data-upcoming-index'));
+});
+
+$(document).on('keydown', '.upcoming-item', function(e) {
+    if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openUpcomingDetail($(this).attr('data-upcoming-index'));
+    }
+});
+
+function openUpcomingDetail(index) {
+    const event = upcomingEventsData[Number(index)];
+    if (!event) return;
+
+    showScheduleDetailFrom({
+        title: event.title,
+        start: event.start,
+        end: event.end,
+        allDay: event.allDay,
+        color: event.color,
+        type: event.type,
+        description: event.description
     });
 }
 
@@ -264,141 +302,71 @@ function formatDateKorean(date) {
     return `${year}년 ${month}월 ${day}일`;
 }
 
-// HTML 이스케이프
-function escapeHtml(text) {
-    if (!text) return '';
-    return text
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
+/*
+ * 일정 상세 보기
+ *
+ * 상세 HTML 을 만드는 곳은 여기 하나뿐이다. 들어오는 값은 항상 원본이고,
+ * 이스케이프는 이 함수 안에서만 한다. 이스케이프된 값을 다시 넘기지 말 것.
+ */
+function showScheduleDetailFrom(data) {
+    const typeName = getScheduleTypeName(data.type || 'STREAM');
+    const description = data.description || '';
+
+    let dateText = formatDateTime(new Date(data.start));
+    if (data.end) {
+        dateText += ' ~ ' + formatDateTime(new Date(data.end));
+    }
+    if (data.allDay) {
+        dateText = formatDateKorean(new Date(data.start)) + ' (종일)';
+    }
+
+    const html = `
+        <div class="detail-header">
+            <div class="detail-color" style="background: ${YetiUtil.safeColor(data.color)};"></div>
+            <h3 class="detail-title">${YetiUtil.escapeHtml(data.title)}</h3>
+        </div>
+        <div class="detail-row">
+            <span class="detail-icon">📅</span>
+            <div class="detail-content">
+                <div class="detail-label">일시</div>
+                <div class="detail-value">${YetiUtil.escapeHtml(dateText)}</div>
+            </div>
+        </div>
+        <div class="detail-row">
+            <span class="detail-icon">🏷️</span>
+            <div class="detail-content">
+                <div class="detail-label">유형</div>
+                <div class="detail-value">${YetiUtil.escapeHtml(typeName)}</div>
+            </div>
+        </div>
+        ${description ? `
+        <div class="detail-row">
+            <span class="detail-icon">📝</span>
+            <div class="detail-content">
+                <div class="detail-label">설명</div>
+                <div class="detail-value">${YetiUtil.escapeHtml(description)}</div>
+            </div>
+        </div>
+        ` : ''}
+    `;
+
+    $('#scheduleDetail').html(html);
+    YetiUtil.openModal('scheduleModal');
 }
 
-// 일정 상세 보기
+// 캘린더 이벤트 클릭
 function showScheduleDetail(event) {
-    const color = event.backgroundColor || '#6366F1';
-    const type = event.extendedProps.type || 'STREAM';
-    const description = event.extendedProps.description || '';
-    const typeClass = getTypeClass(type);
-    const typeName = getScheduleTypeName(type);
-
-    let dateText = formatDateTime(event.start);
-    if (event.end) {
-        dateText += ' ~ ' + formatDateTime(event.end);
-    }
-    if (event.allDay) {
-        dateText = formatDateKorean(event.start) + ' (종일)';
-    }
-
-    const html = `
-        <div class="detail-header">
-            <div class="detail-color" style="background: ${color};"></div>
-            <h3 class="detail-title">${escapeHtml(event.title)}</h3>
-        </div>
-        <div class="detail-row">
-            <span class="detail-icon">📅</span>
-            <div class="detail-content">
-                <div class="detail-label">일시</div>
-                <div class="detail-value">${dateText}</div>
-            </div>
-        </div>
-        <div class="detail-row">
-            <span class="detail-icon">🏷️</span>
-            <div class="detail-content">
-                <div class="detail-label">유형</div>
-                <div class="detail-value">${typeName}</div>
-            </div>
-        </div>
-        ${description ? `
-        <div class="detail-row">
-            <span class="detail-icon">📝</span>
-            <div class="detail-content">
-                <div class="detail-label">설명</div>
-                <div class="detail-value">${escapeHtml(description)}</div>
-            </div>
-        </div>
-        ` : ''}
-    `;
-
-    $('#scheduleDetail').html(html);
-    openModal('scheduleModal');
+    showScheduleDetailFrom({
+        title: event.title,
+        start: event.start,
+        end: event.end,
+        allDay: event.allDay,
+        color: event.backgroundColor,
+        type: event.extendedProps.type,
+        description: event.extendedProps.description
+    });
 }
 
-// ID로 일정 상세 보기 (다가오는 일정에서 클릭 시)
-function showScheduleDetailById(id, title, start, end, allDay, color, type, description) {
-    const typeClass = getTypeClass(type);
-    const typeName = getScheduleTypeName(type);
-
-    let dateText = formatDateTime(new Date(start));
-    if (end) {
-        dateText += ' ~ ' + formatDateTime(new Date(end));
-    }
-    if (allDay) {
-        dateText = formatDateKorean(new Date(start)) + ' (종일)';
-    }
-
-    const html = `
-        <div class="detail-header">
-            <div class="detail-color" style="background: ${color};"></div>
-            <h3 class="detail-title">${title}</h3>
-        </div>
-        <div class="detail-row">
-            <span class="detail-icon">📅</span>
-            <div class="detail-content">
-                <div class="detail-label">일시</div>
-                <div class="detail-value">${dateText}</div>
-            </div>
-        </div>
-        <div class="detail-row">
-            <span class="detail-icon">🏷️</span>
-            <div class="detail-content">
-                <div class="detail-label">유형</div>
-                <div class="detail-value">${typeName}</div>
-            </div>
-        </div>
-        ${description ? `
-        <div class="detail-row">
-            <span class="detail-icon">📝</span>
-            <div class="detail-content">
-                <div class="detail-label">설명</div>
-                <div class="detail-value">${description}</div>
-            </div>
-        </div>
-        ` : ''}
-    `;
-
-    $('#scheduleDetail').html(html);
-    openModal('scheduleModal');
-}
-
-// 모달 열기
-function openModal(modalId) {
-    const $modal = $('#' + modalId);
-    $modal.addClass('active');
-    $('body').css('overflow', 'hidden');
-}
-
-// 모달 닫기
-function closeModal(modalId) {
-    if (modalId) {
-        $('#' + modalId).removeClass('active');
-    } else {
-        $('.modal').removeClass('active');
-    }
-    $('body').css('overflow', 'auto');
-}
-
-// 모달 외부 클릭 시 닫기
-$(document).on('click', '.modal', function(e) {
-    if (e.target === this) {
-        closeModal();
-    }
-});
-
-// ESC 키로 모달 닫기
-$(document).on('keydown', function(e) {
-    if (e.key === 'Escape') {
-        closeModal();
-    }
-});
+// 모달을 열고 닫는 일, 바깥 클릭과 ESC 처리는 common.js (YetiUtil) 가 맡는다.
+// 예전에는 여기서 같은 이름의 전역 함수를 다시 정의해 common.js 것을
+// 덮어썼다. overflow 복원값도 '' 와 'auto' 로 서로 달랐다.

@@ -5,9 +5,52 @@
 let calendar;
 let currentScheduleId = null;
 
+/*
+ * /admin/** 로 나가는 모든 요청에 AJAX 표시를 붙인다.
+ *
+ * 이 표시가 없으면 서버가 인증 실패를 401 이 아니라 로그인 페이지
+ * 리다이렉트로 돌려준다. jQuery 는 리다이렉트를 따라가 HTTP 200 + HTML 을
+ * 받고, JSON 파싱에 실패해 error 콜백으로 오는데 그 때 xhr.status 는
+ * 200 이라 401 분기에 걸리지 않는다. 세션이 끊긴 뒤 캘린더가 에러도 없이
+ * 빈 화면이 되던 원인이다.
+ *
+ * jQuery 가 동일 출처 요청에 X-Requested-With 를 붙여주긴 하지만,
+ * 인증 판정이 걸린 헤더를 라이브러리 기본값에 맡기지 않는다.
+ *
+ * 상태를 바꾸는 요청에는 CSRF 토큰도 함께 싣는다. 토큰은 화면을 열 때
+ * 한 번 받아 온다 (아래 $(document).ready 참고).
+ */
+let csrfToken = null;
+
+$.ajaxPrefilter(function(options) {
+    if (!options.url || options.url.indexOf('/admin/') !== 0) return;
+
+    const headers = {
+        'X-Requested-With': 'XMLHttpRequest',
+        'Accept': 'application/json'
+    };
+
+    const method = (options.type || 'GET').toUpperCase();
+    if (csrfToken && method !== 'GET' && method !== 'HEAD') {
+        headers['X-CSRF-Token'] = csrfToken;
+    }
+
+    options.headers = $.extend(headers, options.headers);
+});
+
 $(document).ready(function() {
-    initCalendar();
-    initEventHandlers();
+    // 토큰을 먼저 받아둔다. 실패해도 화면은 띄운다 — 조회는 토큰이
+    // 필요 없고, 저장을 누르는 시점에 서버가 403 으로 알려준다.
+    $.ajax({
+        url: '/admin/csrf-token',
+        type: 'GET',
+        dataType: 'json'
+    }).done(function(res) {
+        csrfToken = res && res.token;
+    }).always(function() {
+        initCalendar();
+        initEventHandlers();
+    });
 });
 
 // 캘린더 초기화
@@ -94,7 +137,7 @@ function initEventHandlers() {
 
     // 모달 닫기 버튼
     $('.modal-close, .btn-secondary[data-action="cancel"]').on('click', function() {
-        closeModal('scheduleModal');
+        YetiUtil.closeModal('scheduleModal');
     });
 
     // 삭제 버튼
@@ -134,7 +177,6 @@ function loadSchedules(start, end, callback) {
             callback(events);
         },
         error: function(xhr) {
-            console.error('Failed to load schedules:', xhr);
             if (xhr.status === 401) {
                 window.location.href = '/admin/admin-login.html';
             }
@@ -149,7 +191,7 @@ function openAddModal() {
     resetForm();
     $('#modalTitle').text('일정 추가');
     $('#deleteBtn').hide();
-    openModal('scheduleModal');
+    YetiUtil.openModal('scheduleModal');
 }
 
 // 날짜 선택 시 추가 모달 열기
@@ -159,7 +201,7 @@ function openAddModalWithDate(dateStr) {
     $('#modalTitle').text('일정 추가');
     $('#deleteBtn').hide();
     $('#startDate').val(dateStr + 'T00:00');
-    openModal('scheduleModal');
+    YetiUtil.openModal('scheduleModal');
 }
 
 // 수정 모달 열기
@@ -177,14 +219,14 @@ function openEditModal(event) {
 
     // 날짜 설정
     if (event.start) {
-        $('#startDate').val(formatDate(event.start, 'datetime-local'));
+        $('#startDate').val(YetiUtil.formatDate(event.start, 'datetime-local'));
     }
     if (event.end) {
-        $('#endDate').val(formatDate(event.end, 'datetime-local'));
+        $('#endDate').val(YetiUtil.formatDate(event.end, 'datetime-local'));
     }
 
     $('#deleteBtn').show();
-    openModal('scheduleModal');
+    YetiUtil.openModal('scheduleModal');
 }
 
 // 폼 초기화
@@ -241,7 +283,7 @@ function saveSchedule() {
         success: function(response) {
             if (response.success) {
                 showToast(response.message, 'success');
-                closeModal('scheduleModal');
+                YetiUtil.closeModal('scheduleModal');
                 calendar.refetchEvents();
             } else {
                 showToast(response.message || '저장에 실패했습니다.', 'error');
@@ -271,7 +313,7 @@ function deleteSchedule() {
         success: function(response) {
             if (response.success) {
                 showToast(response.message, 'success');
-                closeModal('scheduleModal');
+                YetiUtil.closeModal('scheduleModal');
                 calendar.refetchEvents();
             } else {
                 showToast(response.message || '삭제에 실패했습니다.', 'error');
@@ -279,7 +321,7 @@ function deleteSchedule() {
         },
         error: function(xhr) {
             if (xhr.status === 401) {
-                window.location.href = '/admin/login.html';
+                window.location.href = '/admin/admin-login.html';
                 return;
             }
             showToast('삭제 중 오류가 발생했습니다.', 'error');
@@ -343,16 +385,18 @@ function formatDateForServer(dateTimeLocalString) {
         : dateTimeLocalString;
 }
 
-// 로그아웃
+/*
+ * 로그아웃
+ *
+ * GET 이었을 때는 <img src="/admin/logout"> 만으로도 남의 세션을 끊을 수
+ * 있었다. POST 로 바꿔 CSRF 검사를 받게 한다.
+ */
 function doLogout() {
     $.ajax({
         url: '/admin/logout',
-        type: 'GET',
-        success: function() {
-            window.location.href = '/admin/admin-login.html';
-        },
-        error: function() {
-            window.location.href = '/admin/admin-login.html';
-        }
+        type: 'POST',
+        dataType: 'json'
+    }).always(function() {
+        window.location.href = '/admin/admin-login.html';
     });
 }
