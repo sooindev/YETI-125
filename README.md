@@ -18,6 +18,14 @@
 
 <br>
 
+<div align="center">
+
+<img src="docs/screenshots/home.webp" alt="YETI-125 홈 — 실시간 방송 상태와 이리온 팬사이트 메인 화면" width="900">
+
+</div>
+
+<br>
+
 ## 소개
 
 YETI-125는 치지직 스트리머 이리온의 활동을 한곳에 모아 보여주는 팬 아카이브입니다.
@@ -53,15 +61,21 @@ chzzk API와 연동해 실시간 방송 상태를 보여주고,
 `videoNo` 로 적어둡니다. 제목은 바뀔 수 있지만 번호는 그대로입니다.
 지우는 것이 아니라 이 사이트에서만 가리는 것이라 치지직에는 남아 있습니다.
 
+<img src="docs/screenshots/clips.webp" alt="인기 클립 목록 — 조회수 순으로 자동 수집된 클립 카드" width="900">
+
 ### 방송 일정
 
 월간 캘린더 뷰로 방송 일정을 확인합니다.
 저스트 채팅, 종합게임, 노래방송, 합방 — 유형별로 색을 달리해 한눈에 구분됩니다.
 
+<img src="docs/screenshots/schedule.webp" alt="방송 일정 캘린더 — 유형별 색상과 다가오는 일정 목록" width="900">
+
 ### 프로필
 
 캐릭터 설정, 제작 크레딧, 데뷔일과 생일 D-Day,
 채널과 SNS 링크를 정돈된 형태로 제공합니다.
+
+<img src="docs/screenshots/profile.webp" alt="프로필 명세 — 기본 정보, 상세 정보, 크레딧, 팬 정보" width="900">
 
 ### 관리자
 
@@ -72,6 +86,14 @@ chzzk API와 연동해 실시간 방송 상태를 보여주고,
 필터가 `DispatcherServlet` 앞에서 정적 페이지까지 막고,
 인터셉터가 컨트롤러 진입 직전에 한 번 더 확인합니다.
 두 곳 모두 AJAX 요청에는 리다이렉트 대신 401 을 돌려줍니다.
+
+### 인트로
+
+홈에 처음 들어오면 문이 열리는 연출이 재생됩니다.
+하루에 한 번만 보여주므로, 같은 날 다시 방문하면 바로 본문이 나옵니다.
+(마지막으로 문을 연 날짜를 `localStorage` 에 두고 오늘과 비교합니다)
+
+<img src="docs/screenshots/intro.webp" alt="도어 인트로 — 문이 열리며 사이트로 진입하는 연출" width="900">
 
 ### 다크모드
 
@@ -418,6 +440,7 @@ YETI-125/
 │   │       ├── resources/     css · js · images
 │   │       └── *.html         홈, 일정, 프로필, 관리자
 │   └── test/java/com/irion/   비밀번호 · 치지직 파싱 · 페이지네이션 · 입력 검증
+├── docs/screenshots/      README 용 화면 캡처
 ├── run-local.sh           로컬 빌드 · 배포 · 기동 확인
 ├── deploy.sh              빌드 · 전송 · 배포 · 롤백
 └── pom.xml
