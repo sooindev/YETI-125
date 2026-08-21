@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  세션 쿠키의 SameSite 속성.
+
+  Servlet 4.0 의 web.xml <cookie-config> 에는 SameSite 항목이 없다.
+  톰캣 9 의 쿠키 처리기 설정으로 붙인다.
+
+  Lax 로 두면 다른 사이트에서 넘어온 POST 요청에는 세션 쿠키가 실리지
+  않으므로, CSRF 방어(CsrfFilter)와 겹겹이 막는 셈이 된다. 평범한 링크
+  클릭으로 들어오는 GET 은 그대로 동작한다.
+-->
+<Context>
+    <CookieProcessor className="org.apache.tomcat.util.http.Rfc6265CookieProcessor"
+                     sameSiteCookies="lax"/>
+</Context>

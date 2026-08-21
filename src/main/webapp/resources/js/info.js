@@ -5,10 +5,26 @@
 $(document).ready(function() {
     // D-Day 계산
     calculateDday();
-
-    // 매일 자정에 D-Day 갱신
-    setInterval(calculateDday, 60000);
+    scheduleMidnightRefresh();
 });
+
+/*
+ * 자정에 다시 계산한다.
+ *
+ * 예전에는 setInterval(calculateDday, 60000) 이었다. 주석은 "매일 자정에
+ * 갱신" 이라고 되어 있었지만 실제로는 하루 1440번 돌면서 같은 숫자를
+ * 다시 그렸다. 값이 바뀌는 순간은 날짜가 넘어갈 때뿐이다.
+ */
+function scheduleMidnightRefresh() {
+    const now = new Date();
+    const nextMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+
+    // 경계에 딱 걸쳐 어제 날짜로 계산되지 않도록 1초 여유를 둔다
+    setTimeout(function() {
+        calculateDday();
+        scheduleMidnightRefresh();
+    }, nextMidnight - now + 1000);
+}
 
 // D-Day 계산
 function calculateDday() {
@@ -30,7 +46,7 @@ function calculateDday() {
 
     // 데뷔 D-Day 계산 (D+)
     const debutDiff = Math.floor((today - debutDate) / (1000 * 60 * 60 * 24));
-    $('#debutDday').text('D+' + numberFormat(debutDiff));
+    $('#debutDday').text('D+' + YetiUtil.numberFormat(debutDiff));
 
     // 생일 D-Day 계산
     const birthdayDiff = Math.floor((birthday - today) / (1000 * 60 * 60 * 24));
@@ -38,11 +54,6 @@ function calculateDday() {
     if (birthdayDiff === 0) {
         $('#birthdayDday').text('🎉 TODAY!');
     } else {
-        $('#birthdayDday').text('D-' + numberFormat(birthdayDiff));
+        $('#birthdayDday').text('D-' + YetiUtil.numberFormat(birthdayDiff));
     }
-}
-
-// 숫자 포맷 (1000 -> 1,000)
-function numberFormat(num) {
-    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }

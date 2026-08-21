@@ -38,20 +38,15 @@ function doLogin() {
         },
         dataType: 'json',
         success: function(response) {
-            console.log('=== Login Response ===');
-            console.log('success:', response.success);
-            console.log('message:', response.message);
-            console.log('full response:', response);
-
+            // 로그인 응답을 콘솔에 찍지 않는다. 공용 PC 의 개발자 도구에
+            // 그대로 남는다.
             if (response.success) {
-                console.log('Redirecting to /admin/admin-schedule.html...');
                 window.location.href = '/admin/admin-schedule.html';
             } else {
                 showError(response.message || '로그인에 실패했습니다.');
             }
         },
-        error: function(xhr, status, error) {
-            console.log('Error:', xhr, status, error);  // 디버깅용
+        error: function() {
             showError('로그인 중 오류가 발생했습니다.');
             $('#password').val('').focus();
         }

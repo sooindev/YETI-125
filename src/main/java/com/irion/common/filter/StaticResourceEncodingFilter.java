@@ -6,8 +6,15 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
- * 정적 리소스(JS, CSS, HTML)에 대한 UTF-8 인코딩 필터
- * 이모티콘 등 비-ASCII 문자가 제대로 표시되도록 Content-Type에 charset 추가
+ * 정적 리소스(JS, CSS)에 대한 UTF-8 인코딩 필터
+ *
+ * 이모티콘 등 비-ASCII 문자가 제대로 표시되도록 Content-Type 에 charset 을 붙인다.
+ *
+ * web.xml 에서 /resources/* 에만 매핑돼 있다. 그 아래에는 css / js 와
+ * 이미지뿐이라, 예전에 있던 .html / .json 분기는 한 번도 실행되지 않는
+ * 죽은 코드였다. (HTML 은 /resources 밖에 있다)
+ *
+ * 매핑을 넓히게 되면 그때 분기를 다시 넣을 것.
  */
 public class StaticResourceEncodingFilter implements Filter {
 
@@ -25,15 +32,10 @@ public class StaticResourceEncodingFilter implements Filter {
 
         String uri = httpRequest.getRequestURI();
 
-        // 정적 리소스에 대해 Content-Type charset 설정
         if (uri.endsWith(".js")) {
             httpResponse.setContentType("application/javascript; charset=UTF-8");
         } else if (uri.endsWith(".css")) {
             httpResponse.setContentType("text/css; charset=UTF-8");
-        } else if (uri.endsWith(".html")) {
-            httpResponse.setContentType("text/html; charset=UTF-8");
-        } else if (uri.endsWith(".json")) {
-            httpResponse.setContentType("application/json; charset=UTF-8");
         }
 
         chain.doFilter(request, response);

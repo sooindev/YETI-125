@@ -48,14 +48,16 @@ function checkLiveStatus() {
 
 function showLiveHero(data) {
     $('#liveTitle').text(data.liveTitle || '이리온 방송 중!');
-    $('#liveLink').attr('href', data.channelUrl);
+    $('#liveLink').attr('href', YetiUtil.safeUrl(data.channelUrl));
 
-    if (data.thumbnail) {
-        $('#liveThumbnail').attr('src', data.thumbnail);
+    // .attr() 은 값을 그대로 넣는다. 스킴은 여기서도 확인한다.
+    const thumbnail = YetiUtil.safeUrl(data.thumbnail);
+    if (thumbnail) {
+        $('#liveThumbnail').attr('src', thumbnail);
     }
 
     if (data.viewerCount) {
-        $('#liveViewers').text('👤 ' + numberFormat(data.viewerCount) + '명 시청 중');
+        $('#liveViewers').text('👤 ' + YetiUtil.numberFormat(data.viewerCount) + '명 시청 중');
     }
 
     $('#defaultHero').hide();
@@ -82,8 +84,6 @@ function loadClips() {
         dataType: 'json',
         timeout: 10000,
         success: function(response) {
-            console.log('Clips response:', response);
-
             $('#clipsLoading').hide();
 
             if (response.success && response.data) {
@@ -174,6 +174,7 @@ function initClipModal() {
     $(document).on('click', '#clipModal', function(e) {
         if ($(e.target).is('#clipModal')) clearClipFrame();
     });
+    $(document).on('click', '[data-close-modal="clipModal"]', clearClipFrame);
     $(document).on('keydown', function(e) {
         if (e.key === 'Escape') clearClipFrame();
     });
@@ -181,14 +182,14 @@ function initClipModal() {
 
 function openClipModal(clipId, title, originUrl) {
     $('#clipModalTitle').text(title || '클립');
-    $('#clipModalOrigin').attr('href', originUrl || 'https://chzzk.naver.com/clips/' + clipId);
+    $('#clipModalOrigin').attr('href', YetiUtil.safeUrl(originUrl) || 'https://chzzk.naver.com/clips/' + encodeURIComponent(clipId));
     $('#clipModalFrame').attr('src', 'https://chzzk.naver.com/embed/clip/' + encodeURIComponent(clipId));
-    openModal('clipModal');
+    YetiUtil.openModal('clipModal');
 }
 
 function closeClipModal() {
     clearClipFrame();
-    closeModal('clipModal');
+    YetiUtil.closeModal('clipModal');
 }
 
 // src를 비워 플레이어를 완전히 내린다 (재생 중단)
@@ -205,23 +206,23 @@ function renderClips(clips, append) {
 
     $.each(clips, function(index, clip) {
         const duration = formatDuration(clip.duration);
-        const viewCount = numberFormat(clip.viewCount || 0);
-        const date = formatDate(clip.createdAt);
+        const viewCount = YetiUtil.numberFormat(clip.viewCount || 0);
+        const date = YetiUtil.formatMonthDay(clip.createdAt);
 
         const clipHtml =
-            '<a href="' + clip.clipUrl + '" target="_blank" rel="noopener"' +
+            '<a href="' + YetiUtil.attrUrl(clip.clipUrl) + '" target="_blank" rel="noopener"' +
             ' class="clip-card scroll-animate scale-in"' +
-            ' data-clip-id="' + escapeHtml(clip.clipId) + '"' +
-            ' data-clip-title="' + escapeHtml(clip.clipTitle) + '">' +
+            ' data-clip-id="' + YetiUtil.escapeHtml(clip.clipId) + '"' +
+            ' data-clip-title="' + YetiUtil.escapeHtml(clip.clipTitle) + '">' +
             '<div class="clip-thumbnail">' +
-            '<img src="' + (clip.thumbnailUrl || '') + '" alt="' + escapeHtml(clip.clipTitle) + '">' +
+            '<img src="' + YetiUtil.attrUrl(clip.thumbnailUrl) + '" alt="' + YetiUtil.escapeHtml(clip.clipTitle) + '" loading="lazy">' +
             '<span class="clip-duration">' + duration + '</span>' +
             '<div class="clip-play-overlay">' +
             '<div class="clip-play-icon">▶</div>' +
             '</div>' +
             '</div>' +
             '<div class="clip-info">' +
-            '<h3 class="clip-title">' + escapeHtml(clip.clipTitle) + '</h3>' +
+            '<h3 class="clip-title">' + YetiUtil.escapeHtml(clip.clipTitle) + '</h3>' +
             '<div class="clip-meta">' +
             '<span class="clip-meta-item">👁 ' + viewCount + '</span>' +
             '<span class="clip-meta-item">📅 ' + date + '</span>' +
@@ -247,30 +248,6 @@ function formatDuration(seconds) {
     return mins + ':' + String(secs).padStart(2, '0');
 }
 
-function formatDate(dateStr) {
-    if (!dateStr) return '';
-    try {
-        const date = new Date(dateStr);
-        return (date.getMonth() + 1) + '월 ' + date.getDate() + '일';
-    } catch (e) {
-        return '';
-    }
-}
-
-function numberFormat(num) {
-    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-}
-
-function escapeHtml(text) {
-    if (!text) return '';
-    return text
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-}
-
 let videoOffset = 0;
 let hasMoreVideos = false;
 
@@ -289,8 +266,6 @@ function loadVideos() {
         dataType: 'json',
         timeout: 10000,
         success: function(response) {
-            console.log('Videos response:', response);
-
             $('#videosLoading').hide();
 
             if (response.success && response.data) {
@@ -410,7 +385,7 @@ function initVideoModal() {
         $('#videoModalGo').attr('href', url);
         // 체크는 매번 풀린 상태로 시작한다 — 켜져 있었다면 여기까지 오지 않는다
         $('#videoModalSkip').prop('checked', false);
-        openModal('videoModal');
+        YetiUtil.openModal('videoModal');
     });
 
     // 이동을 누르면 새 탭이 열리고 모달은 닫아둔다.
@@ -423,7 +398,7 @@ function initVideoModal() {
             rememberVideoSkip();
             syncVideoRestoreLink();
         }
-        closeModal('videoModal');
+        YetiUtil.closeModal('videoModal');
     });
 
     $(document).on('click', '#videoConfirmRestore', function() {
@@ -447,22 +422,22 @@ function renderVideos(videos, append) {
 
     $.each(videos, function(index, video) {
         const duration = formatVideoDuration(video.duration);
-        const viewCount = numberFormat(video.readCount || 0);
-        const date = formatDate(video.publishDate);
+        const viewCount = YetiUtil.numberFormat(video.readCount || 0);
+        const date = YetiUtil.formatMonthDay(video.publishDate);
 
         const videoHtml =
-            '<a href="' + video.videoUrl + '" target="_blank" rel="noopener"' +
+            '<a href="' + YetiUtil.attrUrl(video.videoUrl) + '" target="_blank" rel="noopener"' +
             ' class="video-card scroll-animate scale-in"' +
-            ' data-video-title="' + escapeHtml(video.videoTitle) + '">' +
+            ' data-video-title="' + YetiUtil.escapeHtml(video.videoTitle) + '">' +
             '<div class="video-thumbnail">' +
-            '<img src="' + (video.thumbnailUrl || '') + '" alt="' + escapeHtml(video.videoTitle) + '">' +
+            '<img src="' + YetiUtil.attrUrl(video.thumbnailUrl) + '" alt="' + YetiUtil.escapeHtml(video.videoTitle) + '" loading="lazy">' +
             '<span class="video-duration">' + duration + '</span>' +
             '<div class="video-play-overlay">' +
             '<div class="video-play-icon">▶</div>' +
             '</div>' +
             '</div>' +
             '<div class="video-info">' +
-            '<h3 class="video-title">' + escapeHtml(video.videoTitle) + '</h3>' +
+            '<h3 class="video-title">' + YetiUtil.escapeHtml(video.videoTitle) + '</h3>' +
             '<div class="video-meta">' +
             '<span class="video-meta-item">👁 ' + viewCount + '</span>' +
             '<span class="video-meta-item">📅 ' + date + '</span>' +

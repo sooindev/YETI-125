@@ -12,7 +12,7 @@
            http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
     <!-- Enable MVC Annotation (@Controller, @RequestMapping 등) -->
-    <mvc:annotation-driven>
+    <mvc:annotation-driven validator="validator">
         <mvc:message-converters>
             <!-- JSON 변환 설정 (이모티콘 지원) -->
             <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
@@ -25,6 +25,19 @@
             </bean>
         </mvc:message-converters>
     </mvc:annotation-driven>
+
+    <!--
+      Bean Validation (@Valid)
+
+      기본 메시지 보간기는 EL 구현체를 요구한다. 톰캣이 제공하는 EL 에
+      끌려다니지 않도록 EL 을 쓰지 않는 보간기를 지정한다. 제약 메시지에
+      {min} 같은 파라미터 치환은 그대로 되고, ${...} EL 표현식만 못 쓴다.
+    -->
+    <bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean">
+        <property name="messageInterpolator">
+            <bean class="org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator"/>
+        </property>
+    </bean>
 
     <!-- ObjectMapper 설정 (이모티콘 출력 지원) -->
     <bean id="objectMapper" class="org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean">
@@ -62,8 +75,7 @@
         <!-- 관리자 로그인 체크 -->
         <mvc:interceptor>
             <mvc:mapping path="/admin/**"/>
-            <mvc:exclude-mapping path="/admin/login"/>
-            <mvc:exclude-mapping path="/admin/login.html"/>
+            <!-- /admin/login(.html) 은 존재하지 않는 경로였다. 실제 파일은 admin-login.html -->
             <mvc:exclude-mapping path="/admin/admin-login"/>
             <mvc:exclude-mapping path="/admin/admin-login.html"/>
             <mvc:exclude-mapping path="/admin/loginProc"/>

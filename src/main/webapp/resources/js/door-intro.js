@@ -8,8 +8,28 @@
     // 세션 체크 - 같은 세션에서는 한 번만 표시
     const INTRO_SESSION_KEY = 'door_intro_shown';
 
+    /*
+     * 사파리 프라이빗 모드나 쿠키 차단 설정에서는 sessionStorage 접근
+     * 자체가 예외를 던진다. 여기만 맨몸으로 두면 그 브라우저에서
+     * 이 스크립트가 첫 줄에서 죽어 인트로가 영영 열리지 않는다.
+     * (다른 파일은 전부 감싸고 있다)
+     */
+    function introShown() {
+        try {
+            return !!sessionStorage.getItem(INTRO_SESSION_KEY);
+        } catch (e) {
+            return false;
+        }
+    }
+
+    function rememberIntroShown() {
+        try {
+            sessionStorage.setItem(INTRO_SESSION_KEY, 'true');
+        } catch (e) {}
+    }
+
     // 이미 이번 세션에 표시했으면 숨김
-    if (sessionStorage.getItem(INTRO_SESSION_KEY)) {
+    if (introShown()) {
         const intro = document.querySelector('.door-intro');
         if (intro) {
             intro.classList.add('hidden');
@@ -39,7 +59,7 @@
             setTimeout(function() {
                 intro.classList.add('fading');
                 // 세션에 표시 기록
-                sessionStorage.setItem(INTRO_SESSION_KEY, 'true');
+                rememberIntroShown();
 
                 // Fade out 완료 후 완전히 제거
                 setTimeout(function() {

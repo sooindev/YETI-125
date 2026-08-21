@@ -12,11 +12,18 @@
         rootMargin: '0px 0px -50px 0px'
     };
 
-    // Intersection Observer 콜백
+    /*
+     * Intersection Observer 콜백
+     *
+     * 한 번 나타난 요소는 관찰을 끊는다. 애니메이션은 되돌리지 않으므로
+     * 계속 지켜볼 이유가 없다. 클립/다시보기 더보기로 카드가 수백 개까지
+     * 늘어나는 화면이라, 안 끊으면 스크롤할 때마다 그만큼 콜백이 돈다.
+     */
     function handleIntersection(entries, observer) {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 entry.target.classList.add('is-visible');
+                observer.unobserve(entry.target);
             }
         });
     }
@@ -34,8 +41,6 @@
         animateElements.forEach(element => {
             observer.observe(element);
         });
-
-        console.log(`Scroll animations initialized for ${animateElements.length} elements`);
     }
 
     // 동적으로 추가된 요소 관찰

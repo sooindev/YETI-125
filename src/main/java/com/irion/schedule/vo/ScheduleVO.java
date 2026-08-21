@@ -2,6 +2,10 @@ package com.irion.schedule.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -9,19 +13,40 @@ public class ScheduleVO implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    /*
+     * 제약은 DB 컬럼 정의에서 그대로 따왔다 (tb_schedule).
+     * 여기서 걸러내지 않으면 길이 초과가 DB 제약에 걸려 500 이 나가고,
+     * 화면에는 "저장 중 오류가 발생했습니다" 만 뜬다.
+     */
+
     private Long scheduleId;
+
+    @NotBlank(message = "제목을 입력해 주세요.")
+    @Size(max = 200, message = "제목은 200자를 넘을 수 없습니다.")
     private String title;
+
+    @Size(max = 5000, message = "설명은 5000자를 넘을 수 없습니다.")
     private String description;
+
+    @Pattern(regexp = "(STREAM|COLLAB|JUSTCHAT|GAME|KARAOKE|EVENT|OTHER)?",
+             message = "알 수 없는 일정 유형입니다.")
     private String scheduleType;
 
+    @NotNull(message = "시작 일시를 선택해 주세요.")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
     private Date startDate;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
     private Date endDate;
 
+    @Pattern(regexp = "[YN]?", message = "종일 여부가 올바르지 않습니다.")
     private String allDayYn;
+
+    @Pattern(regexp = "[YN]?", message = "공개 여부가 올바르지 않습니다.")
     private String displayYn;
+
+    @Pattern(regexp = "(#[0-9a-fA-F]{3}([0-9a-fA-F]{3})?)?", message = "색상 형식이 올바르지 않습니다.")
+    @Size(max = 10, message = "색상 값이 너무 깁니다.")
     private String color;
     private Date regDate;
     private Date modDate;
