@@ -247,6 +247,14 @@ function apiRequest(url, method, data, callback) {
 }
 
 // Toast Message
+/*
+ * 토스트
+ *
+ * 이전 타이머를 지우고 다시 건다. 그러지 않으면 두 번째 토스트가
+ * 첫 번째의 타이머에 걸려 3초를 못 채우고 사라진다.
+ */
+let toastTimer = null;
+
 function showToast(message, type) {
     const $toast = $('#toast');
     $toast.text(message)
@@ -254,7 +262,8 @@ function showToast(message, type) {
         .addClass(type || 'success')
         .addClass('show');
 
-    setTimeout(function() {
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function() {
         $toast.removeClass('show');
     }, 3000);
 }

@@ -18,22 +18,61 @@ main { padding-top: var(--head-total); }
     overflow: hidden;
 }
 
-/* marquee strip across the top of the hero */
+/* ------------------------------------------------------------
+   marquee strip across the top of the hero
+
+   바깥(.hero-noise-line)이 화면 폭 전체를 차지하는 창이고,
+   안쪽(.hero-noise-track)이 그 뒤로 흘러가는 띠다.
+
+   예전에는 창 없이 문구 하나에 바로 애니메이션을 걸었다. 그러면 요소
+   폭이 글자 폭(654px)에 그쳐 화면의 왼쪽 45%에만 머물고, -50%(327px)
+   만큼 밀렸다가 제자리로 튀었다. -50% 는 내용을 복제해 뒀을 때 쓰는
+   방식이라 복제가 없으면 성립하지 않는다.
+   ------------------------------------------------------------ */
 .hero-noise-line {
+    /*
+      문구 사이 간격.
+
+      화면 폭에 비례시킨다. 고정값으로 두면 넓은 화면에서 문구가 두 개씩
+      들어차 다시 빽빽해진다. 어느 폭에서든 한 번에 하나 남짓만 보이도록.
+    */
+    --marquee-gap: clamp(160px, 52vw, 1400px);
+
     position: absolute;
     top: clamp(20px, 4vw, 40px);
     left: 0;
-    white-space: nowrap;
+    width: 100%;
+    overflow: hidden;
     font-family: var(--f-mono);
     font-size: 0.74rem;
     letter-spacing: 0.28em;
     color: var(--bone-faint);
     text-transform: uppercase;
-    animation: marquee 38s linear infinite;
+    /* 눈에 먼저 들어오지 않도록 한 단계 물린다 */
+    opacity: 0.72;
+    /* 배경 장식이므로 아래 요소의 클릭을 가리지 않는다 */
+    pointer-events: none;
 }
+
+.hero-noise-track {
+    display: flex;
+    width: max-content;
+    animation: marquee 90s linear infinite;
+}
+
+.hero-noise-track > span {
+    white-space: nowrap;
+    padding-right: var(--marquee-gap);
+}
+
 @keyframes marquee {
     from { transform: translateX(0); }
     to   { transform: translateX(-50%); }
+}
+
+/* 움직임을 줄이도록 설정한 사용자에게는 멈춰 세운다 */
+@media (prefers-reduced-motion: reduce) {
+    .hero-noise-track { animation: none; }
 }
 
 .hero-shell { width: 100%; }
