@@ -94,6 +94,100 @@ chzzk API와 연동해 실시간 방송 상태를 보여주고,
 
 <br>
 
+## 아키텍처
+
+nginx가 HTTPS를 끊고 톰캣에 평문으로 넘깁니다.
+방송 일정은 MariaDB에서, 라이브 상태·클립·다시보기는 치지직 API에서 옵니다.
+
+```mermaid
+flowchart LR
+    subgraph browser["브라우저"]
+        UI["HTML · CSS\njQuery · FullCalendar"]
+    end
+
+    subgraph prod["운영 서버"]
+        NG["nginx\nHTTPS 종료"]
+        subgraph tc["Tomcat 9"]
+            FC["필터 체인"]
+            DS["DispatcherServlet"]
+            CT["Controller\nHome · Live · Schedule · Admin"]
+            SV["Service\nLiveFeed · Schedule · Admin"]
+            MP["MyBatis Mapper"]
+        end
+    end
+
+    DB[("MariaDB\nfor_125")]
+    CZ["치지직 API\napi.chzzk.naver.com"]
+
+    UI -->|HTTPS| NG
+    NG -->|"HTTP :8080"| FC
+    FC --> DS --> CT --> SV
+    SV --> MP --> DB
+    SV -->|ChzzkClient| CZ
+```
+
+### 요청 처리 파이프라인
+
+필터 다섯 개가 순서대로 지나갑니다. 순서는 `web.xml` 의 `filter-mapping` 선언 순입니다.
+
+`adminLoginFilter` 가 `DispatcherServlet` **앞에서** 도는 것이 중요합니다.
+정적 HTML까지 막아주는 대신, 인증 실패 응답을 이 필터가 직접 만들어야 합니다
+(트러블슈팅의 "세션이 끊기면 관리자 캘린더가 에러도 없이 비는 문제" 참고).
+
+```mermaid
+flowchart TD
+    R(["요청"]) --> E["encodingFilter\n/* · UTF-8 강제"]
+    E --> Q1{"/resources/* ?"}
+    Q1 -->|예| SE["staticResourceEncodingFilter\nContent-Type charset"]
+    Q1 -->|아니오| SC
+    SE --> SC["staticResourceCacheFilter\n/* · 캐시 재검증 + 보안 헤더"]
+    SC --> Q2{"/admin/* ?"}
+    Q2 -->|아니오| DS
+    Q2 -->|예| AL["adminLoginFilter\n세션 확인"]
+    AL --> CF["csrfFilter\nPOST·PUT·DELETE 토큰 검증"]
+    CF --> DS["DispatcherServlet"]
+    DS --> IC["AdminLoginInterceptor\n/admin/** 재확인"]
+    IC --> CT(["Controller"])
+```
+
+### 데이터 모델
+
+테이블은 둘뿐이고 **서로 외래키로 엮이지 않습니다.**
+일정에 작성자를 남기지 않기 때문입니다. 관리자가 한 명이라 지금은 필요가 없고,
+여러 명이 되면 `tb_schedule` 에 `admin_id` 를 더하면 됩니다.
+
+삭제는 `del_yn` 으로 표시만 하고 행은 남깁니다.
+
+```mermaid
+erDiagram
+    tb_admin {
+        bigint admin_id PK
+        varchar admin_login_id UK
+        varchar admin_password "pbkdf2 형식"
+        varchar admin_name
+        datetime last_login_date
+        datetime reg_date
+        datetime mod_date
+        char del_yn
+    }
+    tb_schedule {
+        bigint schedule_id PK
+        varchar title
+        text description
+        varchar schedule_type
+        datetime start_date
+        datetime end_date
+        char all_day_yn
+        char display_yn
+        varchar color
+        datetime reg_date
+        datetime mod_date
+        char del_yn
+    }
+```
+
+<br>
+
 ## 디자인
 
 파스텔 라이트 테마와 다크 테마.
@@ -145,6 +239,33 @@ CSP 의 `script-src` 에는 `'unsafe-inline'` 이 없습니다.
 
 `SameSite` 는 Servlet 4.0 의 `<cookie-config>` 에 항목이 없어
 `webapp/META-INF/context.xml` 의 톰캣 쿠키 처리기로 지정합니다.
+
+인증 실패를 돌려주는 방식은 요청 종류에 따라 다릅니다.
+AJAX에는 401 JSON을, 브라우저 요청에는 로그인 페이지 리다이렉트를 보냅니다.
+
+```mermaid
+sequenceDiagram
+    participant B as 브라우저
+    participant F as adminLoginFilter
+    participant I as Interceptor
+    participant C as Controller
+
+    Note over B,F: 세션이 만료된 상태
+
+    B->>F: GET /admin/schedule/list<br/>(X-Requested-With: XMLHttpRequest)
+    F->>F: 세션 없음 + AJAX 판정
+    F-->>B: 401 + JSON
+    Note right of B: 로그인 화면으로 이동
+
+    B->>F: GET /admin/admin-schedule.html<br/>(Accept: text/html)
+    F->>F: 세션 없음 + 일반 요청
+    F-->>B: 302 → admin-login.html
+
+    Note over B,C: 로그인된 경우
+    B->>F: 요청
+    F->>I: 통과
+    I->>C: 통과
+```
 
 > `Secure` 때문에 로컬 `http://localhost:8080` 에서는 관리자 로그인이
 > 사파리에서 유지되지 않습니다. 크롬과 파이어폭스는 localhost 를
@@ -251,6 +372,21 @@ mvn clean package -Pprod   # 운영 배포용
 
 ```bash
 ./deploy.sh
+```
+
+```mermaid
+flowchart TD
+    A(["./deploy.sh"]) --> B["mvn clean package -Pprod"]
+    B --> C{"설정 가드\nCHANGE_ME · db.url 검사"}
+    C -->|실패| X(["빌드 중단"])
+    C -->|통과| D["war 내용 재확인"]
+    D --> E["scp → 서버"]
+    E --> F["기존 ROOT.war 백업"]
+    F --> G["교체 후 톰캣 재기동"]
+    G --> H{"헬스체크\n/schedule/list"}
+    H -->|200| I(["외부 접근 확인\nhttps://yeti-125.com"])
+    H -->|실패| R["백업으로 자동 롤백"]
+    R --> Y(["이전 버전으로 복구"])
 ```
 
 <br>
@@ -413,6 +549,26 @@ chzzk 은 모르는 파라미터를 조용히 무시하고 1페이지를 다시 
 같은 자리에서 `paginate()` 의 경계 버그도 고쳤습니다.
 `offset` 이 목록 길이를 넘으면 `subList` 가 예외를 던져
 `/live/clips?offset=99999` 같은 요청이 500 이 됩니다.
+
+정리된 흐름은 다음과 같습니다.
+외부 호출은 락 밖에서 하고, 합치는 순간에만 락을 잡습니다.
+한 스레드가 최대 10회 × 5초 동안 락을 쥔 채 나머지 요청을 세워두는 일을 막기 위해서입니다.
+
+```mermaid
+flowchart TD
+    Q(["GET /live/clips"]) --> CL["limit 을 1~50 으로 클램프"]
+    CL --> C1{"캐시가 신선한가\nTTL 10분"}
+    C1 -->|예| FD["ClipFeed"]
+    C1 -->|아니오| LD["첫 2페이지 적재"]
+    LD --> FD
+    FD --> C2{"offset+limit 만큼\n모였는가"}
+    C2 -->|예| PG["paginate → 응답"]
+    C2 -->|아니오| C3{"다른 요청이\n이미 확장 중인가"}
+    C3 -->|예| PG
+    C3 -->|아니오| GT["락 밖에서 이어 받기\n커서 = clipUID + readCount"]
+    GT --> MG["락 안에서 병합 · 캐시 교체"]
+    MG --> PG
+```
 
 #### hidden 속성을 붙였는데 계속 보이는 문제
 
