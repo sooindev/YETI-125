@@ -5,18 +5,36 @@
 (function() {
     'use strict';
 
-    // 세션 체크 - 같은 세션에서는 한 번만 표시
-    const INTRO_SESSION_KEY = 'door_intro_shown';
+    /*
+     * 하루에 한 번만 표시한다.
+     *
+     * 마지막으로 문을 연 날짜를 저장해 두고 오늘과 비교한다.
+     * 자정이 지나면 값이 저절로 달라져 다시 뜬다.
+     *
+     * sessionStorage 가 아니라 localStorage 다. 탭이나 브라우저를 닫아도
+     * 그날 안에는 다시 뜨지 않아야 하기 때문이다. (sessionStorage 였을
+     * 때는 새 탭을 열 때마다 다시 떴다)
+     *
+     * 날짜는 UTC 가 아니라 보는 사람의 로컬 기준으로 만든다.
+     * toISOString() 을 쓰면 한국에서는 오전 9시에 날짜가 바뀐다.
+     */
+    const INTRO_DATE_KEY = 'door_intro_date';
+
+    function today() {
+        const now = new Date();
+        const pad = function (n) { return String(n).padStart(2, '0'); };
+        return now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate());
+    }
 
     /*
-     * 사파리 프라이빗 모드나 쿠키 차단 설정에서는 sessionStorage 접근
-     * 자체가 예외를 던진다. 여기만 맨몸으로 두면 그 브라우저에서
-     * 이 스크립트가 첫 줄에서 죽어 인트로가 영영 열리지 않는다.
-     * (다른 파일은 전부 감싸고 있다)
+     * 사파리 프라이빗 모드나 쿠키 차단 설정에서는 localStorage 접근
+     * 자체가 예외를 던진다. 감싸두지 않으면 그 브라우저에서 이 스크립트가
+     * 첫 줄에서 죽어 인트로가 영영 열리지 않는다.
+     * 읽기가 막히면 "아직 안 봤다"로 보고 그냥 보여준다.
      */
-    function introShown() {
+    function introShownToday() {
         try {
-            return !!sessionStorage.getItem(INTRO_SESSION_KEY);
+            return localStorage.getItem(INTRO_DATE_KEY) === today();
         } catch (e) {
             return false;
         }
@@ -24,12 +42,12 @@
 
     function rememberIntroShown() {
         try {
-            sessionStorage.setItem(INTRO_SESSION_KEY, 'true');
+            localStorage.setItem(INTRO_DATE_KEY, today());
         } catch (e) {}
     }
 
-    // 이미 이번 세션에 표시했으면 숨김
-    if (introShown()) {
+    // 오늘 이미 봤으면 숨김
+    if (introShownToday()) {
         const intro = document.querySelector('.door-intro');
         if (intro) {
             intro.classList.add('hidden');
@@ -58,7 +76,7 @@
             // 애니메이션 완료 후 fade out
             setTimeout(function() {
                 intro.classList.add('fading');
-                // 세션에 표시 기록
+                // 오늘 봤다고 기록
                 rememberIntroShown();
 
                 // Fade out 완료 후 완전히 제거

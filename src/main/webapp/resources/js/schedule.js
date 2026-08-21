@@ -147,6 +147,7 @@ function loadUpcomingEvents() {
                     const upcomingEvents = futureEvents.slice(0, 6);
                     renderUpcomingEvents(upcomingEvents);
                     $('#upcomingEmpty').hide();
+                    publishEventSchema(futureEvents);
                 } else {
                     $('#upcomingEvents').empty();
                     $('#upcomingEmpty').show();
@@ -232,6 +233,47 @@ function openUpcomingDetail(index) {
         type: event.type,
         description: event.description
     });
+}
+
+/*
+ * 다가오는 일정을 구조화 데이터로 내보낸다.
+ *
+ * 일정은 DB 에서 받아 그리므로 HTML 에는 글자가 남지 않는다. 검색엔진이
+ * "이리온 방송 일정" 같은 질의에서 실제 일정을 알아볼 수 있도록,
+ * 받아온 뒤 schema.org/Event 를 문서에 심는다.
+ *
+ * 지난 일정은 넣지 않는다. 온라인 방송이므로 장소는 VirtualLocation 이다.
+ */
+function publishEventSchema(events) {
+    const CHANNEL = 'https://chzzk.naver.com/63368ec9081dc85e61d0e4310b7e1602';
+
+    const items = events.slice(0, 20).map(function (event) {
+        const node = {
+            '@type': 'Event',
+            name: event.title,
+            startDate: new Date(event.start).toISOString(),
+            eventAttendanceMode: 'https://schema.org/OnlineEventAttendanceMode',
+            eventStatus: 'https://schema.org/EventScheduled',
+            location: { '@type': 'VirtualLocation', url: CHANNEL },
+            performer: { '@type': 'Person', name: '이리온' },
+            organizer: { '@type': 'Person', name: '이리온', url: CHANNEL },
+            url: 'https://yeti-125.com/schedule.html'
+        };
+        if (event.end) node.endDate = new Date(event.end).toISOString();
+        if (event.description) node.description = event.description;
+        return node;
+    });
+
+    if (!items.length) return;
+
+    const existing = document.getElementById('scheduleEventSchema');
+    if (existing) existing.remove();
+
+    const tag = document.createElement('script');
+    tag.type = 'application/ld+json';
+    tag.id = 'scheduleEventSchema';
+    tag.textContent = JSON.stringify({ '@context': 'https://schema.org', '@graph': items });
+    document.head.appendChild(tag);
 }
 
 // 유형별 클래스

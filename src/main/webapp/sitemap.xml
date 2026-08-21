@@ -1,25 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
 
   <url>
     <loc>https://yeti-125.com/</loc>
-    <lastmod>2026-05-31</lastmod>
+    <lastmod>2026-08-21</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://yeti-125.com/resources/images/Irion-profile.jpg</image:loc>
+      <image:title>버추얼 스트리머 이리온(IRION)</image:title>
+    </image:image>
   </url>
 
   <url>
     <loc>https://yeti-125.com/schedule.html</loc>
-    <lastmod>2026-05-31</lastmod>
+    <lastmod>2026-08-21</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
 
   <url>
     <loc>https://yeti-125.com/info.html</loc>
-    <lastmod>2026-05-31</lastmod>
+    <lastmod>2026-08-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://yeti-125.com/resources/images/Irion-profile.jpg</image:loc>
+      <image:title>이리온(IRION) 프로필</image:title>
+    </image:image>
   </url>
 
 </urlset>

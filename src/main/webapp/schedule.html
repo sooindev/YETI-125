@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>방송 일정 — YETI-125 이리온 팬사이트</title>
-  <meta name="description" content="이리온의 방송 일정을 캘린더로 확인하세요. 저스트 채팅 · 종합게임 · 노래방송 · 합방 등 유형별로 정리된 다가오는 일정과 지난 방송 기록.">
-  <meta name="keywords" content="이리온 방송 일정, 이리온 스케줄, 치지직 방송 일정, IRION 일정, 이리온 캘린더">
+  <title>이리온 방송 일정 — 치지직 버튜버 캘린더 | YETI-125</title>
+  <meta name="description" content="치지직 버추얼 스트리머(버튜버) 이리온의 방송 일정을 월간 캘린더로 확인하세요. 저스트 채팅, 종합게임, 노래방송, 합방 일정을 유형별로 정리한 팬사이트입니다.">
+  <meta name="keywords" content="이리온 일정, 이리온 방송일정, 치지직 방송 일정, 버튜버 일정, 치지직 팬사이트, 버튜버 팬사이트, 스트리머 팬사이트, YETI-125">
   <meta name="author" content="sooindev">
   <link rel="canonical" href="https://yeti-125.com/schedule.html">
 
@@ -30,6 +30,45 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
   <!-- FullCalendar 6 은 CSS 를 JS 번들 안에서 주입한다. 별도 스타일시트가 없다. -->
+  <!-- 구조화 데이터 (schema.org) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        "@id": "https://yeti-125.com/schedule.html#webpage",
+        "url": "https://yeti-125.com/schedule.html",
+        "name": "이리온 방송 일정 — 치지직 버튜버 스트리밍 캘린더",
+        "description": "치지직 버추얼 스트리머 이리온의 월간 방송 일정 캘린더.",
+        "isPartOf": {
+          "@id": "https://yeti-125.com/#website"
+        },
+        "about": {
+          "@id": "https://yeti-125.com/#irion"
+        },
+        "inLanguage": "ko-KR"
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "홈",
+            "item": "https://yeti-125.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "방송 일정",
+            "item": "https://yeti-125.com/schedule.html"
+          }
+        ]
+      }
+    ]
+  }
+  </script>
   <link rel="stylesheet" href="/resources/css/common.css">
   <link rel="stylesheet" href="/resources/css/schedule.css">
 </head>
