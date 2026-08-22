@@ -24,8 +24,20 @@ public class AdminServiceImpl implements AdminService {
         // 관리자 조회
         AdminVO admin = adminMapper.selectAdminByLoginId(adminLoginId);
 
-        // 검증 실패
-        if (admin == null || !PasswordUtil.matches(password, admin.getAdminPassword())) {
+        /*
+         * 없는 아이디여도 해시 검증에 드는 시간을 그대로 쓴다.
+         *
+         * 여기서 곧장 돌아서면 있는 아이디는 ~100ms, 없는 아이디는 ~1ms 로
+         * 응답이 갈린다. 비밀번호를 모르는 사람도 응답 시간만 재서
+         * "이 아이디는 존재한다"를 알아낼 수 있다.
+         */
+        if (admin == null) {
+            PasswordUtil.matchesDummy(password);
+            return null;
+        }
+
+        // 비밀번호 불일치
+        if (!PasswordUtil.matches(password, admin.getAdminPassword())) {
             return null;
         }
 
