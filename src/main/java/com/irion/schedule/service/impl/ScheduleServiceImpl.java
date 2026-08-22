@@ -49,6 +49,15 @@ public class ScheduleServiceImpl implements ScheduleService {
     @Override
     @Transactional
     public boolean updateSchedule(ScheduleVO schedule) {
+        /*
+         * 수정도 등록과 같은 기본값을 거쳐야 한다.
+         *
+         * updateSchedule 의 SQL 은 NOT NULL 컬럼(schedule_type, all_day_yn,
+         * display_yn)을 조건 없이 덮어쓴다. 값이 빠진 채로 들어오면 DB 가
+         * 거부해서 500 이 나간다.
+         */
+        setDefaults(schedule);
+
         return scheduleMapper.updateSchedule(schedule) > 0;
     }
 
@@ -59,13 +68,26 @@ public class ScheduleServiceImpl implements ScheduleService {
         return scheduleMapper.deleteSchedule(scheduleId) > 0;
     }
 
-    /** 기본값 설정 */
+    /**
+     * 기본값 설정.
+     *
+     * 여기 있는 값은 schema.sql 의 DEFAULT 와 짝을 맞춘 것이다. 컬럼에
+     * DEFAULT 가 걸려 있어도 INSERT/UPDATE 문이 그 컬럼을 직접 지정하면
+     * DEFAULT 는 쓰이지 않는다. 두 문 모두 여덟 컬럼을 전부 나열하므로,
+     * NOT NULL 컬럼이 null 로 오면 그대로 DB 오류가 된다.
+     *
+     * scheduleType 은 여기 빠져 있었다. 관리자 화면이 늘 값을 실어 보내서
+     * 드러나지 않았을 뿐, 이 값을 안 보내는 호출이 하나라도 생기면
+     * "저장 중 오류가 발생했습니다" 만 뜨고 원인은 로그를 봐야 알 수 있었다.
+     */
     private void setDefaults(ScheduleVO schedule) {
-        if (schedule.getAllDayYn() == null)
+        if (schedule.getScheduleType() == null || schedule.getScheduleType().isEmpty())
+            schedule.setScheduleType("STREAM");
+        if (schedule.getAllDayYn() == null || schedule.getAllDayYn().isEmpty())
             schedule.setAllDayYn("N");
-        if (schedule.getDisplayYn() == null)
+        if (schedule.getDisplayYn() == null || schedule.getDisplayYn().isEmpty())
             schedule.setDisplayYn("Y");
-        if (schedule.getColor() == null)
+        if (schedule.getColor() == null || schedule.getColor().isEmpty())
             schedule.setColor("#6366F1");
     }
 }

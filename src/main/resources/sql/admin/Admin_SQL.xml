@@ -19,21 +19,6 @@
           AND del_yn = 'N'
     </select>
 
-    <!-- 관리자 ID로 조회 -->
-    <select id="selectAdminById" parameterType="Long" resultType="AdminVO">
-        SELECT admin_id
-               ,admin_login_id
-               ,admin_password
-               ,admin_name
-               ,last_login_date
-               ,reg_date
-               ,mod_date
-               ,del_yn
-        FROM tb_admin
-        WHERE admin_id = #{adminId}
-          AND del_yn = 'N'
-    </select>
-
     <!-- 마지막 로그인 시간 업데이트 -->
     <update id="updateLastLoginDate" parameterType="Long">
         UPDATE tb_admin

@@ -50,9 +50,4 @@ public class AdminServiceImpl implements AdminService {
 
         return admin;
     }
-
-    @Override
-    public AdminVO getAdminInfo(Long adminId) {
-        return adminMapper.selectAdminById(adminId);
-    }
 }

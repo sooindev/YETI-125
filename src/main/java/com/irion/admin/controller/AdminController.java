@@ -25,13 +25,24 @@ public class AdminController {
     @Autowired
     private AdminService adminService;
 
+    /** tb_admin.admin_login_id 의 컬럼 폭. 이보다 길면 볼 것도 없이 실패다 */
+    private static final int MAX_LOGIN_ID_LENGTH = 50;
+
     // 컨트롤러는 싱글턴이라 카운터도 하나만 있으면 된다
     private final LoginAttemptGuard loginGuard = new LoginAttemptGuard();
 
-    // 로그인 페이지
+    /**
+     * 로그인 페이지
+     *
+     * 세션을 파라미터로 받지 않는다. 그러면 스프링이 없는 세션을 만들어서
+     * 넣어주는데, 이 경로는 로그인 없이 누구나 열 수 있는 자리라 봇이
+     * 반복해서 두드리는 것만으로 빈 세션이 30분씩 쌓인다. 여기서 알고 싶은
+     * 것은 "이미 로그인돼 있는가" 뿐이므로, 없으면 없는 대로 둔다.
+     */
     @GetMapping("/admin-login")
-    public String loginPage(HttpSession session) {
-        if (session.getAttribute("adminUser") != null) {
+    public String loginPage(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session != null && session.getAttribute("adminUser") != null) {
             return "redirect:/admin/admin-schedule.html";
         }
         return "redirect:/admin/admin-login.html";
@@ -49,6 +60,19 @@ public class AdminController {
     @ResponseBody
     public JsonResult loginProc(@RequestParam String adminLoginId, @RequestParam String password,
                                 HttpServletRequest request) {
+
+        /*
+         * 있을 수 없는 길이는 여기서 끊는다.
+         *
+         * tb_admin.admin_login_id 는 VARCHAR(50) 이라 이보다 긴 값은 어떤
+         * 계정과도 맞지 않는다. 그냥 흘려보내면 1MB 짜리 문자열이 DB 조회
+         * 파라미터로 들어가고 시도 카운터에도 자리를 차지한다. 응답 문구는
+         * 실패와 똑같이 둔다 — 길이로 계정 존재 여부를 흘리지 않는다.
+         */
+        if (adminLoginId.length() > MAX_LOGIN_ID_LENGTH) {
+            logger.warn("Admin login rejected (login id too long): {} chars", adminLoginId.length());
+            return JsonResult.fail("아이디 또는 비밀번호가 일치하지 않습니다.");
+        }
 
         long lockedFor = loginGuard.lockedSecondsRemaining(adminLoginId);
         if (lockedFor > 0) {
