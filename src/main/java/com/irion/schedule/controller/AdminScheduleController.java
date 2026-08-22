@@ -1,5 +1,6 @@
 package com.irion.schedule.controller;
 
+import com.irion.common.util.DateRange;
 import com.irion.common.util.JsonResult;
 import com.irion.schedule.service.ScheduleService;
 import com.irion.schedule.vo.ScheduleVO;
@@ -33,7 +34,9 @@ public class AdminScheduleController {
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date start,
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date end) {
 
-        List<ScheduleVO> scheduleList = scheduleService.getScheduleList(start, end);
+        // 요청한 기간이 아무리 넓어도 상한까지만 본다
+        List<ScheduleVO> scheduleList =
+                scheduleService.getScheduleList(start, DateRange.clampEnd(start, end));
         List<Map<String, Object>> events = new ArrayList<>();
 
         for (ScheduleVO s : scheduleList) {

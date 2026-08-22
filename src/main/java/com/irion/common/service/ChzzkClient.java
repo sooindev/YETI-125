@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -247,31 +249,63 @@ public class ChzzkClient {
     // HTTP
     // ========================================
 
-    /** API 호출 — 응답을 파싱한 트리로 돌려준다. 실패하면 null. */
+    /**
+     * API 호출 — 응답을 파싱한 트리로 돌려준다. 실패하면 null.
+     *
+     * 200 이 아닐 때 그냥 돌아서면 안 된다. HttpURLConnection 은 응답 본문을
+     * 끝까지 읽고 스트림을 닫아야 그 연결을 keep-alive 풀에 돌려준다.
+     * 오류 응답의 본문(errorStream)을 버려두면 연결이 풀로 돌아가지 못하고,
+     * 치지직 쪽 장애가 길게 이어지면 그런 연결이 계속 쌓인다.
+     *
+     * disconnect() 는 예외로 끝났을 때만 부른다. 정상 경로에서 부르면
+     * 소켓을 끊어버려 재사용 자체를 막는다.
+     */
     private JsonNode fetchApi(String apiUrl) {
+        HttpURLConnection conn = null;
         try {
             URL url = new URL(apiUrl);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.setRequestProperty("User-Agent", "Mozilla/5.0");
             conn.setConnectTimeout(CONNECT_TIMEOUT_MS);
             conn.setReadTimeout(READ_TIMEOUT_MS);
 
-            if (conn.getResponseCode() != 200)
+            if (conn.getResponseCode() != 200) {
+                drain(conn.getErrorStream());
                 return null;
+            }
 
-            BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
-            StringBuilder sb = new StringBuilder();
+            return MAPPER.readTree(readAll(conn.getInputStream()));
+
+        } catch (Exception e) {
+            if (conn != null) {
+                conn.disconnect();
+            }
+            return null;
+        }
+    }
+
+    /** 스트림을 끝까지 읽어 문자열로. 다 읽고 닫아야 연결이 풀로 돌아간다. */
+    private static String readAll(InputStream in) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(in, "UTF-8"))) {
             String line;
             while ((line = br.readLine()) != null) {
                 sb.append(line);
             }
-            br.close();
+        }
+        return sb.toString();
+    }
 
-            return MAPPER.readTree(sb.toString());
-
-        } catch (Exception e) {
-            return null;
+    /** 오류 응답 본문 — 내용은 쓰지 않지만, 비워야 연결이 풀로 돌아간다 */
+    private static void drain(InputStream in) {
+        if (in == null) {
+            return;
+        }
+        try {
+            readAll(in);
+        } catch (IOException e) {
+            // 비우려던 것뿐이다. 실패해도 더 할 일이 없다.
         }
     }
 
