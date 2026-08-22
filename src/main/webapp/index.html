@@ -29,10 +29,15 @@
   <meta name="twitter:image:alt" content="버추얼 스트리머 이리온 프로필 이미지">
 
   <link rel="icon" type="image/png" href="/resources/images/snowflake.png">
-  <script src="/resources/js/theme-init.js"></script>
+  <!-- 폰트는 두 줄로 나눠 받는다 — Anton·JetBrains Mono(1.1KB)가
+       Noto Sans KR(90.8KB) 뒤에 묶여 기다리지 않도록.
+       preconnect 는 스크립트 앞, 스타일시트는 스크립트 뒤에 온다.
+       (이유는 common.css 의 "대체 폰트 보정" 주석 참고) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <script src="/resources/js/theme-init.js"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap">
   <!-- 구조화 데이터 (schema.org) — 검색엔진이 사이트의 주제와
        인물, 페이지 관계를 이해하도록 명시한다. -->
   <script type="application/ld+json">
