@@ -134,6 +134,10 @@
       <div class="profile-hero-grid">
 
         <div class="profile-portrait">
+          <!-- 이 이미지만 width/height 를 붙이지 않는다.
+               .profile-portrait img 가 aspect-ratio: 4/5 로 자리를 이미 잡아두는데,
+               속성으로 height 를 주면 그 값이 이겨서 882px 짜리 세로로 늘어난다.
+               (원본은 882x882 정사각이고 object-fit: cover 로 잘라 쓴다) -->
           <img src="/resources/images/Irion-profile.jpg" alt="이리온">
           <span class="portrait-tag idx">FILE / IRION-125</span>
         </div>
@@ -167,16 +171,16 @@
           <span class="dday-label idx">Channels</span>
           <div class="quick-social">
             <a href="https://chzzk.naver.com/live/63368ec9081dc85e61d0e4310b7e1602" target="_blank" class="quick-social-btn" title="치지직">
-              <img src="/resources/images/chzzk.png" alt="치지직">
+              <img src="/resources/images/chzzk.png" alt="치지직" width="22" height="22">
             </a>
             <a href="https://www.youtube.com/@2leon0809" target="_blank" class="quick-social-btn" title="유튜브">
-              <img src="/resources/images/youtube.webp" alt="유튜브">
+              <img src="/resources/images/youtube.webp" alt="유튜브" width="22" height="22">
             </a>
             <a href="https://x.com/lrion_125" target="_blank" class="quick-social-btn" title="X">
-              <img src="/resources/images/x.webp" alt="X">
+              <img src="/resources/images/x.webp" alt="X" width="22" height="22">
             </a>
             <a href="https://cafe.naver.com/dlfldhs0809" target="_blank" class="quick-social-btn" title="팬카페">
-              <img src="/resources/images/naver-cafe.png" alt="네이버 카페">
+              <img src="/resources/images/naver-cafe.png" alt="네이버 카페" width="22" height="22">
             </a>
           </div>
         </div>
@@ -264,7 +268,7 @@
         <li>
           <a href="https://chzzk.naver.com/live/63368ec9081dc85e61d0e4310b7e1602" target="_blank" class="channel-row">
             <span class="channel-idx">01</span>
-            <img src="https://ssl.pstatic.net/static/nng/glive/icon/favicon.png" alt="치지직" class="channel-ico">
+            <img src="https://ssl.pstatic.net/static/nng/glive/icon/favicon.png" alt="치지직" class="channel-ico" width="28" height="28">
             <span class="channel-name">치지직</span>
             <span class="channel-desc">메인 방송 플랫폼</span>
             <span class="channel-arrow">↗</span>
@@ -273,7 +277,7 @@
         <li>
           <a href="https://www.youtube.com/@2leon0809" target="_blank" class="channel-row">
             <span class="channel-idx">02</span>
-            <img src="/resources/images/youtube.webp" alt="유튜브" class="channel-ico">
+            <img src="/resources/images/youtube.webp" alt="유튜브" class="channel-ico" width="28" height="28">
             <span class="channel-name">유튜브</span>
             <span class="channel-desc">메인 유튜브 채널</span>
             <span class="channel-arrow">↗</span>
@@ -282,7 +286,7 @@
         <li>
           <a href="https://www.youtube.com/@2reon" target="_blank" class="channel-row">
             <span class="channel-idx">03</span>
-            <img src="/resources/images/youtube.webp" alt="유튜브" class="channel-ico">
+            <img src="/resources/images/youtube.webp" alt="유튜브" class="channel-ico" width="28" height="28">
             <span class="channel-name">다시보기</span>
             <span class="channel-desc">방송 다시보기 채널</span>
             <span class="channel-arrow">↗</span>
@@ -291,7 +295,7 @@
         <li>
           <a href="https://x.com/lrion_125" target="_blank" class="channel-row">
             <span class="channel-idx">04</span>
-            <img src="/resources/images/x.webp" alt="X" class="channel-ico">
+            <img src="/resources/images/x.webp" alt="X" class="channel-ico" width="28" height="28">
             <span class="channel-name">X / Twitter</span>
             <span class="channel-desc">공지 및 소통</span>
             <span class="channel-arrow">↗</span>
@@ -300,7 +304,7 @@
         <li>
           <a href="https://cafe.naver.com/dlfldhs0809" target="_blank" class="channel-row">
             <span class="channel-idx">05</span>
-            <img src="/resources/images/naver-cafe.png" alt="네이버 카페" class="channel-ico">
+            <img src="/resources/images/naver-cafe.png" alt="네이버 카페" class="channel-ico" width="28" height="28">
             <span class="channel-name">팬카페</span>
             <span class="channel-desc">네이버 팬카페</span>
             <span class="channel-arrow">↗</span>

@@ -119,7 +119,47 @@ public class ScheduleServiceImplTest {
 
         assertEquals("STREAM", captor.saved.getScheduleType());
         assertEquals("N", captor.saved.getAllDayYn());
-        assertEquals("Y", captor.saved.getDisplayYn());
+    }
+
+    /**
+     * 공개 여부만은 수정할 때 기본값을 채우지 않는다.
+     *
+     * 'Y' 로 채우면 숨겨둔 일정이 조용히 공개되고, 'N' 으로 채우면 공개하던
+     * 일정이 조용히 사라진다. 어느 쪽도 부르는 쪽이 의도한 바가 아니므로
+     * 값을 비운 채로 넘기고, SQL 이 그 컬럼을 건드리지 않게 한다.
+     * (Schedule_SQL.xml 의 updateSchedule 참고)
+     */
+    @Test
+    public void 수정할_때_공개여부가_없으면_비운_채로_넘긴다() {
+        Captor captor = new Captor();
+        ScheduleService service = service(captor);
+
+        ScheduleVO schedule = new ScheduleVO();
+        schedule.setScheduleId(7L);
+        schedule.setTitle("제목만 고침");
+        schedule.setStartDate(new Date());
+        // displayYn 을 넣지 않는다
+
+        service.updateSchedule(schedule);
+
+        assertNull("기본값을 채우면 DB 의 기존 값을 덮어쓰게 된다",
+                captor.saved.getDisplayYn());
+    }
+
+    @Test
+    public void 수정할_때_공개여부를_보내면_그대로_쓴다() {
+        Captor captor = new Captor();
+        ScheduleService service = service(captor);
+
+        ScheduleVO schedule = new ScheduleVO();
+        schedule.setScheduleId(7L);
+        schedule.setTitle("숨기기");
+        schedule.setStartDate(new Date());
+        schedule.setDisplayYn("N");
+
+        service.updateSchedule(schedule);
+
+        assertEquals("N", captor.saved.getDisplayYn());
     }
 
     // ========================================
