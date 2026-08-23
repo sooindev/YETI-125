@@ -9,11 +9,8 @@ $(document).ready(function() {
 });
 
 /*
- * 자정에 다시 계산한다.
- *
- * 예전에는 setInterval(calculateDday, 60000) 이었다. 주석은 "매일 자정에
- * 갱신" 이라고 되어 있었지만 실제로는 하루 1440번 돌면서 같은 숫자를
- * 다시 그렸다. 값이 바뀌는 순간은 날짜가 넘어갈 때뿐이다.
+ * 자정에 다시 계산한다. 값이 바뀌는 순간은 날짜가 넘어갈 때뿐이라
+ * 주기적으로 돌릴 이유가 없다.
  */
 function scheduleMidnightRefresh() {
     const now = new Date();

@@ -34,7 +34,7 @@ public class AdminScheduleController {
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date start,
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date end) {
 
-        // 요청한 기간이 아무리 넓어도 상한까지만 본다
+        // 기간이 아무리 넓어도 상한까지만
         List<ScheduleVO> scheduleList =
                 scheduleService.getScheduleList(start, DateRange.clampEnd(start, end));
         List<Map<String, Object>> events = new ArrayList<>();
@@ -120,11 +120,8 @@ public class AdminScheduleController {
     }
 
     /**
-     * 첫 번째 검증 오류 메시지.
-     *
-     * 화면은 토스트 한 줄로 보여주므로 하나만 골라 준다. 여기서 막지 않으면
-     * 길이 초과가 DB 제약에 걸려 500 이 나가고, 사용자는 무엇이 잘못됐는지
-     * 알 수 없다.
+     * 첫 번째 검증 오류 메시지. 화면이 토스트 한 줄로 보여주므로 하나만 고른다.
+     * 여기서 막지 않으면 길이 초과가 DB 제약에 걸려 500 이 나간다.
      */
     private String firstMessage(BindingResult binding) {
         FieldError error = binding.getFieldError();

@@ -14,13 +14,8 @@ import static org.junit.Assert.*;
 /**
  * 저장 직전 기본값 채우기.
  *
- * schema.sql 의 DEFAULT 는 INSERT/UPDATE 문이 그 컬럼을 직접 지정하는 순간
- * 쓰이지 않는다. 두 문 모두 여덟 컬럼을 전부 나열하므로, NOT NULL 컬럼이
- * null 로 내려가면 그대로 DB 오류 — 화면에는 "저장 중 오류가 발생했습니다"
- * 만 뜨고 원인은 로그를 봐야 알 수 있었다.
- *
- * scheduleType 이 이 처리에서 빠져 있었고, 수정 경로는 기본값 처리 자체가
- * 없었다.
+ * INSERT/UPDATE 가 컬럼을 직접 지정하면 schema.sql 의 DEFAULT 는 쓰이지 않는다.
+ * NOT NULL 컬럼이 null 로 내려가면 그대로 DB 오류다.
  */
 public class ScheduleServiceImplTest {
 
@@ -81,10 +76,7 @@ public class ScheduleServiceImplTest {
         assertEquals("#FF0000", captor.saved.getColor());
     }
 
-    /**
-     * 검증 규칙(@Pattern)이 빈 문자열을 허용하므로 null 만 막아서는 부족하다.
-     * 빈 문자열은 NOT NULL 을 통과해 CHAR(1) 컬럼에 '' 로 눌러앉는다.
-     */
+    /** @Pattern 이 빈 문자열을 허용해서, '' 가 NOT NULL 을 통과해 눌러앉는다 */
     @Test
     public void 빈_문자열도_기본값으로_바꾼다() {
         Captor captor = new Captor();
@@ -122,12 +114,8 @@ public class ScheduleServiceImplTest {
     }
 
     /**
-     * 공개 여부만은 수정할 때 기본값을 채우지 않는다.
-     *
-     * 'Y' 로 채우면 숨겨둔 일정이 조용히 공개되고, 'N' 으로 채우면 공개하던
-     * 일정이 조용히 사라진다. 어느 쪽도 부르는 쪽이 의도한 바가 아니므로
-     * 값을 비운 채로 넘기고, SQL 이 그 컬럼을 건드리지 않게 한다.
-     * (Schedule_SQL.xml 의 updateSchedule 참고)
+     * 'Y' 로 채우면 숨겨둔 일정이 공개되고 'N' 이면 공개하던 일정이 사라진다.
+     * 비운 채로 넘겨 SQL 이 그 컬럼을 건드리지 않게 한다.
      */
     @Test
     public void 수정할_때_공개여부가_없으면_비운_채로_넘긴다() {

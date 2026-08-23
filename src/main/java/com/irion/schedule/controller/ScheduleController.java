@@ -23,7 +23,7 @@ public class ScheduleController {
     @ResponseBody
     public List<Map<String, Object>> getScheduleList(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date start, @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date end) {
 
-        // 요청한 기간이 아무리 넓어도 상한까지만 본다
+        // 기간이 아무리 넓어도 상한까지만
         List<ScheduleVO> scheduleList =
                 scheduleService.getDisplayScheduleList(start, DateRange.clampEnd(start, end));
         List<Map<String, Object>> events = new ArrayList<>();

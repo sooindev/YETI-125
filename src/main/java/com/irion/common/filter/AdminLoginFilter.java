@@ -15,12 +15,10 @@ import java.util.Set;
 public class AdminLoginFilter implements Filter {
 
     /**
-     * 로그인 없이 지나갈 수 있는 관리자 경로.
+     * 로그인 없이 지나갈 수 있는 경로.
      *
-     * contains 가 아니라 정확히 일치하는지 본다. 예전에는
-     * uri.contains("/admin/login") 으로 걸렀는데, getRequestURI() 는
-     * 정규화 전 원본이라 /admin/login/../admin-schedule.html 같은 요청이
-     * "포함하니까 공개" 로 통과해 버렸다.
+     * 부분 문자열이 아니라 정확히 일치하는지 본다. contains 로 판정하면
+     * /admin/loginProc/../admin-schedule.html 같은 요청에 뚫린다.
      */
     private static final Set<String> PUBLIC_PATHS = Collections.unmodifiableSet(
             new HashSet<String>(Arrays.asList(
@@ -48,12 +46,9 @@ public class AdminLoginFilter implements Filter {
 
             if (session == null || session.getAttribute("adminUser") == null) {
                 /*
-                 * 이 필터는 DispatcherServlet 앞에서 돈다. 여기서 무조건
-                 * 리다이렉트해 버리면 AdminLoginInterceptor 의 401 분기까지
-                 * 요청이 닿지 못한다. jQuery 는 302 를 따라가 로그인 HTML 을
-                 * 200 으로 받고, JSON 파싱에 실패해 error 콜백으로 가는데
-                 * 그 때 xhr.status 는 200 이라 로그인 화면으로 보낼 수 없다.
-                 * 세션이 끊기면 관리자 화면이 조용히 비었다.
+                 * AJAX 에 리다이렉트를 주면 안 된다. jQuery 가 302 를 따라가
+                 * 로그인 HTML 을 200 으로 받아버려서, 화면은 세션이 끊긴 것을
+                 * 알아채지 못하고 조용히 빈 채로 남는다.
                  */
                 if (RequestUtil.isAjaxRequest(httpRequest)) {
                     httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

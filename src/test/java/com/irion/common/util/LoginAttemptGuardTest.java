@@ -5,12 +5,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
- * 로그인 시도 제한.
- *
- * 잠금 동작 자체와, 실패 기록이 무한히 쌓이지 않는지를 함께 본다.
- * 예전에는 recordSuccess 로만 항목이 지워져서, 가짜 아이디로 실패만
- * 반복하면 지워지는 경로가 아예 없었다. /admin/loginProc 는 인증도 CSRF 도
- * 거치지 않는 자리라 누구나 그 상태를 만들 수 있었다.
+ * 로그인 시도 제한. 잠금 동작과 함께, 실패 기록이 무한히 쌓이지 않는지 본다.
  */
 public class LoginAttemptGuardTest {
 
@@ -63,11 +58,7 @@ public class LoginAttemptGuardTest {
         assertEquals("같은 계정이므로 항목은 하나다", 1, guard.trackedCount());
     }
 
-    /**
-     * 이 테스트가 고치기 전 코드에서는 실패한다.
-     *
-     * 예전에는 서로 다른 아이디 5만 개면 항목도 5만 개가 그대로 남았다.
-     */
+    /** 서로 다른 아이디 5만 개를 부어도 항목은 상한에서 멈춰야 한다 */
     @Test
     public void 가짜_아이디를_쏟아부어도_기록이_무한히_쌓이지_않는다() {
         LoginAttemptGuard guard = new LoginAttemptGuard();
@@ -80,10 +71,7 @@ public class LoginAttemptGuardTest {
         assertTrue("상한(10,000) 안에 있어야 한다. 실제: " + tracked, tracked <= 10_000);
     }
 
-    /**
-     * 아이디는 공격자가 지어내는 값이라 길이도 믿을 수 없다.
-     * 자르지 않으면 1MB 짜리 문자열 하나가 그대로 키가 된다.
-     */
+    /** 자르지 않으면 1MB 짜리 문자열 하나가 그대로 키가 된다 */
     @Test
     public void 아주_긴_아이디도_잘라서_보관한다() {
         LoginAttemptGuard guard = new LoginAttemptGuard();
@@ -100,12 +88,7 @@ public class LoginAttemptGuardTest {
         assertEquals(1, guard.trackedCount());
     }
 
-    /**
-     * 상한 때문에 진짜 잠금이 씻겨나가면 안 된다.
-     *
-     * 잠긴 계정을 밀어내면서까지 새 항목을 받아주면, 가짜 아이디를 부어
-     * 잠금을 풀어버리는 우회로가 생긴다.
-     */
+    /** 잠긴 계정을 밀어내면 가짜 아이디로 잠금을 푸는 우회로가 생긴다 */
     @Test
     public void 넘치더라도_잠긴_계정은_풀리지_않는다() {
         LoginAttemptGuard guard = new LoginAttemptGuard();

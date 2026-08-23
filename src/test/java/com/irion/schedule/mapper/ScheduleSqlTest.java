@@ -19,12 +19,9 @@ import static org.junit.Assert.*;
 /**
  * 매퍼 XML 이 만들어내는 SQL 문장.
  *
- * updateSchedule 에는 조건이 하나 들어 있다. display_yn 은 값이 실려
- * 왔을 때만 덮어쓰고, 없으면 컬럼 자체를 문장에서 빼야 한다. 조건이
- * 잘못 짜이면 SET 절에 쉼표가 남거나 컬럼이 그대로 들어가는데, 둘 다
- * 서비스 계층 테스트로는 잡히지 않는다 — 매퍼는 가짜였으니까.
- *
- * DB 없이 MyBatis 에 XML 만 읽혀서 생성된 문장을 직접 들여다본다.
+ * updateSchedule 의 display_yn 조건이 잘못 짜이면 SET 절에 쉼표가 남거나
+ * 컬럼이 그대로 들어간다. 서비스 계층 테스트는 매퍼가 가짜라 잡지 못한다.
+ * DB 없이 XML 만 읽혀 생성된 문장을 직접 본다.
  */
 public class ScheduleSqlTest {
 
@@ -35,8 +32,7 @@ public class ScheduleSqlTest {
     @BeforeClass
     public static void 매퍼_XML_을_읽는다() throws Exception {
         config = new Configuration();
-        // DataSource 는 형식상 필요할 뿐이다. 연결은 한 번도 열지 않는다 —
-        // 생성된 SQL 문자열만 들여다본다.
+        // 형식상 필요할 뿐 연결은 열지 않는다
         config.setEnvironment(new Environment(
                 "test", new JdbcTransactionFactory(), new UnpooledDataSource()));
         config.getTypeAliasRegistry().registerAlias("ScheduleVO", ScheduleVO.class);
@@ -56,14 +52,7 @@ public class ScheduleSqlTest {
                 sql.contains("display_yn"));
     }
 
-    /**
-     * 이 테스트가 고치기 전 SQL 에서는 실패한다.
-     *
-     * 예전에는 display_yn = #{displayYn} 이 조건 없이 들어 있어서, 값이
-     * 없으면 DB 의 기존 값을 null 로 덮어쓰려다 오류가 났다. 서비스가
-     * 기본값 'Y' 를 채워 넣던 시기에는 오류 대신 "숨겨둔 일정이 조용히
-     * 공개되는" 결과가 됐다.
-     */
+    /** 조건 없이 덮어쓰면 숨겨둔 일정이 조용히 공개된다 */
     @Test
     public void 공개여부가_없으면_문장에서_빠진다() {
         String sql = updateSql(schedule(null));
@@ -130,7 +119,7 @@ public class ScheduleSqlTest {
         return boundSql.getSql();
     }
 
-    /** 줄바꿈과 연속 공백을 한 칸으로 — 문장 모양만 보면 되므로 */
+    /** 문장 모양만 보면 되므로 공백을 한 칸으로 */
     private static String normalize(String sql) {
         return sql.replaceAll("\\s+", " ").trim();
     }

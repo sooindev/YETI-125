@@ -38,17 +38,10 @@ public class ScheduleServiceImpl implements ScheduleService {
     @Override
     @Transactional
     public Long createSchedule(ScheduleVO schedule) {
-        // 기본값 설정
         setDefaults(schedule);
 
-        /*
-         * 공개 여부는 등록할 때만 기본값을 준다.
-         *
-         * 새로 만드는 일정에는 "아직 정해진 값" 이라는 게 없으므로,
-         * schema.sql 의 DEFAULT 와 같은 'Y' 로 시작한다. 수정은 다르다
-         * — 이미 정해진 값이 있고, 그것을 함부로 바꾸면 안 된다.
-         * (updateSchedule 과 Schedule_SQL.xml 의 주석 참고)
-         */
+        // 공개 여부는 등록할 때만 기본값을 준다. 새 일정에는 "이미 정해진 값" 이
+        // 없기 때문이다. 수정은 다르다 — updateSchedule 참고
         if (schedule.getDisplayYn() == null || schedule.getDisplayYn().isEmpty())
             schedule.setDisplayYn("Y");
 
@@ -60,16 +53,9 @@ public class ScheduleServiceImpl implements ScheduleService {
     @Override
     @Transactional
     public boolean updateSchedule(ScheduleVO schedule) {
-        /*
-         * 수정도 등록과 같은 기본값을 거쳐야 한다.
-         *
-         * updateSchedule 의 SQL 은 NOT NULL 컬럼(schedule_type, all_day_yn)을
-         * 조건 없이 덮어쓴다. 값이 빠진 채로 들어오면 DB 가 거부해서 500 이
-         * 나간다.
-         *
-         * display_yn 은 여기서 채우지 않는다. 빠져 있으면 SQL 이 그 컬럼을
-         * 아예 건드리지 않아 DB 의 기존 값이 남는다.
-         */
+        // NOT NULL 컬럼을 조건 없이 덮어쓰므로 기본값을 거쳐야 한다.
+        // display_yn 만 예외 — 빠져 있으면 SQL 이 그 컬럼을 건드리지 않아
+        // DB 의 기존 값이 남는다
         setDefaults(schedule);
 
         return scheduleMapper.updateSchedule(schedule) > 0;
@@ -83,19 +69,13 @@ public class ScheduleServiceImpl implements ScheduleService {
     }
 
     /**
-     * 기본값 설정.
+     * schema.sql 의 DEFAULT 와 짝을 맞춘 값.
      *
-     * 여기 있는 값은 schema.sql 의 DEFAULT 와 짝을 맞춘 것이다. 컬럼에
-     * DEFAULT 가 걸려 있어도 INSERT/UPDATE 문이 그 컬럼을 직접 지정하면
-     * DEFAULT 는 쓰이지 않는다. 두 문 모두 여덟 컬럼을 전부 나열하므로,
-     * NOT NULL 컬럼이 null 로 오면 그대로 DB 오류가 된다.
+     * 컬럼에 DEFAULT 가 있어도 INSERT/UPDATE 가 그 컬럼을 직접 지정하면 쓰이지
+     * 않는다. 두 문 모두 컬럼을 전부 나열하므로 NOT NULL 이 null 로 오면 DB 오류다.
+     * 검증 규칙이 빈 문자열을 허용하므로 null 만 막아서는 부족하다.
      *
-     * displayYn 은 여기서 다루지 않는다 — 등록에서만 값을 정하고, 수정은
-     * 빠져 있으면 DB 의 기존 값을 그대로 둔다.
-     *
-     * scheduleType 은 여기 빠져 있었다. 관리자 화면이 늘 값을 실어 보내서
-     * 드러나지 않았을 뿐, 이 값을 안 보내는 호출이 하나라도 생기면
-     * "저장 중 오류가 발생했습니다" 만 뜨고 원인은 로그를 봐야 알 수 있었다.
+     * displayYn 은 여기서 다루지 않는다 (createSchedule / updateSchedule 참고).
      */
     private void setDefaults(ScheduleVO schedule) {
         if (schedule.getScheduleType() == null || schedule.getScheduleType().isEmpty())

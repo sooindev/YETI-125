@@ -1,14 +1,10 @@
 /**
- * First-paint Initialization Script
+ * First-paint init — <head>에서 동기로 로드된다.
  *
- * 이 파일은 <head>에서 동기로 로드된다. 첫 페인트 전에 정해둬야
- * 화면이 번쩍이지 않는 것 두 가지를 여기서 처리한다.
+ *   1. 테마: data-theme 확정 (저장된 선택 → OS 설정 → 라이트)
+ *   2. 폰트: 문 인트로 텍스트를 폰트가 준비될 때까지 미룸
  *
- *   1. 테마   — data-theme 확정 (저장된 선택 → OS 설정 → 라이트)
- *   2. 폰트   — 문 인트로의 제목을 폰트가 준비될 때까지 잠깐 미룸
- *
- * 다른 스크립트는 전부 </body> 앞에서 로드되므로 이 일을 맡길 수 없다.
- * 그때는 이미 첫 페인트가 끝난 뒤다.
+ * 다른 스크립트는 </body> 앞이라 첫 페인트 뒤에 실행돼 이 일을 못 맡는다.
  */
 (function () {
     'use strict';
@@ -45,18 +41,12 @@
     /*
      * 폰트 준비 표시.
      *
-     * 문 인트로의 제목(.door-title)은 최대 304px 이다. 이 크기에서는
-     * 대체 폰트로 먼저 그려졌다가 Anton 으로 바뀌는 것이 그대로 보인다.
-     * 글자 폭은 common.css 의 size-adjust 로 맞춰뒀지만, 폭이 같아도
-     * 글자 모양까지 같지는 않다.
+     * .door-title 은 최대 304px 이라 폰트가 바뀌는 것이 그대로 보인다.
+     * 폭은 common.css 의 size-adjust 로 맞춰뒀지만 글자 모양까지 같지는 않다.
+     * 문이 닫혀 있는 동안이므로 텍스트만 미룬다 — 문짝은 곧바로 그려진다.
      *
-     * 문이 열리기 전까지는 어차피 가려진 화면이므로, 폰트가 도착할
-     * 때까지 인트로 텍스트만 잠깐 미뤄둔다. 문짝(배경)은 곧바로
-     * 그려지니 빈 화면이 보이지는 않는다.
-     *
-     * 기다리는 대상은 Anton 과 JetBrains Mono 뿐이다. 둘은 합쳐서
-     * 1.1KB 라 금방 온다. Noto Sans KR(90.8KB)까지 기다리면 문이
-     * 늦게 열린다 — 한글은 크기를 맞춘 대체 폰트로 먼저 그려진다.
+     * 기다리는 대상은 Anton + JetBrains Mono(합쳐서 1.1KB)뿐이다.
+     * Noto Sans KR(90.8KB)까지 기다리면 문이 늦게 열린다.
      */
     var FONTS_TIMEOUT_MS = 1500;
     var fontsSettled = false;
@@ -67,14 +57,14 @@
         root.classList.remove('fonts-pending');
     }
 
-    // JS 가 꺼져 있으면 이 클래스가 붙지 않는다 — 그때는 원래대로 바로 보인다
+    // JS 가 꺼져 있으면 클래스가 안 붙어 원래대로 바로 보인다
     root.classList.add('fonts-pending');
 
-    // 폰트 서버가 늦거나 막히면 영영 오지 않는다. 기다리는 데 상한을 둔다.
+    // 폰트 서버가 막히면 영영 오지 않는다
     setTimeout(fontsReady, FONTS_TIMEOUT_MS);
 
-    // @font-face 는 스타일시트가 파싱된 뒤에야 등록된다. 그전에 물어보면
-    // "기다릴 폰트가 없다" 는 답이 돌아와 곧바로 통과해 버린다.
+    // @font-face 는 스타일시트 파싱 뒤에 등록된다. 그전에 물어보면
+    // "기다릴 폰트가 없다" 는 답이 돌아온다
     document.addEventListener('DOMContentLoaded', function () {
         if (!document.fonts || !document.fonts.load) {
             fontsReady();
@@ -100,7 +90,7 @@
         }
     };
 
-    // 사용자가 직접 고르기 전까지는 OS 설정 변화를 따라간다
+    // 직접 고르기 전까지는 OS 설정을 따라간다
     if (window.matchMedia) {
         var mq = window.matchMedia('(prefers-color-scheme: dark)');
         var onChange = function (e) {
@@ -111,7 +101,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-        // 로드 직후 transition 억제 — 초기 렌더가 흔들리지 않도록
+        // 초기 렌더가 흔들리지 않도록 transition 억제
         document.body.classList.add('preload');
         setTimeout(function () {
             document.body.classList.remove('preload');
