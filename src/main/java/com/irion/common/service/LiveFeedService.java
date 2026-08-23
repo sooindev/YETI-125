@@ -34,11 +34,8 @@ public class LiveFeedService {
     private static final int VIDEO_MAX_PAGES = 20;
 
     /**
-     * 다시보기 목록에서 감출 항목 (videoNo).
-     *
-     * 제목이 아니라 번호로 거른다. 제목은 나중에 바뀔 수 있지만
-     * 번호는 그대로다. 지운 것이 아니라 이 사이트에서만 안 보이게
-     * 하는 것이라, 치지직에는 그대로 남아 있다.
+     * 다시보기에서 감출 항목. 제목은 바뀔 수 있으므로 videoNo 로 거른다.
+     * 이 사이트에서만 숨기는 것이고 치지직에는 그대로 남아 있다.
      */
     private static final Set<String> HIDDEN_VIDEO_NOS = Collections.unmodifiableSet(
             new HashSet<String>(Arrays.asList(
@@ -63,18 +60,14 @@ public class LiveFeedService {
     /**
      * 지금 클립을 이어 받는 중인가.
      *
-     * 확장은 외부 API 를 최대 10회까지 부르고 한 번에 5초씩 기다린다.
-     * 그 동안 락을 쥐고 있으면 최악의 경우 한 스레드가 50초간 락을 잡고
-     * 나머지 요청이 전부 그 뒤에 줄을 선다. 확장은 락 밖에서 하고,
-     * 이미 누가 받아오는 중이면 다른 스레드는 기다리지 않고 지금 있는
-     * 만큼만 받아간다. (hasMore 가 그대로라 화면에는 더보기가 남는다)
+     * 확장은 외부 API 를 최대 10회 부르므로 락을 쥔 채로 하면 한 스레드가
+     * 수십 초간 락을 잡는다. 락 밖에서 하고, 이미 받아오는 중이면 다른
+     * 스레드는 기다리지 않고 지금 있는 만큼만 받아간다.
      */
     private final AtomicBoolean clipsExtending = new AtomicBoolean(false);
 
     /**
-     * 클립 목록의 한 조각과 다음 커서를 함께 들고 다니는 스냅샷.
-     *
-     * chzzk 의 클립 페이징은 offset 이 아니라 커서다. (ChzzkClient.ClipPage 참고)
+     * 클립 목록 조각과 다음 커서. chzzk 의 클립 페이징은 offset 이 아니라 커서다.
      */
     public static final class ClipFeed {
         private final List<Map<String, Object>> clips;
@@ -112,8 +105,6 @@ public class LiveFeedService {
 
     /**
      * 클립 목록을 need 개까지 채워서 돌려준다. 못 가져오면 null.
-     *
-     * 더보기를 누르는 만큼 목록이 뒤로 자란다.
      */
     public ClipFeed getClips(int need) {
         ClipFeed feed = cached(clipsCache, clipsLock, CACHE_DURATION, this::loadClips);
@@ -140,11 +131,8 @@ public class LiveFeedService {
     }
 
     /**
-     * 캐시에 담긴 목록을 need 개까지 늘린다.
-     *
-     * 늘리는 동안 적재 시각을 새로 찍는다. 더보기를 누르며 보고 있는
-     * 사이에 TTL 이 끝나 목록이 처음부터 다시 쌓이는 일을 막는다.
-     * 손을 놓으면 10분 뒤 평소대로 만료된다.
+     * 캐시 목록을 need 개까지 늘린다. 늘리는 동안 적재 시각을 새로 찍어,
+     * 더보기를 누르는 사이에 TTL 이 끝나 처음부터 다시 쌓이는 일을 막는다.
      */
     private ClipFeed extendClips(ClipFeed feed, int need) {
         if (feed.clips.size() >= need || !feed.hasNext() || feed.clips.size() >= CLIP_MAX) {
@@ -178,12 +166,8 @@ public class LiveFeedService {
                 Snapshot<ClipFeed> snapshot = clipsCache.get();
                 ClipFeed current = (snapshot != null) ? snapshot.value : null;
 
-                /*
-                 * 받아오는 사이에 TTL 이 끝나 다른 스레드가 목록을 처음부터
-                 * 다시 쌓았을 수 있다. 그 경우 우리가 들고 있는 커서는 이미
-                 * 지난 세대의 것이라 이어 붙일 수 없다. 새 것을 그대로 두고
-                 * 우리 결과는 버린다. (다음 더보기에서 다시 이어 받는다)
-                 */
+                // 받아오는 사이 다른 스레드가 목록을 다시 쌓았으면 우리 커서는
+                // 지난 세대라 이어 붙일 수 없다. 새 것을 두고 우리 결과는 버린다
                 if (current != null && current != base) {
                     return current;
                 }
@@ -241,10 +225,7 @@ public class LiveFeedService {
     }
 
     /**
-     * 다시보기 로드.
-     *
-     * 지금 이 채널의 다시보기는 18개뿐이라 한 번이면 끝나지만,
-     * 한 페이지(50개)에 맞춰두면 쌓였을 때 조용히 잘려나간다.
+     * 다시보기 로드. 한 페이지(50개)에 맞춰두면 쌓였을 때 조용히 잘리므로
      * 페이지가 빌 때까지 이어 받는다.
      */
     private List<Map<String, Object>> loadVideos() {
@@ -279,9 +260,8 @@ public class LiveFeedService {
     // ========================================
 
     /**
-     * 값과 적재 시각을 함께 담는 불변 스냅샷.
-     * 둘을 각각 필드로 두면 "새 값 + 옛 시각" 같은 어긋난 조합이 잠깐
-     * 보일 수 있다. 참조 하나만 통째로 바꾸면 그런 틈이 생기지 않는다.
+     * 값과 적재 시각을 함께 담는 불변 스냅샷. 각각 필드로 두면
+     * "새 값 + 옛 시각" 같은 어긋난 조합이 잠깐 보인다.
      */
     private static final class Snapshot<T> {
         final T value;
@@ -298,15 +278,11 @@ public class LiveFeedService {
     }
 
     /**
-     * 캐시에서 읽되, 만료됐으면 갱신한다.
+     * 캐시에서 읽되 만료됐으면 갱신한다.
      *
-     * 갱신은 락으로 묶어 한 스레드만 수행한다. 캐시가 만료되는 순간
-     * 요청이 몰려도 외부 API 는 한 번만 호출된다. 나머지 스레드는
-     * 잠깐 기다렸다가 갱신된 값을 그대로 받는다.
-     *
-     * 갱신에 실패하면(로더가 null 을 주거나 예외를 던지면) 만료된 값이라도
-     * 돌려준다. 외부 API 가 흔들려도 화면이 비지 않게 하기 위해서다.
-     * 값이 아예 없고 적재도 실패한 경우에만 null 이다.
+     * 갱신은 락으로 묶어 한 스레드만 수행하므로, 만료 순간 요청이 몰려도
+     * 외부 API 는 한 번만 호출된다. 갱신에 실패하면 만료된 값이라도 돌려준다
+     * — 외부 API 가 흔들려도 화면이 비지 않게. 값이 아예 없을 때만 null.
      */
     private <T> T cached(AtomicReference<Snapshot<T>> ref, Object lock,
                          long ttl, Supplier<T> loader) {

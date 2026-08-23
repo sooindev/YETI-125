@@ -13,12 +13,8 @@ import java.util.Map;
 /**
  * 필터 테스트용 가짜 서블릿 객체.
  *
- * 필터는 서블릿 컨테이너 안에서 돌지만, 여기서 보려는 것은 "어떤 요청을
- * 통과시키고 어떤 요청을 어떻게 막는가" 뿐이다. 톰캣을 띄우는 대신
- * 필요한 메서드만 답하는 대역을 세운다.
- *
- * 이 프로젝트는 목 프레임워크를 쓰지 않는다. JDK 의 동적 Proxy 로 충분하고,
- * 의존성이 늘지 않는다 (RequestUtilTest 도 같은 방식).
+ * 톰캣을 띄우지 않고 필요한 메서드만 답하는 대역을 세운다. 목 프레임워크
+ * 대신 JDK 동적 Proxy 를 쓴다 (RequestUtilTest 도 같은 방식).
  */
 final class FakeHttp {
 
@@ -109,8 +105,7 @@ final class FakeHttp {
                                         || Boolean.TRUE.equals(args[0]);
                                 if (create && session == null) {
                                     sessionCreated = true;
-                                    // Request.session(HttpSession) 빌더에 가려지므로 클래스 이름을 붙인다
-                                    session = FakeHttp.session();
+                                    session = FakeHttp.session();  // 빌더 메서드에 가려짐
                                 }
                                 return session;
                             default:

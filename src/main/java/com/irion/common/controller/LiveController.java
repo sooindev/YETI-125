@@ -14,20 +14,14 @@ import java.util.Map;
 /**
  * 치지직 연동 조회 API.
  *
- * 외부 호출과 파싱은 ChzzkClient, 캐시는 LiveFeedService 가 맡는다.
- * 여기서는 요청 파라미터를 다듬고 응답 모양을 만드는 일만 한다.
+ * 외부 호출·파싱은 ChzzkClient, 캐시는 LiveFeedService 가 맡는다.
+ * 여기서는 파라미터를 다듬고 응답 모양을 만든다.
  */
 @Controller
 @RequestMapping("/live")
 public class LiveController {
 
-    /**
-     * 한 요청이 가져갈 수 있는 최대 개수.
-     *
-     * 상한이 없으면 ?limit=500 하나로 매번 목록 확장 경로를 태울 수 있다.
-     * 확장은 외부 API 를 여러 번 부르므로, 그 길을 아무나 마음대로
-     * 열게 두지 않는다. 화면은 6개씩 받아간다.
-     */
+    /** 상한이 없으면 ?limit=500 하나로 외부 API 를 여러 번 부르게 만들 수 있다 */
     private static final int MAX_LIMIT = 50;
 
     @Autowired
@@ -54,7 +48,7 @@ public class LiveController {
         int safeLimit = clampLimit(limit);
         int safeOffset = Math.max(0, offset);
 
-        // 확장 목표도 메모리 상한을 넘기지 않는다
+        // 확장 목표도 메모리 상한 안에서
         int need = (int) Math.min((long) safeOffset + safeLimit, LiveFeedService.CLIP_MAX);
 
         LiveFeedService.ClipFeed feed = liveFeed.getClips(need);
@@ -64,7 +58,7 @@ public class LiveController {
         }
 
         Map<String, Object> result = paginate(feed.getClips(), "clips", safeOffset, safeLimit);
-        // 아직 커서가 남아 있으면 지금 다 보여줬어도 더 있는 것이다
+        // 커서가 남아 있으면 더 있는 것이다
         if (feed.canGrow()) {
             result.put("hasMore", true);
         }
@@ -94,7 +88,7 @@ public class LiveController {
         return Math.min(limit, MAX_LIMIT);
     }
 
-    /** 페이지네이션 결과 생성 (경계값을 테스트에서 확인하므로 package-private) */
+    /** 경계값을 테스트에서 확인하므로 package-private */
     Map<String, Object> paginate(List<Map<String, Object>> list, String key, int offset, int limit) {
         Map<String, Object> result = new HashMap<String, Object>();
 
@@ -104,7 +98,7 @@ public class LiveController {
             return result;
         }
 
-        // offset 이 목록을 넘으면 subList 가 예외를 던진다. 빈 페이지로 받는다.
+        // offset 이 목록을 넘으면 subList 가 예외를 던진다
         int start = Math.max(0, Math.min(offset, list.size()));
         int endIndex = Math.min(start + Math.max(0, limit), list.size());
         result.put(key, new ArrayList<Map<String, Object>>(list.subList(start, endIndex)));

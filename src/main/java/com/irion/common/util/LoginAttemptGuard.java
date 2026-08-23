@@ -11,21 +11,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * 로그인 시도 제한.
  *
- * 지금까지는 제한이 전혀 없어서, 아이디만 알면 초당 수십 번씩 비밀번호를
- * 밀어 넣을 수 있었다. 관리자 계정이 하나뿐이라 대상도 뻔하다.
+ * IP 가 아니라 계정 기준으로 센다 — 프록시 뒤라 IP 를 믿기 어렵고, 계정
+ * 기준이면 여러 IP 로 나눠 들어와도 같은 카운터에 걸린다. 대신 남의 계정을
+ * 잠가버릴 수 있으므로 영구 잠금이 아니라 시간이 지나면 풀린다.
  *
- * 계정 이름 기준으로 실패를 센다. IP 기준은 프록시 뒤라 신뢰하기 어렵고,
- * 계정 기준이면 여러 IP 로 나눠 들어와도 같은 카운터에 걸린다. 대신
- * 남의 계정을 일부러 잠가버릴 수 있으므로, 영구 잠금이 아니라 짧은
- * 대기 시간이 지나면 저절로 풀리게 한다.
+ * 아이디는 공격자가 지어내는 값이고 /admin/loginProc 는 인증도 CSRF 도 거치지
+ * 않는 자리다. 항목 수와 키 길이 양쪽에 상한을 둔다.
  *
- * 계정 기준으로 세는 데에는 대가가 따른다. 아이디는 공격자가 지어내는
- * 값이라, 매번 다른 이름으로 실패하면 그만큼 항목이 늘어난다.
- * /admin/loginProc 는 인증도 CSRF 도 거치지 않는 자리라 누구나 두드릴 수
- * 있으므로, 항목 수와 키 길이 양쪽에 상한을 두고 오래된 것을 걷어낸다.
- *
- * 인스턴스는 톰캣 하나 안에서만 산다. 서버를 여러 대로 늘리면 공유 저장소
- * (예: DB 컬럼)로 옮겨야 한다.
+ * 톰캣 하나 기준이다. 서버를 늘리면 공유 저장소로 옮겨야 한다.
  */
 public class LoginAttemptGuard {
 
@@ -38,21 +31,10 @@ public class LoginAttemptGuard {
     /** 마지막 실패 후 이 시간이 지나면 카운터를 잊는다 */
     private static final long RESET_MILLIS = 30 * 60 * 1000L;
 
-    /**
-     * 동시에 추적할 계정 수 상한.
-     *
-     * 실제 관리자는 한 자리 수다. 이 숫자는 "정상적으로 필요한 양"이 아니라
-     * "여기까지는 받아주고 그 이상은 버린다"는 선이다.
-     */
+    /** 추적 상한 — 정상적으로 필요한 양이 아니라 "여기까지만 받는다"는 선 */
     private static final int MAX_TRACKED = 10_000;
 
-    /**
-     * 키로 보관할 최대 길이.
-     *
-     * tb_admin.admin_login_id 가 VARCHAR(50) 이라 이보다 긴 아이디는
-     * 어차피 존재할 수 없다. 잘라 담아도 실제 계정끼리 겹치지 않는다.
-     * 자르지 않으면 1MB 짜리 아이디 하나가 그대로 키가 된다.
-     */
+    /** admin_login_id 가 VARCHAR(50) 이라 이보다 길면 실제 계정일 수 없다 */
     private static final int MAX_KEY_LENGTH = 64;
 
     private final Map<String, Attempt> attempts = new ConcurrentHashMap<String, Attempt>();
@@ -87,12 +69,8 @@ public class LoginAttemptGuard {
                 makeRoom(now);
             }
             if (attempts.size() >= MAX_TRACKED) {
-                /*
-                 * 자리를 못 만들었다 — 추적 중인 계정이 전부 잠금 상태라는 뜻이다.
-                 * 이 실패는 세지 않고 넘어간다. 이미 걸어둔 잠금을 밀어내면서까지
-                 * 새 계정을 받아주면, 가짜 아이디를 쏟아부어 진짜 잠금을 씻어낼
-                 * 수 있게 된다. 기록을 하나 놓치는 편이 낫다.
-                 */
+                // 전부 잠금 상태라 자리를 못 만들었다. 잠금을 밀어내면서까지
+                // 받아주면 가짜 아이디로 진짜 잠금을 씻어낼 수 있다
                 return;
             }
             attempt = attempts.computeIfAbsent(key, k -> new Attempt());
@@ -116,14 +94,8 @@ public class LoginAttemptGuard {
     }
 
     /**
-     * 자리 만들기.
-     *
-     * 먼저 잊어도 되는 것을 지운다. 잠금이 이미 풀렸고 마지막 실패가
-     * RESET_MILLIS 보다 오래된 항목은, 남겨둬도 다음 실패에 카운터가
-     * 0 부터 다시 시작하므로 지우는 것과 결과가 같다.
-     *
-     * 그래도 넘치면 잠기지 않은 항목 중 오래된 순으로 잘라낸다.
-     * 잠금이 살아 있는 항목은 건드리지 않는다.
+     * 자리 만들기 — 만료된 항목을 먼저 지우고, 그래도 넘치면 잠기지 않은
+     * 것 중 오래된 순으로 잘라낸다. 잠금이 살아 있는 항목은 건드리지 않는다.
      */
     private void makeRoom(long now) {
         Iterator<Map.Entry<String, Attempt>> it = attempts.entrySet().iterator();
@@ -148,7 +120,7 @@ public class LoginAttemptGuard {
         }
         evictable.sort(Comparator.comparingLong(entry -> entry.getValue().lastFailedAt));
 
-        // 한 자리만 비우면 곧바로 다시 부르게 된다. 여유분까지 정리한다.
+        // 한 자리만 비우면 곧바로 다시 부르게 된다
         int target = attempts.size() - (MAX_TRACKED * 3 / 4);
         for (Map.Entry<String, Attempt> entry : evictable) {
             if (target-- <= 0) {
@@ -158,7 +130,7 @@ public class LoginAttemptGuard {
         }
     }
 
-    /** 추적 중인 계정 수 — 상한이 지켜지는지 테스트에서 확인하므로 package-private */
+    /** 상한이 지켜지는지 테스트에서 확인하므로 package-private */
     int trackedCount() {
         return attempts.size();
     }

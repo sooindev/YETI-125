@@ -10,16 +10,9 @@ import static org.junit.Assert.*;
 /**
  * 관리자 영역 CSRF 방어.
  *
- * 예전에는 관리자 API 가 contentType: application/json 을 쓴다는 점이
- * 우연히 방패 노릇을 하고 있었다 — 폼이나 &lt;img&gt; 로는 그 Content-Type 을
- * 만들 수 없기 때문이다. 하지만 그건 방어가 아니라 부작용이라, 요청
- * 하나만 단순 폼으로 바뀌어도 그대로 뚫린다.
- *
- * 확인할 것.
- *
- *   1. 상태를 바꾸는 메서드만 검사하고 조회는 그냥 통과시키는가
+ *   1. 상태를 바꾸는 메서드만 검사하고 조회는 통과시키는가
  *   2. 토큰이 없거나 틀리면 막는가
- *   3. 로그인 요청만 예외로 두되, 그 예외를 경로 조작으로 빌려쓸 수 없는가
+ *   3. 로그인 예외를 경로 조작으로 빌려쓸 수 없는가
  */
 public class CsrfFilterTest {
 
@@ -110,18 +103,13 @@ public class CsrfFilterTest {
     // 로그인 예외
     // ========================================
 
-    /** 로그인 시점에는 아직 세션이 없어 토큰을 줄 수가 없다 */
+    /** 로그인 시점에는 세션이 없어 토큰을 줄 수가 없다 */
     @Test
     public void 로그인_처리는_예외로_통과시킨다() throws Exception {
         assertPassed(request("/admin/loginProc").method("POST"));
     }
 
-    /**
-     * 예외 경로를 빌려 다른 요청을 통과시킬 수 없어야 한다.
-     *
-     * /admin/loginProc/../schedule 이 서블릿 컨테이너에 닿는 실제 대상은
-     * /admin/schedule 이다. 예외 판정을 원본 문자열로 하면 여기서 뚫린다.
-     */
+    /** 컨테이너에 닿는 실제 대상은 /admin/schedule 이다 */
     @Test
     public void 예외_경로를_빌려_다른_요청을_통과시킬_수_없다() throws Exception {
         FakeHttp.Response response =
@@ -164,12 +152,7 @@ public class CsrfFilterTest {
         assertEquals("CSRF token mismatch", response.body());
     }
 
-    /**
-     * 폼으로 위장한 요청도 막힌다.
-     *
-     * 이 필터를 만든 이유가 이것이다. Content-Type 이 폼이면 예전의
-     * "우연한 방패" 는 통하지 않는다.
-     */
+    /** 이 필터를 만든 이유 — JSON Content-Type 은 방어가 아니라 우연이었다 */
     @Test
     public void 폼으로_위장한_요청도_막는다() throws Exception {
         FakeHttp.Response response = run(request("/admin/schedule")

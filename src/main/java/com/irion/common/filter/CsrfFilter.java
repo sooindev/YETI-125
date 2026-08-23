@@ -14,18 +14,15 @@ import java.util.Set;
 /**
  * 관리자 영역의 CSRF 방어.
  *
- * 상태를 바꾸는 메서드(POST/PUT/DELETE/PATCH)만 본다. 조회는 그대로 통과.
- * 로그인 자체는 아직 세션이 없어 토큰을 줄 수가 없으므로 예외로 둔다.
- *
- * AdminLoginFilter 다음에 놓는다. 로그인 여부를 먼저 가리고, 로그인한
- * 요청에 대해서만 토큰을 따진다.
+ * 상태를 바꾸는 메서드만 검사한다. 로그인은 아직 세션이 없어 토큰을 줄 수
+ * 없으므로 예외다. web.xml 에서 AdminLoginFilter 다음에 매핑한다.
  */
 public class CsrfFilter implements Filter {
 
     private static final Set<String> PROTECTED_METHODS = new HashSet<String>(
             Arrays.asList("POST", "PUT", "DELETE", "PATCH"));
 
-    /** 세션이 없는 시점의 요청 — 토큰을 요구할 수 없다 */
+    /** 세션이 없는 시점의 요청 */
     private static final Set<String> EXEMPT_PATHS = new HashSet<String>(
             Arrays.asList("/admin/loginProc"));
 

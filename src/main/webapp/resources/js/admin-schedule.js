@@ -6,19 +6,12 @@ let calendar;
 let currentScheduleId = null;
 
 /*
- * /admin/** 로 나가는 모든 요청에 AJAX 표시를 붙인다.
+ * /admin/** 요청에 AJAX 표시와 CSRF 토큰을 붙인다.
  *
- * 이 표시가 없으면 서버가 인증 실패를 401 이 아니라 로그인 페이지
- * 리다이렉트로 돌려준다. jQuery 는 리다이렉트를 따라가 HTTP 200 + HTML 을
- * 받고, JSON 파싱에 실패해 error 콜백으로 오는데 그 때 xhr.status 는
- * 200 이라 401 분기에 걸리지 않는다. 세션이 끊긴 뒤 캘린더가 에러도 없이
- * 빈 화면이 되던 원인이다.
- *
- * jQuery 가 동일 출처 요청에 X-Requested-With 를 붙여주긴 하지만,
- * 인증 판정이 걸린 헤더를 라이브러리 기본값에 맡기지 않는다.
- *
- * 상태를 바꾸는 요청에는 CSRF 토큰도 함께 싣는다. 토큰은 화면을 열 때
- * 한 번 받아 온다 (아래 $(document).ready 참고).
+ * 표시가 없으면 서버가 인증 실패를 401 이 아니라 로그인 페이지 리다이렉트로
+ * 돌려주는데, jQuery 가 그걸 따라가 200 + HTML 을 받아버려 401 분기에 걸리지
+ * 않는다. jQuery 도 X-Requested-With 를 붙여주지만 인증 판정이 걸린 헤더를
+ * 라이브러리 기본값에 맡기지 않는다.
  */
 let csrfToken = null;
 
@@ -39,8 +32,8 @@ $.ajaxPrefilter(function(options) {
 });
 
 $(document).ready(function() {
-    // 토큰을 먼저 받아둔다. 실패해도 화면은 띄운다 — 조회는 토큰이
-    // 필요 없고, 저장을 누르는 시점에 서버가 403 으로 알려준다.
+    // 실패해도 화면은 띄운다. 조회에는 토큰이 필요 없고,
+    // 저장 시점에 서버가 403 으로 알려준다
     $.ajax({
         url: '/admin/csrf-token',
         type: 'GET',
@@ -385,12 +378,7 @@ function formatDateForServer(dateTimeLocalString) {
         : dateTimeLocalString;
 }
 
-/*
- * 로그아웃
- *
- * GET 이었을 때는 <img src="/admin/logout"> 만으로도 남의 세션을 끊을 수
- * 있었다. POST 로 바꿔 CSRF 검사를 받게 한다.
- */
+/* GET 이면 img 태그 하나로도 남의 세션을 끊을 수 있어 POST 로 둔다 */
 function doLogout() {
     $.ajax({
         url: '/admin/logout',
