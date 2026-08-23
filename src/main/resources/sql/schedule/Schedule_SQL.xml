@@ -90,16 +90,35 @@
     </insert>
 
     <!-- 일정 수정 -->
+    <!--
+      일정 수정
+
+      display_yn 만 다른 컬럼과 다루는 방식이 다르다. 값이 실려 왔을 때만
+      덮어쓰고, 없으면 손대지 않는다.
+
+      나머지 컬럼은 빠져 있으면 서비스가 기본값을 채워 넣는다. 그런데
+      공개 여부는 기본값을 정할 수가 없다 — 'Y' 로 채우면 숨겨둔 일정이
+      조용히 공개되고, 'N' 으로 채우면 공개하던 일정이 조용히 사라진다.
+      어느 쪽도 부르는 쪽이 의도한 바가 아니다.
+
+      수정 요청은 항목을 전부 다시 실어 보내게 되어 있다(admin-schedule.js
+      의 "기존 데이터 유지" 참고). 그 중 하나가 빠지는 것은 정상 경로가
+      아니라 사고이므로, 사고가 나더라도 공개 여부만은 건드리지 않는다.
+    -->
     <update id="updateSchedule" parameterType="ScheduleVO">
         UPDATE tb_schedule
-        SET title = #{title}
-            ,description = #{description}
-            ,schedule_type = #{scheduleType}
-            ,start_date = #{startDate}
-            ,end_date = #{endDate}
-            ,all_day_yn = #{allDayYn}
-            ,display_yn = #{displayYn}
-            ,color = #{color}
+        <set>
+            title = #{title},
+            description = #{description},
+            schedule_type = #{scheduleType},
+            start_date = #{startDate},
+            end_date = #{endDate},
+            all_day_yn = #{allDayYn},
+            color = #{color},
+            <if test="displayYn != null and displayYn != ''">
+                display_yn = #{displayYn},
+            </if>
+        </set>
         WHERE schedule_id = #{scheduleId}
           AND del_yn = 'N'
     </update>
