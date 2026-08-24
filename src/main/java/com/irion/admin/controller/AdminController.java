@@ -43,8 +43,7 @@ public class AdminController {
         if (session != null && session.getAttribute("adminUser") != null) {
             return "redirect:/admin/schedule";
         }
-        // forward 라 주소창에는 /admin/admin-login 이 남는다
-        return "forward:/admin/admin-login.html";
+        return "admin/admin-login";
     }
 
     /** 로그인 처리. 성공하면 세션을 새로 발급한다 (세션 고정 방어) */

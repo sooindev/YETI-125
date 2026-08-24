@@ -1,3 +1,4 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -5,16 +6,7 @@
   <meta name="robots" content="noindex, nofollow">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Schedule Admin — YETI-125</title>
-  <link rel="icon" type="image/png" href="/resources/images/snowflake.png">
-  <!-- 폰트는 두 줄로 나눠 받는다 — Anton·JetBrains Mono(1.1KB)가
-       Noto Sans KR(90.8KB) 뒤에 묶여 기다리지 않도록.
-       preconnect 는 스크립트 앞, 스타일시트는 스크립트 뒤에 온다.
-       (이유는 common.css 의 "대체 폰트 보정" 주석 참고) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <script src="/resources/js/theme-init.js"></script>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap">
+<jsp:include page="/WEB-INF/views/common/head-assets.jsp"/>
   <!-- FullCalendar 6 은 CSS 를 JS 번들 안에서 주입한다. 별도 스타일시트가 없다. -->
   <link rel="stylesheet" href="/resources/css/common.css">
   <link rel="stylesheet" href="/resources/css/admin.css">
@@ -33,11 +25,7 @@
       <a href="/" target="_blank" class="nav-link">사이트 보기</a>
       <a href="#" id="logoutBtn" class="nav-link logout-btn">로그아웃</a>
     </nav>
-    <button class="theme-toggle" id="themeToggle" aria-label="테마 전환">
-      <svg class="icon-auto" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.2"/><path class="half" d="M12 3.8a8.2 8.2 0 0 1 0 16.4z"/></svg>
-      <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
-      <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.4v2.6M12 19v2.6M4.2 4.2l1.9 1.9M17.9 17.9l1.9 1.9M2.4 12h2.6M19 12h2.6M4.2 19.8l1.9-1.9M17.9 6.1l1.9-1.9"/></svg>
-    </button>
+    <jsp:include page="/WEB-INF/views/common/theme-toggle.jsp"/>
     <button class="mobile-menu-btn" aria-label="메뉴" aria-expanded="false">
       <span></span><span></span><span></span>
     </button>
@@ -140,9 +128,7 @@
 <!-- Toast -->
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"
-        integrity="sha384-1H217gwSVyLSIfaLxHbE7dRb3v4mYCKbpQvzx0cegeju1MVsGrX5xXxAvs/HgeFs"
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<jsp:include page="/WEB-INF/views/common/jquery.jsp"/>
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"
         integrity="sha384-WfE/vOHqht3KDj6FvpwQUf3UxEPUHoGJ3w1yZ8rhpLWnVigt8HjXL2zXqtcfS7mf"
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>

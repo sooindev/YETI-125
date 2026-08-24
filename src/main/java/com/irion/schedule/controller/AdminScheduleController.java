@@ -21,10 +21,10 @@ public class AdminScheduleController {
     @Autowired
     private ScheduleService scheduleService;
 
-    /** 일정 관리 페이지. forward 라 주소창에는 /admin/schedule 이 남는다 */
+    /** 일정 관리 페이지 */
     @GetMapping("")
     public String scheduleManage() {
-        return "forward:/admin/admin-schedule.html";
+        return "admin/admin-schedule";
     }
 
     /** 일정 목록 조회 */
