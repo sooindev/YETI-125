@@ -4,9 +4,12 @@
 
 $(document).ready(function() {
     // Mobile Menu Toggle
+    //
+    // aria-expanded 를 같이 갱신한다. 버튼 모양(햄버거 ↔ X)만으로는
+    // 스크린 리더 사용자가 메뉴가 열렸는지 알 수 없다.
     $('.mobile-menu-btn').on('click', function() {
-        $('.nav').toggleClass('active');
-        $(this).toggleClass('active');
+        var opened = $('.nav').toggleClass('active').hasClass('active');
+        $(this).toggleClass('active').attr('aria-expanded', opened ? 'true' : 'false');
     });
 
     initHeaderScrollState();

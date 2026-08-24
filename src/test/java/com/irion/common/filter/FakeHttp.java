@@ -31,6 +31,7 @@ final class FakeHttp {
         private String method = "GET";
         private HttpSession session;
         private String contentType;
+        private String queryString;
         private final Map<String, String> headers = new HashMap<String, String>();
         private final Map<String, String> params = new HashMap<String, String>();
 
@@ -49,6 +50,11 @@ final class FakeHttp {
 
         Request method(String value) {
             this.method = value;
+            return this;
+        }
+
+        Request queryString(String value) {
+            this.queryString = value;
             return this;
         }
 
@@ -96,6 +102,8 @@ final class FakeHttp {
                                 return this.method;
                             case "getContentType":
                                 return contentType;
+                            case "getQueryString":
+                                return queryString;
                             case "getHeader":
                                 return headers.get((String) args[0]);
                             case "getParameter":
@@ -159,10 +167,16 @@ final class FakeHttp {
         int status = 200;
         String redirect;
         String contentType;
+        private final Map<String, String> headers = new HashMap<String, String>();
         private final StringWriter written = new StringWriter();
 
         String body() {
             return written.toString();
+        }
+
+        /** 301 은 sendRedirect 가 아니라 setStatus + Location 으로 나간다 */
+        String header(String name) {
+            return headers.get(name);
         }
 
         HttpServletResponse build() {
@@ -180,6 +194,11 @@ final class FakeHttp {
                                 redirect = (String) args[0];
                                 status = 302;
                                 return null;
+                            case "setHeader":
+                                headers.put((String) args[0], (String) args[1]);
+                                return null;
+                            case "getHeader":
+                                return headers.get((String) args[0]);
                             case "setContentType":
                                 contentType = (String) args[0];
                                 return null;

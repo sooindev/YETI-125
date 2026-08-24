@@ -15,7 +15,7 @@ import static org.junit.Assert.*;
  */
 public class AdminLoginFilterTest {
 
-    private static final String LOGIN_PAGE = "/admin/admin-login.html";
+    private static final String LOGIN_PAGE = "/admin/admin-login";
 
     // ========================================
     // 공개 경로
