@@ -20,7 +20,7 @@
     <mariadb.version>3.1.4</mariadb.version>
     <jackson.version>2.15.2</jackson.version>
     <hibernate-validator.version>6.2.5.Final</hibernate-validator.version>
-    <slf4j.version>1.7.36</slf4j.version>
+    <slf4j.version>2.0.18</slf4j.version>
     <logback.version>1.2.13</logback.version>
 
     <!-- -Dnvd.api.key=... 또는 환경변수로 덮어쓴다. 저장소에는 비워 둔다 -->
