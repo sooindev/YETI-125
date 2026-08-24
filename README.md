@@ -322,6 +322,39 @@ sequenceDiagram
 > 사파리에서 유지되지 않습니다. 크롬과 파이어폭스는 localhost 를
 > 신뢰할 수 있는 출처로 보아 그대로 동작합니다.
 
+### 의존성 취약점 감시
+
+애플리케이션 코드가 아무리 멀쩡해도 가져다 쓰는 라이브러리에 구멍이 나면
+같이 뚫립니다. 두 가지를 겁니다.
+
+**자동 (키 없이 동작)** — [.github/dependabot.yml](.github/dependabot.yml)
+
+깃허브가 매주 월요일 `pom.xml` 을 훑어 새 버전이 나오면 PR 을 열어줍니다.
+패치 단위 업데이트는 한 PR 로 묶고, 지금 올릴 수 없는 것(Spring 6 계열 —
+`jakarta` 네임스페이스가 필요합니다)은 소음이 되므로 제외했습니다.
+
+보안 경고(Dependabot alerts)는 이 파일과 별개입니다. 저장소
+`Settings › Code security` 에서 켜며, 공개 저장소는 기본으로 켜져 있습니다.
+
+**수동 (NVD API 키 필요)** — `security` 프로파일
+
+```bash
+mvn -Psecurity verify -Dnvd.api.key=발급받은키
+```
+
+CVSS 7.0 이상이 나오면 빌드를 실패시키고, 보고서는
+`target/dependency-check-report.html` 에 남습니다.
+
+키는 <https://nvd.nist.gov/developers/request-an-api-key> 에서 무료로
+받습니다. 2024년부터 익명 접근이 막혀 **키 없이는 아예 돌지 않습니다**.
+저장소에 적지 말고 명령줄이나 `NVD_API_KEY` 환경변수로 넘깁니다.
+
+오탐은 [dependency-check-suppress.xml](dependency-check-suppress.xml) 에
+**왜 해당되지 않는지 근거를 적어** 예외 처리합니다. 근거 없는 예외는 스캔을
+통과시키려고 눈을 가리는 것과 같습니다.
+
+기본 빌드에는 들어가지 않습니다 — NVD 데이터를 받느라 몇 분씩 걸립니다.
+
 <br>
 
 ## 시작하기

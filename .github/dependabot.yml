@@ -1,0 +1,39 @@
+# 의존성 취약점·업데이트 감시.
+#
+# 깃허브가 매주 pom.xml 을 훑어 새 버전이 나오면 PR 을 열어준다.
+# 별도 키나 계정이 필요 없고, 로컬 스캔과 달리 잊어버릴 일이 없다.
+#
+# 보안 경고(Dependabot alerts)는 이 파일과 별개다 — 저장소
+# Settings › Code security 에서 켠다. 공개 저장소는 기본으로 켜져 있다.
+version: 2
+
+updates:
+  - package-ecosystem: maven
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Asia/Seoul
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "의존성"
+    groups:
+      # 자잘한 패치는 한 PR 로 묶는다 — 매주 PR 5개가 열리면 아무도 안 본다
+      patch-updates:
+        patterns:
+          - "*"
+        update-types:
+          - patch
+    ignore:
+      # jakarta 네임스페이스를 요구해 Spring 6 마이그레이션과 한 묶음이다.
+      # 따로 PR 이 열려도 지금은 머지할 수 없어 소음만 된다.
+      - dependency-name: "org.springframework:*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "org.mybatis:mybatis-spring"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "org.hibernate.validator:*"
+        update-types: ["version-update:semver-major"]
+      # HikariCP 5+ 는 Java 11+, 7+ 는 17 이 필요하다 (지금 컴파일 타깃 1.8)
+      - dependency-name: "com.zaxxer:HikariCP"
+        update-types: ["version-update:semver-major"]
