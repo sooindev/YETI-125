@@ -465,9 +465,11 @@ YETI-125/
 │   │   ├── resources-prod/    DB 접속 정보 (운영) — mvn -Pprod 전용
 │   │   └── webapp/
 │   │       ├── META-INF/      톰캣 쿠키 처리기 (SameSite)
-│   │       ├── WEB-INF/       web.xml · 오류 페이지
-│   │       ├── resources/     css · js · images
-│   │       └── *.html         홈, 일정, 프로필, 관리자
+│   │       ├── WEB-INF/
+│   │       │   ├── web.xml
+│   │       │   └── views/     페이지 JSP — 홈, 일정, 프로필, 관리자
+│   │       │       └── common/  상단바 · 바닥글 · 테마 토글 · head 공통 조각
+│   │       └── resources/     css · js · images
 │   └── test/java/com/irion/   비밀번호 · 로그인 검증 · 시도 제한 · 일정 저장
 │                              치지직 파싱 · 페이지네이션 · 입력 검증 · 조회 기간
 ├── docs/screenshots/      README 용 화면 캡처

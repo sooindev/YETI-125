@@ -23,7 +23,6 @@ public class AdminLoginFilter implements Filter {
     private static final Set<String> PUBLIC_PATHS = Collections.unmodifiableSet(
             new HashSet<String>(Arrays.asList(
                     "/admin/admin-login",
-                    "/admin/admin-login.html",
                     "/admin/loginProc")));
 
     @Override

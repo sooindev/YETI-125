@@ -63,6 +63,35 @@ public class LegacyHtmlRedirectFilterTest {
         assertPassed("/admin/schedule");
     }
 
+    /**
+     * 글자만 다른 표기로 옛 페이지에 닿을 수 있으면 안 된다.
+     *
+     * 톰캣이 /./ 와 /../ 는 필터에 오기 전에 정리해주지만 겹친 슬래시는
+     * 그대로 넘어온다. 퍼센트 인코딩도 getRequestURI() 에는 남아 있다.
+     */
+    @Test
+    public void 다른_표기로도_옛_주소에_닿을_수_없다() throws Exception {
+        assertMoved("//schedule.html", "/schedule");
+        assertMoved("/schedule%2Ehtml", "/schedule");
+        assertMoved("//admin//admin-schedule.html", "/admin/schedule");
+    }
+
+    /** 같은 곳을 가리키는 표기는 정규 표기 하나로 모은다 */
+    @Test
+    public void 겹친_슬래시와_끝_슬래시를_정리한다() throws Exception {
+        assertMoved("/schedule/", "/schedule");
+        assertMoved("/schedule//", "/schedule");
+        assertMoved("//schedule", "/schedule");
+        assertMoved("//info", "/info");
+        assertMoved("//", "/");
+    }
+
+    /** 루트는 끝 슬래시가 정규 표기다 — 떼면 빈 주소가 된다 */
+    @Test
+    public void 루트는_그대로_둔다() throws Exception {
+        assertPassed("/");
+    }
+
     @Test
     public void 정적_파일과_API_는_지나간다() throws Exception {
         assertPassed("/resources/css/common.css");
