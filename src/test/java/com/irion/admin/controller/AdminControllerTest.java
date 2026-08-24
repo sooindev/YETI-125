@@ -25,7 +25,7 @@ public class AdminControllerTest {
 
         String view = new AdminController().loginPage(request);
 
-        assertEquals("redirect:/admin/admin-login.html", view);
+        assertEquals("forward:/admin/admin-login.html", view);
         assertFalse("세션을 새로 만들면 안 된다", created[0]);
     }
 
@@ -34,7 +34,7 @@ public class AdminControllerTest {
         boolean[] created = { false };
         HttpServletRequest request = request(created, session(null));
 
-        assertEquals("redirect:/admin/admin-login.html",
+        assertEquals("forward:/admin/admin-login.html",
                 new AdminController().loginPage(request));
     }
 
@@ -43,7 +43,7 @@ public class AdminControllerTest {
         boolean[] created = { false };
         HttpServletRequest request = request(created, session(new AdminVO()));
 
-        assertEquals("redirect:/admin/admin-schedule.html",
+        assertEquals("redirect:/admin/schedule",
                 new AdminController().loginPage(request));
     }
 

@@ -51,6 +51,16 @@ public class StaticResourceCacheFilter implements Filter {
      */
     private static final String HSTS = "max-age=31536000";
 
+    /**
+     * Referrer-Policy
+     *
+     * 요즘 브라우저 기본값과 같은 값이지만 명시한다 — 기본값은 브라우저가
+     * 정하는 것이라 언제든 달라질 수 있다. 다른 사이트로 나갈 때는 출처
+     * (https://yeti-125.com)까지만 보내고 경로는 숨긴다. 같은 사이트 안에서는
+     * 전체 주소를 보내 유입 경로 분석이 그대로 된다.
+     */
+    private static final String REFERRER_POLICY = "strict-origin-when-cross-origin";
+
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
     }
@@ -72,6 +82,7 @@ public class StaticResourceCacheFilter implements Filter {
         httpResponse.setHeader("X-Frame-Options", "DENY");
         httpResponse.setHeader("X-Content-Type-Options", "nosniff");
         httpResponse.setHeader("Strict-Transport-Security", HSTS);
+        httpResponse.setHeader("Referrer-Policy", REFERRER_POLICY);
 
         chain.doFilter(request, response);
     }

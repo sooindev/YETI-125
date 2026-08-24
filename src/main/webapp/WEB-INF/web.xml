@@ -98,6 +98,17 @@
       <http-only>true</http-only>
       <secure>true</secure>
     </cookie-config>
+
+    <!--
+      세션 추적을 쿠키로만 한다.
+
+      톰캣 기본값은 COOKIE + URL 이라, 쿠키를 받지 않는 클라이언트에는
+      주소에 ;jsessionid=... 가 붙는다. 그 주소가 공유되거나 Referer 로
+      새어 나가면 세션이 통째로 넘어간다.
+
+      스키마상 cookie-config 다음에 와야 한다.
+    -->
+    <tracking-mode>COOKIE</tracking-mode>
   </session-config>
 
   <!-- Error Pages -->
