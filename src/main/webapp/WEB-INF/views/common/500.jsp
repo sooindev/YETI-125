@@ -12,6 +12,31 @@
 <%
     String occurredAt = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
             .format(new java.util.Date());
+
+    /*
+     * "다시 시도" 가 돌아갈 주소.
+     *
+     * 예전에는 javascript:location.reload() 였는데 CSP 가 막는다 — script-src 에
+     * 'unsafe-inline' 이 없어서 javascript: 링크는 실행되지 않는다. 눌러도 아무
+     * 일이 없었다. 원래 요청 주소로 가는 평범한 링크로 바꾼다.
+     *
+     * 이 주소는 바깥에서 들어온 값이라 그대로 심으면 안 된다. 경로 모양인지
+     * 확인하고(// 로 시작하면 남의 사이트로 나간다) HTML 특수문자를 바꾼다.
+     */
+    String retryUrl = "/";
+    Object errorUri = request.getAttribute("javax.servlet.error.request_uri");
+    if (errorUri instanceof String) {
+        String uri = (String) errorUri;
+        String query = request.getQueryString();
+        if (query != null && !query.isEmpty()) {
+            uri = uri + "?" + query;
+        }
+        if (uri.startsWith("/") && !uri.startsWith("//")) {
+            retryUrl = uri;
+        }
+    }
+    retryUrl = retryUrl.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+                       .replace("\"", "&quot;").replace("'", "&#39;");
 %>
 <!DOCTYPE html>
 <html lang="ko">
@@ -41,7 +66,7 @@
 
     <div class="error-actions">
       <a href="/" class="btn btn-primary">홈으로 <span class="btn-arrow">→</span></a>
-      <a href="javascript:location.reload()" class="btn">다시 시도</a>
+      <a href="<%= retryUrl %>" class="btn">다시 시도</a>
     </div>
 
     <p class="error-meta idx">발생 시각 · <%= occurredAt %></p>
