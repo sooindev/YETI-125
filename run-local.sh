@@ -121,7 +121,7 @@ done
 if [ "$CODE" = "200" ]; then
   printf '\n\033[32m✓ 실행 중\033[0m\n'
   printf '   사이트   : %s\n' "$URL"
-  printf '   관리자   : %s/admin/admin-login.html\n' "$URL"
+  printf '   관리자   : %s/admin/admin-login\n' "$URL"
   printf '   로그     : ./run-local.sh --logs\n'
   printf '   정지     : ./run-local.sh --stop\n\n'
 else

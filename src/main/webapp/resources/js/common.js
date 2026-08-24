@@ -232,7 +232,7 @@ function apiRequest(url, method, data, callback) {
         error: function(xhr) {
             // 인증 실패 시
             if (xhr.status === 401) {
-                window.location.href = '/admin/admin-login.html';
+                window.location.href = '/admin/admin-login';
                 return;
             }
             if (callback) callback(null);

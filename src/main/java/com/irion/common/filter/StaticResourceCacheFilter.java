@@ -64,7 +64,7 @@ public class StaticResourceCacheFilter implements Filter {
 
         String uri = httpRequest.getRequestURI();
 
-        if (uri.endsWith(".html") || uri.endsWith(".css") || uri.endsWith(".js")) {
+        if (isPagePath(uri) || uri.endsWith(".html") || uri.endsWith(".css") || uri.endsWith(".js")) {
             httpResponse.setHeader("Cache-Control", "no-cache");
         }
 
@@ -74,6 +74,17 @@ public class StaticResourceCacheFilter implements Filter {
         httpResponse.setHeader("Strict-Transport-Security", HSTS);
 
         chain.doFilter(request, response);
+    }
+
+    /**
+     * 페이지 주소는 확장자가 없다 — /schedule 처럼.
+     *
+     * 확장자로만 걸러내면 정규 주소가 된 페이지들이 Cache-Control 없이 나가
+     * 톰캣 휴리스틱 캐시로 되돌아간다. 이 필터를 만든 이유가 바로 그것이다.
+     * API 응답(/live/status 등)도 같이 걸리는데 매번 확인하는 편이 맞다.
+     */
+    private static boolean isPagePath(String uri) {
+        return uri.indexOf('.', uri.lastIndexOf('/') + 1) < 0;
     }
 
     @Override

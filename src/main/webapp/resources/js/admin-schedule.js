@@ -171,7 +171,7 @@ function loadSchedules(start, end, callback) {
         },
         error: function(xhr) {
             if (xhr.status === 401) {
-                window.location.href = '/admin/admin-login.html';
+                window.location.href = '/admin/admin-login';
             }
             callback([]);
         }
@@ -284,7 +284,7 @@ function saveSchedule() {
         },
         error: function(xhr) {
             if (xhr.status === 401) {
-                window.location.href = '/admin/admin-login.html';
+                window.location.href = '/admin/admin-login';
                 return;
             }
             showToast('저장 중 오류가 발생했습니다.', 'error');
@@ -314,7 +314,7 @@ function deleteSchedule() {
         },
         error: function(xhr) {
             if (xhr.status === 401) {
-                window.location.href = '/admin/admin-login.html';
+                window.location.href = '/admin/admin-login';
                 return;
             }
             showToast('삭제 중 오류가 발생했습니다.', 'error');
@@ -385,6 +385,6 @@ function doLogout() {
         type: 'POST',
         dataType: 'json'
     }).always(function() {
-        window.location.href = '/admin/admin-login.html';
+        window.location.href = '/admin/admin-login';
     });
 }

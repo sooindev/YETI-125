@@ -257,7 +257,7 @@ function publishEventSchema(events) {
             location: { '@type': 'VirtualLocation', url: CHANNEL },
             performer: { '@type': 'Person', name: '이리온' },
             organizer: { '@type': 'Person', name: '이리온', url: CHANNEL },
-            url: 'https://yeti-125.com/schedule.html'
+            url: 'https://yeti-125.com/schedule'
         };
         if (event.end) node.endDate = new Date(event.end).toISOString();
         if (event.description) node.description = event.description;

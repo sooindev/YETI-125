@@ -55,6 +55,20 @@
     <url-pattern>/*</url-pattern>
   </filter-mapping>
 
+  <!--
+    예전 .html 주소 → 확장자 없는 정규 주소 301.
+    staticResourceCacheFilter 다음에 둬서 301 응답에도 보안 헤더가 실리고,
+    adminLoginFilter 앞에 둬서 관리자 페이지도 로그인 검사 전에 주소부터 정리된다.
+  -->
+  <filter>
+    <filter-name>legacyHtmlRedirectFilter</filter-name>
+    <filter-class>com.irion.common.filter.LegacyHtmlRedirectFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>legacyHtmlRedirectFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+
   <!-- Spring MVC DispatcherServlet -->
   <servlet>
     <servlet-name>dispatcher</servlet-name>

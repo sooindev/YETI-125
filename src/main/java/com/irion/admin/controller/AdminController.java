@@ -41,9 +41,10 @@ public class AdminController {
     public String loginPage(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
         if (session != null && session.getAttribute("adminUser") != null) {
-            return "redirect:/admin/admin-schedule.html";
+            return "redirect:/admin/schedule";
         }
-        return "redirect:/admin/admin-login.html";
+        // forward 라 주소창에는 /admin/admin-login 이 남는다
+        return "forward:/admin/admin-login.html";
     }
 
     /** 로그인 처리. 성공하면 세션을 새로 발급한다 (세션 고정 방어) */
@@ -111,7 +112,7 @@ public class AdminController {
 
     @GetMapping("")
     public String adminMain() {
-        return "redirect:/admin/admin-schedule.html";
+        return "redirect:/admin/schedule";
     }
 
     /** 로그에 계정 이름을 그대로 남기지 않는다. 뒤쫓을 만큼만 남기고 가린다 */
