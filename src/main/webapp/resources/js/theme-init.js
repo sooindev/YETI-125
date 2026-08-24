@@ -1,7 +1,7 @@
 /**
  * First-paint init — <head>에서 동기로 로드된다.
  *
- *   1. 테마: data-theme 확정 (저장된 선택 → OS 설정 → 라이트)
+ *   1. 테마: data-theme 확정 (고른 모드 → 시스템 설정 → 라이트)
  *   2. 폰트: 문 인트로 텍스트를 폰트가 준비될 때까지 미룸
  *
  * 다른 스크립트는 </body> 앞이라 첫 페인트 뒤에 실행돼 이 일을 못 맡는다.
@@ -12,13 +12,27 @@
     var KEY = 'yeti-theme';
     var root = document.documentElement;
 
-    function stored() {
+    /*
+     * 모드와 테마는 다른 값이다.
+     *
+     *   모드  = 사용자가 고른 것    — system | light | dark
+     *   테마  = 지금 화면에 칠한 색 — light | dark
+     *
+     * system 모드에서는 둘이 갈린다. OS 가 다크면 테마는 dark 지만
+     * 모드는 여전히 system 이다. 버튼 아이콘은 모드를, <html> 은
+     * 테마를 따라간다.
+     */
+    var MODES = ['system', 'light', 'dark'];
+
+    // 저장값이 없으면 시스템을 따른다. light/dark 만 저장하므로
+    // 예전에 테마를 골라둔 방문자의 값도 그대로 유효하다.
+    function storedMode() {
         try {
             var v = localStorage.getItem(KEY);
-            return (v === 'dark' || v === 'light') ? v : null;
+            return (v === 'dark' || v === 'light') ? v : 'system';
         } catch (e) {
             // 사파리 프라이빗 모드 등에서 localStorage 접근이 막힐 수 있다
-            return null;
+            return 'system';
         }
     }
 
@@ -26,17 +40,40 @@
         return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
     }
 
-    function apply(theme) {
-        root.setAttribute('data-theme', theme);
+    function resolve(mode) {
+        return mode === 'system' ? (systemPrefersDark() ? 'dark' : 'light') : mode;
+    }
+
+    // 버튼 title 은 "다음에 무엇이 되는지" 를 알려준다
+    var NEXT_HINT = {
+        system: '시스템 설정 따르기',
+        light:  '라이트 모드로 전환',
+        dark:   '다크 모드로 전환'
+    };
+    var MODE_LABEL = {
+        system: '시스템 설정',
+        light:  '라이트 모드',
+        dark:   '다크 모드'
+    };
+
+    function nextMode(mode) {
+        return MODES[(MODES.indexOf(mode) + 1) % MODES.length];
+    }
+
+    function apply(mode) {
+        root.setAttribute('data-theme', resolve(mode));
+
+        // <head> 에서 도는 첫 호출에는 버튼이 아직 없다. DOMContentLoaded 에서 다시 부른다.
         var btn = document.getElementById('themeToggle');
         if (btn) {
-            btn.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
-            btn.setAttribute('title', theme === 'dark' ? '라이트 모드로 전환' : '다크 모드로 전환');
+            btn.setAttribute('data-mode', mode);
+            btn.setAttribute('aria-label', '테마: ' + MODE_LABEL[mode]);
+            btn.setAttribute('title', NEXT_HINT[nextMode(mode)]);
         }
     }
 
     // 첫 페인트 전에 확정
-    apply(stored() || (systemPrefersDark() ? 'dark' : 'light'));
+    apply(storedMode());
 
     /*
      * 폰트 준비 표시.
@@ -77,24 +114,34 @@
     });
 
     window.YetiTheme = {
+        // 지금 칠해진 색
         get: function () {
             return root.getAttribute('data-theme') || 'light';
         },
-        set: function (theme) {
-            if (theme !== 'dark' && theme !== 'light') return;
-            apply(theme);
-            try { localStorage.setItem(KEY, theme); } catch (e) {}
+        // 사용자가 고른 모드
+        getMode: function () {
+            return storedMode();
         },
+        set: function (mode) {
+            if (MODES.indexOf(mode) === -1) return;
+            try {
+                // system 은 "저장값 없음" 으로 표현한다 — 지워야 OS 를 다시 따라간다
+                if (mode === 'system') localStorage.removeItem(KEY);
+                else localStorage.setItem(KEY, mode);
+            } catch (e) {}
+            apply(mode);
+        },
+        // 시스템 → 라이트 → 다크 → 시스템
         toggle: function () {
-            this.set(this.get() === 'dark' ? 'light' : 'dark');
+            this.set(nextMode(storedMode()));
         }
     };
 
-    // 직접 고르기 전까지는 OS 설정을 따라간다
+    // system 모드인 동안에는 OS 설정 변경을 그대로 따라간다
     if (window.matchMedia) {
         var mq = window.matchMedia('(prefers-color-scheme: dark)');
-        var onChange = function (e) {
-            if (!stored()) apply(e.matches ? 'dark' : 'light');
+        var onChange = function () {
+            if (storedMode() === 'system') apply('system');
         };
         if (mq.addEventListener) mq.addEventListener('change', onChange);
         else if (mq.addListener) mq.addListener(onChange);
@@ -109,7 +156,7 @@
 
         var btn = document.getElementById('themeToggle');
         if (btn) {
-            apply(window.YetiTheme.get());
+            apply(storedMode());
             btn.addEventListener('click', function () {
                 window.YetiTheme.toggle();
             });
