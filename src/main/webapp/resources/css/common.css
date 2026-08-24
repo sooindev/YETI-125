@@ -499,22 +499,27 @@ img { display: block; max-width: 100%; }
 }
 .theme-toggle svg {
     width: 17px; height: 17px;
-    display: block;
+    display: none;
     fill: none;
     stroke: currentColor;
     stroke-width: 1.6;
     stroke-linecap: round;
     stroke-linejoin: round;
 }
-/* light theme shows the moon (what a click switches you to) */
-.theme-toggle .icon-sun  { display: none; }
-.theme-toggle .icon-moon { display: block; }
-:root[data-theme="dark"] .theme-toggle .icon-sun  { display: block; }
-:root[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+/* 아이콘은 지금 칠해진 색이 아니라 사용자가 고른 모드를 보여준다.
+   시스템 따름 + OS 다크면 화면은 어둡지만 아이콘은 자동이어야 한다.
+   data-mode 는 theme-init.js 가 버튼에 찍는다. */
+.theme-toggle[data-mode="system"] .icon-auto { display: block; }
+.theme-toggle[data-mode="light"]  .icon-sun  { display: block; }
+.theme-toggle[data-mode="dark"]   .icon-moon { display: block; }
 
-@media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) .theme-toggle .icon-sun  { display: block; }
-    :root:not([data-theme="light"]) .theme-toggle .icon-moon { display: none; }
+/* JS 가 꺼져 있으면 data-mode 가 없다 — 시스템을 따르는 상태이므로 자동 아이콘 */
+.theme-toggle:not([data-mode]) .icon-auto { display: block; }
+
+/* 자동 아이콘의 반쪽만 채워 명암 대비를 나타낸다 */
+.theme-toggle .icon-auto .half {
+    fill: currentColor;
+    stroke: none;
 }
 
 /* mobile burger */
