@@ -308,9 +308,9 @@ sequenceDiagram
     F-->>B: 401 + JSON
     Note right of B: 로그인 화면으로 이동
 
-    B->>F: GET /admin/admin-schedule.html<br/>(Accept: text/html)
+    B->>F: GET /admin/schedule<br/>(Accept: text/html)
     F->>F: 세션 없음 + 일반 요청
-    F-->>B: 302 → admin-login.html
+    F-->>B: 302 → /admin/admin-login
 
     Note over B,C: 로그인된 경우
     B->>F: 요청
@@ -398,7 +398,7 @@ mvn test
 | | |
 |---|---|
 | 메인 사이트 | `http://localhost:8080` |
-| 관리자 | `http://localhost:8080/admin/admin-login.html` |
+| 관리자 | `http://localhost:8080/admin/admin-login` |
 
 <br>
 

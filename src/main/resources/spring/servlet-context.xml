@@ -72,7 +72,12 @@
         <!-- 관리자 로그인 체크 -->
         <mvc:interceptor>
             <mvc:mapping path="/admin/**"/>
-            <!-- 실제 파일명은 admin-login.html 이다 -->
+            <!--
+              정규 주소는 /admin/admin-login 이다. .html 쪽도 빼두는 이유는
+              컨트롤러가 실제 파일로 forward 하면 그 경로가 여기를 한 번 더
+              지나가기 때문 — 빼지 않으면 로그인 페이지가 자기 자신에게
+              막혀 무한 리다이렉트가 된다.
+            -->
             <mvc:exclude-mapping path="/admin/admin-login"/>
             <mvc:exclude-mapping path="/admin/admin-login.html"/>
             <mvc:exclude-mapping path="/admin/loginProc"/>

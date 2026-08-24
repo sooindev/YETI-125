@@ -57,7 +57,7 @@ public class AdminLoginFilter implements Filter {
                     return;
                 }
 
-                httpResponse.sendRedirect(contextPath + "/admin/admin-login.html");
+                httpResponse.sendRedirect(contextPath + "/admin/admin-login");
                 return;
             }
         }

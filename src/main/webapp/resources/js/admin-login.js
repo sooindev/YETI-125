@@ -41,7 +41,7 @@ function doLogin() {
             // 로그인 응답을 콘솔에 찍지 않는다. 공용 PC 의 개발자 도구에
             // 그대로 남는다.
             if (response.success) {
-                window.location.href = '/admin/admin-schedule.html';
+                window.location.href = '/admin/schedule';
             } else {
                 showError(response.message || '로그인에 실패했습니다.');
             }

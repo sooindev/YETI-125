@@ -31,8 +31,8 @@
 
     <div class="error-actions">
       <a href="/" class="btn btn-primary">홈으로 <span class="btn-arrow">→</span></a>
-      <a href="/schedule.html" class="btn">방송 일정</a>
-      <a href="/info.html" class="btn">프로필</a>
+      <a href="/schedule" class="btn">방송 일정</a>
+      <a href="/info" class="btn">프로필</a>
     </div>
 
     <p class="error-meta idx">YETI-125 · IRION ARCHIVE</p>
