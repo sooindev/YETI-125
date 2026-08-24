@@ -21,11 +21,7 @@
   <title>일시적인 오류 — YETI-125</title>
   <meta name="robots" content="noindex">
 
-  <link rel="icon" type="image/png" href="/resources/images/snowflake.png">
-  <script src="/resources/js/theme-init.js"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<jsp:include page="/WEB-INF/views/common/head-assets.jsp"/>
   <link rel="stylesheet" href="/resources/css/common.css">
   <link rel="stylesheet" href="/resources/css/error.css">
 </head>
