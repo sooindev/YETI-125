@@ -1,13 +1,8 @@
-/* ============================================================
-   YETI-125 — Profile page
-   ============================================================ */
+/* YETI-125 — Profile page */
 
 main { padding-top: var(--head-total); }
 
-/* ============================================================
-   Profile hero
-   asymmetric: portrait (5) + identity block (7)
-   ============================================================ */
+/* Profile hero — asymmetric: portrait (5) + identity block (7) */
 .profile-hero {
     padding: clamp(48px, 8vw, 120px) 0 0;
     border-bottom: 1px solid var(--ink-line);
@@ -97,9 +92,7 @@ main { padding-top: var(--head-total); }
     color: var(--bone);
 }
 
-/* ============================================================
-   D-Day row
-   ============================================================ */
+/* D-Day row */
 .dday-row {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.2fr);
@@ -145,9 +138,7 @@ main { padding-top: var(--head-total); }
 }
 .quick-social-btn:hover img { filter: grayscale(0); }
 
-/* ============================================================
-   Spec sheet — 4 cards, asymmetric spans
-   ============================================================ */
+/* Spec sheet — 4 cards, asymmetric spans */
 .spec-grid {
     display: grid;
     grid-template-columns: repeat(12, 1fr);
@@ -225,9 +216,7 @@ main { padding-top: var(--head-total); }
 }
 .spec-link:hover { opacity: 0.6; }
 
-/* ============================================================
-   Channel list
-   ============================================================ */
+/* Channel list */
 .channel-list { list-style: none; }
 .channel-list li { border-top: 1px solid var(--ink-line); }
 .channel-list li:last-child { border-bottom: 1px solid var(--ink-line); }
@@ -280,9 +269,7 @@ main { padding-top: var(--head-total); }
     transform: translate(3px, -3px);
 }
 
-/* ============================================================
-   About slab
-   ============================================================ */
+/* About slab */
 .about-slab {
     border: 1px solid var(--ink-line-2);
     background: var(--ink-raise);
@@ -315,9 +302,7 @@ main { padding-top: var(--head-total); }
     color: var(--bone-faint);
 }
 
-/* ============================================================
-   Responsive
-   ============================================================ */
+/* Responsive */
 @media (max-width: 920px) {
     .profile-hero-grid { grid-template-columns: 1fr; gap: 32px; }
     .profile-portrait { max-width: 360px; }

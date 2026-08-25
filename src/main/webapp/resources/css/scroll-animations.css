@@ -1,8 +1,4 @@
-/* ============================================================
-   YETI-125 — Scroll reveal
-   Restrained editorial entrances. No 3D, no shimmer.
-   JS (scroll-animations.js) toggles .is-visible on .scroll-animate
-   ============================================================ */
+/* 스크롤 등장 — scroll-animations.js 가 .scroll-animate 에 .is-visible 을 붙인다 */
 
 .scroll-animate {
     opacity: 0;

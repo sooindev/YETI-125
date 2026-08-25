@@ -7,13 +7,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-/**
- * 옛 .html 주소가 확장자 없는 정규 주소로 301 되는지.
- *
- * 정규 주소가 둘로 갈리면 검색 색인도 밖에 걸린 링크도 흩어진다.
- * 옮긴 주소는 되돌리기 어려우므로(브라우저가 301 을 오래 물고 있다)
- * 목적지를 여기서 못 박아둔다.
- */
+/** 옛 주소가 정규 주소로 301 되는지. 301 은 되돌리기 어려우므로 목적지를 못 박아둔다. */
 public class LegacyHtmlRedirectFilterTest {
 
     @Test
@@ -48,13 +42,7 @@ public class LegacyHtmlRedirectFilterTest {
         assertEquals("/yeti/schedule", response.header("Location"));
     }
 
-    /**
-     * 정규 주소는 그냥 지나가야 한다.
-     *
-     * 컨트롤러가 /schedule 을 /schedule.html 로 forward 해서 실제 파일을
-     * 꺼내오므로, 여기서 정규 주소까지 건드리면 301 과 forward 가 서로를
-     * 부르며 끝없이 돈다.
-     */
+    /** 정규 주소까지 건드리면 301 과 forward 가 서로를 부르며 끝없이 돈다. */
     @Test
     public void 정규_주소는_건드리지_않는다() throws Exception {
         assertPassed("/");
@@ -63,12 +51,7 @@ public class LegacyHtmlRedirectFilterTest {
         assertPassed("/admin/schedule");
     }
 
-    /**
-     * 글자만 다른 표기로 옛 페이지에 닿을 수 있으면 안 된다.
-     *
-     * 톰캣이 /./ 와 /../ 는 필터에 오기 전에 정리해주지만 겹친 슬래시는
-     * 그대로 넘어온다. 퍼센트 인코딩도 getRequestURI() 에는 남아 있다.
-     */
+    /** 톰캣이 /./ 와 /../ 는 정리해주지만 겹친 슬래시와 퍼센트 인코딩은 그대로 넘어온다. */
     @Test
     public void 다른_표기로도_옛_주소에_닿을_수_없다() throws Exception {
         assertMoved("//schedule.html", "/schedule");

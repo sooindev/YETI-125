@@ -21,13 +21,11 @@ public class AdminScheduleController {
     @Autowired
     private ScheduleService scheduleService;
 
-    /** 일정 관리 페이지 */
     @GetMapping("")
     public String scheduleManage() {
         return "admin/admin-schedule";
     }
 
-    /** 일정 목록 조회 */
     @GetMapping("/list")
     @ResponseBody
     public List<Map<String, Object>> getScheduleList(
@@ -56,7 +54,6 @@ public class AdminScheduleController {
         return events;
     }
 
-    /** 일정 상세 조회 */
     @GetMapping("/{scheduleId}")
     @ResponseBody
     public JsonResult getSchedule(@PathVariable Long scheduleId) {
@@ -69,7 +66,6 @@ public class AdminScheduleController {
         return JsonResult.success("조회 성공", schedule);
     }
 
-    /** 일정 등록 */
     @PostMapping("")
     @ResponseBody
     public JsonResult createSchedule(@Valid @RequestBody ScheduleVO scheduleVO, BindingResult binding) {
@@ -86,7 +82,6 @@ public class AdminScheduleController {
         return JsonResult.success("일정이 등록되었습니다.", scheduleId);
     }
 
-    /** 일정 수정 */
     @PutMapping("/{scheduleId}")
     @ResponseBody
     public JsonResult updateSchedule(@PathVariable Long scheduleId,
@@ -106,7 +101,6 @@ public class AdminScheduleController {
         return JsonResult.success("일정이 수정되었습니다.");
     }
 
-    /** 일정 삭제 */
     @DeleteMapping("/{scheduleId}")
     @ResponseBody
     public JsonResult deleteSchedule(@PathVariable Long scheduleId) {
@@ -119,10 +113,7 @@ public class AdminScheduleController {
         return JsonResult.success("일정이 삭제되었습니다.");
     }
 
-    /**
-     * 첫 번째 검증 오류 메시지. 화면이 토스트 한 줄로 보여주므로 하나만 고른다.
-     * 여기서 막지 않으면 길이 초과가 DB 제약에 걸려 500 이 나간다.
-     */
+    /** 첫 검증 오류만 고른다. 여기서 안 막으면 길이 초과가 DB 제약에 걸려 500 이 난다. */
     private String firstMessage(BindingResult binding) {
         FieldError error = binding.getFieldError();
         if (error != null && error.getDefaultMessage() != null) {

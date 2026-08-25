@@ -1,17 +1,11 @@
-/* ================================================
-   Irion Fansite - Info Page (jQuery)
-   ================================================ */
+/* 프로필 화면 — 데뷔일·생일 D-Day */
 
 $(document).ready(function() {
-    // D-Day 계산
     calculateDday();
     scheduleMidnightRefresh();
 });
 
-/*
- * 자정에 다시 계산한다. 값이 바뀌는 순간은 날짜가 넘어갈 때뿐이라
- * 주기적으로 돌릴 이유가 없다.
- */
+// 값이 바뀌는 순간은 날짜가 넘어갈 때뿐이라 자정에만 다시 계산한다
 function scheduleMidnightRefresh() {
     const now = new Date();
     const nextMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
@@ -23,7 +17,6 @@ function scheduleMidnightRefresh() {
     }, nextMidnight - now + 1000);
 }
 
-// D-Day 계산
 function calculateDday() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -36,16 +29,13 @@ function calculateDday() {
     const birthday = new Date(today.getFullYear(), 3, 10); // 월은 0부터 시작
     birthday.setHours(0, 0, 0, 0);
 
-    // 생일이 지났으면 내년 생일로 설정
     if (today > birthday) {
         birthday.setFullYear(today.getFullYear() + 1);
     }
 
-    // 데뷔 D-Day 계산 (D+)
     const debutDiff = Math.floor((today - debutDate) / (1000 * 60 * 60 * 24));
     $('#debutDday').text('D+' + YetiUtil.numberFormat(debutDiff));
 
-    // 생일 D-Day 계산
     const birthdayDiff = Math.floor((birthday - today) / (1000 * 60 * 60 * 24));
 
     if (birthdayDiff === 0) {

@@ -10,12 +10,7 @@ import java.lang.reflect.Proxy;
 
 import static org.junit.Assert.*;
 
-/**
- * 로그인 화면과 로그인 처리의 입구.
- *
- * HttpSession 을 파라미터로 받으면 스프링이 없는 세션을 만들어 넣는다.
- * 누구나 열 수 있는 경로라 그것만으로 빈 세션이 쌓인다.
- */
+/** 로그인 화면 입구. HttpSession 을 파라미터로 받으면 빈 세션이 쌓인다. */
 public class AdminControllerTest {
 
     @Test
@@ -47,10 +42,7 @@ public class AdminControllerTest {
                 new AdminController().loginPage(request));
     }
 
-    /**
-     * adminService 를 꽂지 않은 컨트롤러로도 통과한다는 것 자체가
-     * DB 조회 앞에서 끊긴다는 뜻이다.
-     */
+    /** adminService 없이도 통과한다는 것이 DB 조회 앞에서 끊긴다는 뜻이다. */
     @Test
     public void 있을_수_없는_길이의_아이디는_먼저_끊는다() {
         StringBuilder huge = new StringBuilder();
@@ -67,7 +59,6 @@ public class AdminControllerTest {
         assertFalse("세션도 만들지 않는다", created[0]);
     }
 
-    // ========================================
 
     /** getSession(false) 는 existing 을, 그 밖은 "만들었다" 로 기록 */
     private static HttpServletRequest request(boolean[] created, HttpSession existing) {

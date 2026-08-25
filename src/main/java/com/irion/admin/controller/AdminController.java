@@ -31,12 +31,7 @@ public class AdminController {
     // 컨트롤러가 싱글턴이라 카운터도 하나면 된다
     private final LoginAttemptGuard loginGuard = new LoginAttemptGuard();
 
-    /**
-     * 로그인 페이지.
-     *
-     * HttpSession 을 파라미터로 받으면 스프링이 없는 세션을 만들어 넣는다.
-     * 누구나 열 수 있는 경로라 그것만으로 빈 세션이 쌓인다.
-     */
+    /** 로그인 페이지. HttpSession 을 파라미터로 받으면 빈 세션이 쌓인다. */
     @GetMapping("/admin-login")
     public String loginPage(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
@@ -52,8 +47,7 @@ public class AdminController {
     public JsonResult loginProc(@RequestParam String adminLoginId, @RequestParam String password,
                                 HttpServletRequest request) {
 
-        // 흘려보내면 DB 조회 파라미터로 들어가고 시도 카운터에도 자리를 차지한다.
-        // 응답 문구는 일반 실패와 똑같이 둔다
+        // 흘려보내면 시도 카운터에 자리를 차지한다. 문구는 일반 실패와 똑같이 둔다
         if (adminLoginId.length() > MAX_LOGIN_ID_LENGTH) {
             logger.warn("Admin login rejected (login id too long): {} chars", adminLoginId.length());
             return JsonResult.fail("아이디 또는 비밀번호가 일치하지 않습니다.");

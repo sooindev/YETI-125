@@ -17,26 +17,10 @@ CATALINA_HOME="$BREW_PREFIX/opt/tomcat@9/libexec"
 WAR="target/yeti-125.war"
 URL="http://localhost:8080"
 
-# 로컬 DB 접속 정보.
-#
-# 비밀번호는 이 파일에 두지 않는다. 저장소에 올라가는 스크립트이고,
-# database.properties 를 .gitignore 해 둔 설계와도 어긋난다.
-#
-#   권장) ~/.my.cnf 에 적어두면 아무것도 설정할 필요가 없다
-#           [client]
-#           password="비밀번호"
-#         chmod 600 ~/.my.cnf
-#
-#         값은 반드시 큰따옴표로 감쌀 것. my.cnf 에서 # 는 주석 시작
-#         문자라, 비밀번호에 # 가 들어 있으면 거기서 잘린 채로 읽혀
-#         Access denied 가 난다. 원인을 짐작하기 어려운 실패다.
-#
-#         user= 는 넣지 않는다. [client] 는 모든 mariadb 클라이언트에
-#         적용되므로, 소켓 인증으로 쓰는 mariadb -u $(whoami) 까지
-#         yeti 로 끌려간다.
-#
-#   또는) 환경변수로 넘긴다
-#           YETI_DB_PASSWORD=... ./run-local.sh
+# 로컬 DB 접속 정보. 비밀번호는 여기 두지 않는다.
+#   ~/.my.cnf 의 [client] password="..." (큰따옴표 필수 — # 는 주석이라 거기서 잘린다.
+#   user= 는 넣지 말 것, 모든 mariadb 클라이언트에 적용된다)
+#   또는 YETI_DB_PASSWORD=... ./run-local.sh
 DB_NAME="${YETI_DB_NAME:-for_125}"
 DB_USER="${YETI_DB_USER:-yeti}"
 CHECK="$URL/schedule/list?start=2020-01-01&end=2030-12-31"
@@ -57,9 +41,7 @@ cd "$(dirname "$0")"
 say() { printf '\n\033[1m▶ %s\033[0m\n' "$1"; }
 die() { printf '\n\033[31m✗ %s\033[0m\n' "$1" >&2; exit 1; }
 
-# 비밀번호를 명령줄에 싣지 않는다 (ps 에 그대로 보인다).
-# YETI_DB_PASSWORD 가 있으면 MYSQL_PWD 로 넘기고, 없으면
-# mariadb 클라이언트가 ~/.my.cnf 를 읽게 둔다.
+# 비밀번호를 명령줄에 싣지 않는다 — ps 에 그대로 보인다
 db_query() {
   if [ -n "${YETI_DB_PASSWORD:-}" ]; then
     MYSQL_PWD="$YETI_DB_PASSWORD" mariadb -u "$DB_USER" -h 127.0.0.1 "$DB_NAME" -e "$1"
@@ -100,8 +82,7 @@ else
 fi
 printf '   war: %s (%s)\n' "$WAR" "$(du -h "$WAR" | cut -f1)"
 
-# ─────────────────────────────────────────────────────────────
-# HTML 이 /resources/... 절대경로를 쓰므로 반드시 ROOT 컨텍스트로 배포한다
+# /resources/... 절대경로를 쓰므로 반드시 ROOT 컨텍스트로 배포한다
 say "3/4  로컬 톰캣에 ROOT 로 배포"
 "$CATALINA_HOME/bin/catalina.sh" stop 2>/dev/null || true
 sleep 2

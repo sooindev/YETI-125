@@ -1,13 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" isErrorPage="true" %>
 <%--
-    500 에러 페이지.
-
-    web.xml 의 <error-page> 가 이 경로를 가리킨다. 이 파일이 없으면
-    500 발생 시 없는 페이지로 포워딩되면서 404 빈 응답으로 바뀌어,
-    원래 오류가 완전히 가려진다.
-
-    스택 트레이스는 화면에 노출하지 않는다. 대신 발생 시각을 보여줘서
-    서버 로그(catalina.out)의 해당 시점과 대조할 수 있게 한다.
+    500 에러 페이지. web.xml 의 <error-page> 가 이 경로를 가리킨다.
+    스택 트레이스 대신 발생 시각만 보여줘 서버 로그와 대조하게 한다.
 --%>
 <%
     String occurredAt = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss")

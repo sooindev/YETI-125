@@ -1,6 +1,4 @@
-/* ================================================
-   Irion Fansite - Index Page (jQuery)
-   ================================================ */
+/* 홈 화면 — 방송 상태, 클립, 다시보기 */
 
 let clipOffset = 0;
 let hasMoreClips = false;
@@ -69,11 +67,9 @@ function showDefaultHero() {
     $('#defaultHero').fadeIn();
 }
 
-// 클립 로드 (초기)
 function loadClips() {
     clipOffset = 0;
 
-    // 로딩 표시
     $('#clipsLoading').show();
     $('#clipsEmpty').hide();
 
@@ -113,7 +109,6 @@ function loadClips() {
     });
 }
 
-// 클립 더보기
 function loadMoreClips() {
     if (!hasMoreClips) return;
 
@@ -154,12 +149,9 @@ function loadMoreClips() {
     });
 }
 
-/* ------------------------------------------------
-   클립 모달 — 치지직 공식 임베드로 사이트 안에서 재생
-   ------------------------------------------------ */
+// 클립 모달 — 치지직 공식 임베드로 사이트 안에서 재생
 function initClipModal() {
-    // 카드 클릭은 모달로 가로챈다. 새 탭 열기(⌘/Ctrl/Shift/휠 클릭)는
-    // 원래대로 치지직 원본으로 보낸다.
+    // 카드 클릭은 모달로 가로채고, 새 탭 열기는 원본으로 보낸다
     $(document).on('click', '.clip-card', function(e) {
         const clipId = $(this).attr('data-clip-id');
         if (!clipId) return;
@@ -169,8 +161,7 @@ function initClipModal() {
         openClipModal(clipId, $(this).attr('data-clip-title'), $(this).attr('href'));
     });
 
-    // 배경 클릭과 ESC는 common.js가 닫아주지만 iframe은 그대로 남아
-    // 소리가 계속 난다. 같은 신호를 받아 src를 거둔다.
+    // common.js 가 모달을 닫아도 iframe 은 남아 소리가 계속 난다 — 같은 신호로 src 를 거둔다
     $(document).on('click', '#clipModal', function(e) {
         if ($(e.target).is('#clipModal')) clearClipFrame();
     });
@@ -233,7 +224,6 @@ function renderClips(clips, append) {
         $container.append(clipHtml);
     });
 
-    // DOM 렌더링 완료 후 애니메이션 적용
     setTimeout(function() {
         if (typeof window.observeNewElements === 'function') {
             window.observeNewElements();
@@ -251,11 +241,9 @@ function formatDuration(seconds) {
 let videoOffset = 0;
 let hasMoreVideos = false;
 
-// 다시보기 로드 (초기)
 function loadVideos() {
     videoOffset = 0;
 
-    // 로딩 표시
     $('#videosLoading').show();
     $('#videosEmpty').hide();
 
@@ -295,7 +283,6 @@ function loadVideos() {
     });
 }
 
-// 다시보기 더보기
 function loadMoreVideos() {
     if (!hasMoreVideos) return;
 
@@ -336,15 +323,10 @@ function loadMoreVideos() {
     });
 }
 
-/* ------------------------------------------------
-   다시보기 이동 확인 모달
-   치지직이 VOD 임베드를 지원하지 않아 사이트 안에서
-   재생할 수 없다. 나가기 전에 한 번 알린다.
-   ------------------------------------------------ */
+// 치지직이 VOD 임베드를 지원하지 않아 나가기 전에 한 번 알린다
 const VIDEO_SKIP_KEY = 'yeti-video-leave';
 
-// 사파리 프라이빗 모드 등에서 localStorage 접근이 막힐 수 있다.
-// 읽기가 막히면 "묻는다"로, 쓰기가 막히면 조용히 넘어간다.
+// localStorage 가 막히면 읽기는 "묻는다"로, 쓰기는 조용히 넘어간다
 function skipVideoConfirm() {
     try {
         return localStorage.getItem(VIDEO_SKIP_KEY) === 'skip';
@@ -365,8 +347,7 @@ function forgetVideoSkip() {
     } catch (e) {}
 }
 
-// 되돌릴 길은 꺼져 있을 때만 보여준다.
-// 평소에는 섹션 머리말에 군더더기를 남기지 않는다.
+// 되돌릴 길은 꺼져 있을 때만 보여준다
 function syncVideoRestoreLink() {
     $('#videoConfirmRestore').prop('hidden', !skipVideoConfirm());
 }
@@ -388,11 +369,7 @@ function initVideoModal() {
         YetiUtil.openModal('videoModal');
     });
 
-    // 이동을 누르면 새 탭이 열리고 모달은 닫아둔다.
-    // (링크의 기본 동작을 그대로 쓰므로 팝업 차단에 걸리지 않는다)
-    //
-    // 기억은 실제로 이동할 때만 한다. 체크만 하고 취소를 누른 것은
-    // "이번엔 안 간다"는 뜻이지 "앞으로 묻지 말라"는 뜻이 아니다.
+    // 기억은 실제로 이동할 때만 한다 — 체크하고 취소한 것은 "묻지 말라"가 아니다
     $(document).on('click', '#videoModalGo', function() {
         if ($('#videoModalSkip').prop('checked')) {
             rememberVideoSkip();
@@ -412,7 +389,6 @@ function initVideoModal() {
     syncVideoRestoreLink();
 }
 
-// 다시보기 렌더링
 function renderVideos(videos, append) {
     const $container = $('#videosContainer');
 
@@ -448,7 +424,6 @@ function renderVideos(videos, append) {
         $container.append(videoHtml);
     });
 
-    // DOM 렌더링 완료 후 애니메이션 적용
     setTimeout(function() {
         if (typeof window.observeNewElements === 'function') {
             window.observeNewElements();
@@ -456,7 +431,6 @@ function renderVideos(videos, append) {
     }, 50);
 }
 
-// 영상 시간 포맷 (초 -> HH:MM:SS 또는 MM:SS)
 function formatVideoDuration(seconds) {
     if (!seconds) return '0:00';
 

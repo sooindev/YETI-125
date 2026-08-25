@@ -10,20 +10,12 @@ import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * 필터 테스트용 가짜 서블릿 객체.
- *
- * 톰캣을 띄우지 않고 필요한 메서드만 답하는 대역을 세운다. 목 프레임워크
- * 대신 JDK 동적 Proxy 를 쓴다 (RequestUtilTest 도 같은 방식).
- */
+/** 필터 테스트용 가짜 서블릿 객체. 목 프레임워크 대신 JDK 동적 Proxy 를 쓴다. */
 final class FakeHttp {
 
     private FakeHttp() {
     }
 
-    // ========================================
-    // 요청
-    // ========================================
 
     static final class Request {
         private String uri = "/";
@@ -123,9 +115,6 @@ final class FakeHttp {
         }
     }
 
-    // ========================================
-    // 세션
-    // ========================================
 
     /** 로그인 전 — 속성이 비어 있는 세션 */
     static HttpSession session() {
@@ -159,9 +148,6 @@ final class FakeHttp {
                 });
     }
 
-    // ========================================
-    // 응답
-    // ========================================
 
     static final class Response {
         int status = 200;
@@ -213,9 +199,6 @@ final class FakeHttp {
         }
     }
 
-    // ========================================
-    // 필터 체인
-    // ========================================
 
     static final class Chain {
         /** 필터가 요청을 다음으로 넘겼는가 */

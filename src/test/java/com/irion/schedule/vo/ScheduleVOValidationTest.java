@@ -13,12 +13,7 @@ import java.util.Set;
 
 import static org.junit.Assert.*;
 
-/**
- * ScheduleVO 제약.
- *
- * 검증기는 운영과 같은 방식(EL 없는 보간기)으로 만든다.
- * servlet-context.xml 의 validator 빈 설정과 짝을 맞춘 것이다.
- */
+/** ScheduleVO 제약. 검증기는 servlet-context.xml 과 같은 방식(EL 없는 보간기)으로 만든다. */
 public class ScheduleVOValidationTest {
 
     private static Validator validator;
@@ -88,10 +83,7 @@ public class ScheduleVOValidationTest {
         assertFalse(validator.validate(vo).isEmpty());
     }
 
-    /**
-     * 드래그로 일정을 옮길 때 FullCalendar 가 색이나 공개 여부를 비워
-     * 보낼 수 있다. 값이 없는 것과 잘못된 것은 다르게 다룬다.
-     */
+    /** 드래그로 옮길 때 FullCalendar 가 비워 보낸다. 없는 것과 잘못된 것은 다르다. */
     @Test
     public void 선택_항목은_비어_있어도_통과한다() {
         ScheduleVO vo = valid();
@@ -125,7 +117,6 @@ public class ScheduleVOValidationTest {
         assertEquals("설명은 5000자를 넘을 수 없습니다.", firstMessage(vo));
     }
 
-    // ── 헬퍼 ─────────────────────────────────────
 
     private static ScheduleVO valid() {
         ScheduleVO vo = new ScheduleVO();

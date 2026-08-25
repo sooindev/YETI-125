@@ -11,12 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * 치지직 연동 조회 API.
- *
- * 외부 호출·파싱은 ChzzkClient, 캐시는 LiveFeedService 가 맡는다.
- * 여기서는 파라미터를 다듬고 응답 모양을 만든다.
- */
+/** 치지직 연동 조회 API. 파라미터를 다듬고 응답 모양만 만든다. */
 @Controller
 @RequestMapping("/live")
 public class LiveController {
@@ -27,7 +22,6 @@ public class LiveController {
     @Autowired
     private LiveFeedService liveFeed;
 
-    /** 방송 상태 조회 */
     @GetMapping("/status")
     @ResponseBody
     public JsonResult getLiveStatus() {
@@ -39,7 +33,6 @@ public class LiveController {
         return JsonResult.success("조회 성공", data);
     }
 
-    /** 클립 목록 조회 (인기순) */
     @GetMapping("/clips")
     @ResponseBody
     public JsonResult getClips(@RequestParam(defaultValue = "6") int limit,
@@ -65,7 +58,6 @@ public class LiveController {
         return JsonResult.success("조회 성공", result);
     }
 
-    /** 다시보기 목록 조회 */
     @GetMapping("/videos")
     @ResponseBody
     public JsonResult getVideos(@RequestParam(defaultValue = "6") int limit,

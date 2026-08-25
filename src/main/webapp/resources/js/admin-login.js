@@ -1,21 +1,16 @@
-/* ================================================
-   Irion Fansite - Admin Login (jQuery)
-   ================================================ */
+/* 관리자 로그인 */
 
 $(document).ready(function() {
-    // 로그인 폼 제출
     $('#loginForm').on('submit', function(e) {
         e.preventDefault();
         doLogin();
     });
 });
 
-// 로그인 처리
 function doLogin() {
     const adminLoginId = $('#adminLoginId').val().trim();
     const password = $('#password').val().trim();
 
-    // 유효성 검사
     if (!adminLoginId) {
         showError('아이디를 입력해주세요.');
         $('#adminLoginId').focus();
@@ -28,7 +23,6 @@ function doLogin() {
         return;
     }
 
-    // 로그인 요청
     $.ajax({
         url: '/admin/loginProc',
         type: 'POST',
@@ -38,8 +32,7 @@ function doLogin() {
         },
         dataType: 'json',
         success: function(response) {
-            // 로그인 응답을 콘솔에 찍지 않는다. 공용 PC 의 개발자 도구에
-            // 그대로 남는다.
+            // 로그인 응답을 콘솔에 찍지 않는다 — 공용 PC 의 개발자 도구에 남는다
             if (response.success) {
                 window.location.href = '/admin/schedule';
             } else {
@@ -53,12 +46,10 @@ function doLogin() {
     });
 }
 
-// 에러 메시지 표시
 function showError(message) {
     const $errorMsg = $('#errorMsg');
     $errorMsg.text(message).show();
 
-    // 3초 후 숨김
     setTimeout(function() {
         $errorMsg.fadeOut();
     }, 3000);

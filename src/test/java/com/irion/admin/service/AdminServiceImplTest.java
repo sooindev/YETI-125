@@ -13,12 +13,7 @@ import java.util.List;
 
 import static org.junit.Assert.*;
 
-/**
- * 관리자 로그인 검증.
- *
- * 통과/거절뿐 아니라 "얼마나 빨리 거절하는가" 도 본다. 없는 아이디를 곧장
- * 돌려보내면 응답 시간만으로 계정 존재 여부가 드러난다.
- */
+/** 관리자 로그인. 통과/거절뿐 아니라 "얼마나 빨리 거절하는가" 도 본다. */
 public class AdminServiceImplTest {
 
     /** 로그인은 실패하지만 계정은 존재하는 상황을 만든다 */
@@ -86,10 +81,7 @@ public class AdminServiceImplTest {
         assertFalse(calls.contains("updatePassword"));
     }
 
-    /**
-     * 옛 형식(SHA-256 1회) 해시로는 로그인할 수 없다. 되돌릴 수 없는 변경이라,
-     * 그런 백업을 되살리면 PasswordUtil.main 으로 해시를 새로 넣어야 한다.
-     */
+    /** 옛 형식 해시로는 로그인할 수 없다 — 그런 백업을 되살리면 해시를 새로 넣어야 한다. */
     @Test
     public void 옛_해시로는_로그인할_수_없다() throws Exception {
         List<String> calls = new ArrayList<String>();
@@ -123,7 +115,6 @@ public class AdminServiceImplTest {
         assertFalse(calls.contains("updatePassword"));
     }
 
-    // ========================================
 
     /** login 을 여러 번 돌려 가장 빨랐던 시간(ns) */
     private static long fastestLoginNanos(AdminService service, String loginId) {

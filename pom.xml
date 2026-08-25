@@ -58,15 +58,7 @@
       <version>${mybatis-spring.version}</version>
     </dependency>
 
-    <!--
-      MariaDB
-
-      드라이버가 waffle-jna 를 딸려 온다. 윈도우 SSPI 통합 인증용이고,
-      그게 다시 jna / jna-platform / caffeine 을 끌고 온다. 합쳐서 4.5MB 인데
-      리눅스 톰캣 배포에서는 한 줄도 실행되지 않는다.
-
-      드라이버가 실제로 쓰는 것은 사용자명/비밀번호 인증뿐이다.
-    -->
+    <!-- waffle-jna(윈도우 SSPI)와 딸린 것들 4.5MB 를 뺀다 — 리눅스 배포에서는 안 쓴다 -->
     <dependency>
       <groupId>org.mariadb.jdbc</groupId>
       <artifactId>mariadb-java-client</artifactId>
@@ -99,10 +91,7 @@
       <version>2.3.3</version>
       <scope>provided</scope>
     </dependency>
-    <!--
-      jstl 은 뺐다. WEB-INF/views 의 JSP 두 개(404, 500)가 taglib 를
-      하나도 쓰지 않는다. 다시 쓰게 되면 그때 되살릴 것.
-    -->
+    <!-- jstl 은 뺐다 — JSP 가 taglib 를 하나도 쓰지 않는다 -->
 
     <!-- Jackson JSON -->
     <dependency>
@@ -111,16 +100,7 @@
       <version>${jackson.version}</version>
     </dependency>
 
-    <!--
-      Bean Validation (javax.validation)
-
-      6.2.x 가 javax 네임스페이스를 쓰는 마지막 계열이다. 7.x 부터는
-      jakarta 로 넘어가 톰캣 9 / Spring 5.3 조합에서 쓸 수 없다.
-
-      메시지 보간에 EL 구현체가 필요하지만, servlet-context.xml 에서
-      ParameterMessageInterpolator 를 지정해 EL 없이 돌린다. 컨테이너의
-      EL 버전에 끌려다니지 않으려는 것이다.
-    -->
+    <!-- 6.2.x 가 javax 네임스페이스의 마지막 계열이다. 7.x 는 jakarta 라 지금 조합에서 못 쓴다 -->
     <dependency>
       <groupId>org.hibernate.validator</groupId>
       <artifactId>hibernate-validator</artifactId>
@@ -171,17 +151,8 @@
 
   <profiles>
     <!--
-      배포용 빌드 프로파일.
-
-        mvn clean package          → 로컬 개발용 (src/main/resources 그대로)
-        mvn clean package -Pprod   → 운영 배포용
-
-      src/main/resources/properties/database.properties 는 항상 로컬 설정을
-      유지하고, 운영 설정은 src/main/resources-prod 에 따로 둔다. prod 로
-      빌드할 때만 그 디렉터리를 target/classes 위에 덮어써서 war 에 운영
-      설정이 들어가게 한다. 배포할 때 파일을 손으로 바꿔치기할 필요가 없다.
-
-      두 파일 모두 .gitignore 대상이라 저장소에는 올라가지 않는다.
+      배포용 빌드 (mvn clean package -Pprod).
+      운영 설정은 resources-prod 에 따로 두고 prod 빌드에서만 덮어쓴다. 둘 다 .gitignore 대상.
     -->
     <profile>
       <id>prod</id>
@@ -212,11 +183,7 @@
             </executions>
           </plugin>
 
-          <!--
-            안전장치: 자리표시자가 남은 채로 배포용 war 가 만들어지면
-            운영에서 DB 접속이 실패한다. 그런 war 는 아예 만들어지지
-            않도록 빌드를 중단시킨다.
-          -->
+          <!-- 자리표시자가 남은 war 는 운영에서 DB 접속이 실패한다 — 만들어지지 않게 막는다 -->
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-antrun-plugin</artifactId>
@@ -254,21 +221,9 @@
       </build>
     </profile>
     <!--
-      의존성 취약점 스캔.
-
-        mvn -Psecurity verify -Dnvd.api.key=...   (또는 환경변수 NVD_API_KEY)
-
-      기본 빌드에는 들어가지 않는다 — NVD 데이터를 받아오느라 몇 분씩 걸려서
-      매번 돌리면 빌드가 못 쓸 만큼 느려진다.
-
-      키는 https://nvd.nist.gov/developers/request-an-api-key 에서 무료로
-      받는다. 2024년부터 익명 접근이 막혀 키 없이는 아예 돌지 않는다.
-      키를 저장소에 적지 말 것 — 명령줄이나 환경변수로 넘긴다.
-
-      CVSS 7.0 이상(High/Critical)이 나오면 빌드를 실패시킨다. 오탐이면
-      dependency-check-suppress.xml 에 근거를 적어 예외 처리한다.
-
-      키가 없어도 도는 감시는 .github/dependabot.yml 이 맡는다.
+      의존성 취약점 스캔 — mvn -Psecurity verify -Dnvd.api.key=...
+      NVD 키가 없으면 아예 돌지 않는다 (nvd.nist.gov/developers/request-an-api-key).
+      기본 빌드에는 넣지 않는다. 키 없이 도는 감시는 .github/dependabot.yml 이 맡는다.
     -->
     <profile>
       <id>security</id>

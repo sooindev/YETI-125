@@ -58,12 +58,10 @@ public class PasswordUtilTest {
         assertFalse(PasswordUtil.matches("hunter2", null));
     }
 
-    // ── 옛 형식(SHA-256 1회) 호환 ─────────────────────────────
 
     @Test
     public void 옛_형식_해시는_더_이상_통하지_않는다() throws Exception {
-        // 2026-08-22, tb_admin 이 모두 새 형식으로 옮겨간 것을 확인하고 지운 경로다.
-        // 옛 해시만 검증이 1ms 도 안 걸려서, 응답 시간으로 계정을 알아낼 수 있었다.
+        // 2026-08-22 제거. 옛 해시는 검증이 1ms 도 안 걸려 응답 시간으로 계정을 알아낼 수 있었다.
         String legacy = legacyEncode("hunter2");
 
         assertFalse("맞는 비밀번호여도 통과시키지 않는다", PasswordUtil.matches("hunter2", legacy));
@@ -94,10 +92,7 @@ public class PasswordUtilTest {
         assertFalse(PasswordUtil.matchesDummy(null));
     }
 
-    /**
-     * 더미 검증은 진짜 검증과 같은 비용이어야 의미가 있다.
-     * 더미만 싸게 끝나면 시간 차이가 도로 벌어진다.
-     */
+    /** 더미 검증이 진짜 검증과 같은 비용이어야 시간 차이가 안 벌어진다. */
     @Test
     public void 더미_검증도_진짜_검증만큼_시간을_쓴다() {
         String stored = PasswordUtil.encode("hunter2");

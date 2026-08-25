@@ -11,18 +11,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 주소를 하나로 모은다.
+ * 주소를 정규 주소 하나로 모은다 — 옛 .html, 그리고 //schedule 이나 /schedule/ 같은 다른 표기.
  *
- *   1. 예전 .html 주소  → 확장자 없는 정규 주소
- *   2. 같은 곳을 가리키는 다른 표기 → 정규 표기
- *      (//schedule, /schedule/, /schedule// …)
- *
- * 같은 내용이 여러 주소로 200 을 주면 검색엔진이 어느 쪽이 진짜인지 스스로
- * 정하고, 밖에서 걸어둔 링크도 갈래갈래 갈린다.
- *
- * REQUEST 디스패치에만 걸린다(필터 기본값). 컨트롤러가 /schedule 을
- * /schedule.html 로 forward 해서 실제 파일을 꺼내오는데, 그 forward 까지
- * 여기로 들어오면 301 → forward → 301 로 끝없이 돈다.
+ * REQUEST 디스패치에만 걸린다(필터 기본값). forward 까지 걸리면 301 과 forward 가 서로를 부른다.
  */
 public class LegacyHtmlRedirectFilter implements Filter {
 
@@ -50,7 +41,7 @@ public class LegacyHtmlRedirectFilter implements Filter {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
 
-        // 루트 배포가 아닐 수도 있어 컨텍스트 경로를 떼고 본다
+        // 루트 배포가 아닐 수 있어 컨텍스트 경로를 떼고 본다
         String contextPath = httpRequest.getContextPath();
         String path = httpRequest.getRequestURI().substring(contextPath.length());
 
@@ -71,24 +62,14 @@ public class LegacyHtmlRedirectFilter implements Filter {
     /** 보내야 할 정규 주소. 이미 정규 주소면 null */
     private static String canonicalOf(HttpServletRequest request, String path) {
 
-        /*
-         * 옮긴 주소인지는 정규화한 경로로 판정한다.
-         *
-         * /schedule%2Ehtml 이나 //schedule.html 처럼 글자만 다른 표기로도
-         * 옛 페이지에 닿을 수 있다. 목적지는 아래 표에 박아둔 값이라
-         * 요청에서 만들어내지 않는다 — 그래야 되돌아오는 요청이 다시
-         * 걸리는 일이 없다.
-         */
+        // %2E 나 // 같은 표기로도 옛 주소에 닿으므로 정규화해서 판정한다.
+        // 목적지는 표에 박힌 값 — 요청에서 만들면 되돌아온 요청이 또 걸린다.
         String moved = MOVED.get(RequestUtil.normalizedPath(request));
         if (moved != null) {
             return moved;
         }
 
-        /*
-         * 그 외에는 표기만 손본다. 여기서는 퍼센트 디코딩을 하지 않는다.
-         * 디코딩한 주소로 보내면 브라우저가 다시 인코딩해서 돌아오고,
-         * 그것을 또 디코딩해 보내는 무한 왕복이 된다.
-         */
+        // 표기만 손본다. 디코딩하면 브라우저가 다시 인코딩해 보내 무한 왕복이 된다.
         String tidied = collapseSlashes(path);
         return tidied.equals(path) ? null : tidied;
     }

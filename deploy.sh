@@ -62,7 +62,6 @@ scp "$WAR" "$SERVER:/tmp/yeti-125.war"
 # ─────────────────────────────────────────────────────────────
 say "3/4  교체 및 검증 (서버)"
 # 원격 작업은 한 세션에서 끝낸다 — 실패하면 그 자리에서 롤백한다
-# (set -e 로 조용히 죽지 않도록 실패를 직접 받아 처리한다)
 REMOTE_OK=1
 ssh "$SERVER" 'bash -s' <<'REMOTE' || REMOTE_OK=0
 set -uo pipefail

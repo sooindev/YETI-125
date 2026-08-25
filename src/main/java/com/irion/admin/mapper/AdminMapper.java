@@ -7,10 +7,8 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface AdminMapper {
 
-    // 로그인 ID로 관리자 조회
     AdminVO selectAdminByLoginId(@Param("adminLoginId") String adminLoginId);
 
-    // 마지막 로그인 시간 업데이트
     int updateLastLoginDate(@Param("adminId") Long adminId);
 
     // 비밀번호 해시 갱신 (옛 형식 → PBKDF2 재해시)

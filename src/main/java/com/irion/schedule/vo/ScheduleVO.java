@@ -13,11 +13,7 @@ public class ScheduleVO implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    /*
-     * 제약은 DB 컬럼 정의에서 그대로 따왔다 (tb_schedule).
-     * 여기서 걸러내지 않으면 길이 초과가 DB 제약에 걸려 500 이 나가고,
-     * 화면에는 "저장 중 오류가 발생했습니다" 만 뜬다.
-     */
+    // 제약은 tb_schedule 컬럼 정의에서 따왔다. 여기서 안 걸러내면 DB 제약에 걸려 500 이 난다.
 
     private Long scheduleId;
 

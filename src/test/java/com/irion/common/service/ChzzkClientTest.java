@@ -8,13 +8,7 @@ import java.util.Map;
 
 import static org.junit.Assert.*;
 
-/**
- * 치지직 응답 파싱 회귀 테스트.
- *
- * 예전 구현은 indexOf 로 문자열을 잘라 썼다. JSON 이스케이프를 몰라서
- * 제목에 큰따옴표가 들어가면 그 앞에서 잘렸고, \n \\ \/ 도 디코드되지
- * 않았다. 아래 케이스들이 그때 깨지던 것들이다.
- */
+/** 파싱 회귀 테스트. 옛 indexOf 구현은 제목에 큰따옴표가 들어가면 그 앞에서 잘렸다. */
 public class ChzzkClientTest {
 
     private final ChzzkClient client = new ChzzkClient();

@@ -11,12 +11,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- * 관리자 영역의 CSRF 방어.
- *
- * 상태를 바꾸는 메서드만 검사한다. 로그인은 아직 세션이 없어 토큰을 줄 수
- * 없으므로 예외다. web.xml 에서 AdminLoginFilter 다음에 매핑한다.
- */
+/** 관리자 CSRF 방어. 상태를 바꾸는 메서드만 검사하고, 세션 이전인 로그인은 예외다. */
 public class CsrfFilter implements Filter {
 
     private static final Set<String> PROTECTED_METHODS = new HashSet<String>(
