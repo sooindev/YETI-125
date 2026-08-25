@@ -72,13 +72,29 @@ db_query "SELECT 1" >/dev/null 2>&1 \
 echo "   $DB_NAME 접속 확인"
 
 # ─────────────────────────────────────────────────────────────
+# war 안의 DB 설정이 로컬 것과 같은지 본다.
+#
+# deploy.sh 는 -Pprod 로 빌드하므로 배포 뒤 target/ 에는 운영용 war 가 남는다.
+# --skip-build 로 그걸 로컬에 올리면 운영 계정으로 로컬 DB 에 붙어 500 이 난다
+# (2026-08-25). 값은 비교만 하고 출력하지 않는다.
+assert_local_war() {
+  local want have
+  want=$(shasum "src/main/resources/properties/database.properties" | cut -d' ' -f1)
+  have=$(unzip -p "$WAR" WEB-INF/classes/properties/database.properties 2>/dev/null | shasum | cut -d' ' -f1)
+
+  [ -n "$have" ] || die "war 안에 DB 설정이 없습니다: $WAR"
+  [ "$want" = "$have" ] || die "war 의 DB 설정이 로컬 설정과 다릅니다 (운영용이거나 낡은 war). --skip-build 없이 다시 빌드하세요."
+}
+
 if [ "$SKIP_BUILD" = "1" ]; then
   say "2/4  빌드 건너뜀 (--skip-build)"
   [ -f "$WAR" ] || die "war 가 없습니다: $WAR"
+  assert_local_war
 else
   say "2/4  빌드 (로컬 프로파일)"
   mvn -q clean package -DskipTests
   [ -f "$WAR" ] || die "war 가 생성되지 않았습니다: $WAR"
+  assert_local_war
 fi
 printf '   war: %s (%s)\n' "$WAR" "$(du -h "$WAR" | cut -f1)"
 
