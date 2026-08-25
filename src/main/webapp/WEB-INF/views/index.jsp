@@ -194,9 +194,16 @@
             <span class="status-tag" id="heroStatusTag">
               <span class="status-led"></span> Offline
             </span>
-            <p class="status-copy">
+            <p class="status-copy" id="heroOfflineCopy">
               현재 채널이 오프라인 상태입니다. 다음 라이브를 기다려 주세요.
             </p>
+
+            <%-- 다음 방송. 예정이 없으면 위 문구가 그대로 남는다 (index.js) --%>
+            <div class="hero-next" id="heroNext" hidden>
+              <span class="hero-next-label">다음 방송까지</span>
+              <p class="hero-next-countdown" id="heroNextCountdown"></p>
+              <p class="hero-next-title" id="heroNextTitle"></p>
+            </div>
           </div>
 
           <div class="hero-actions">

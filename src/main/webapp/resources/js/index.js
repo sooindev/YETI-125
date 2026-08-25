@@ -65,6 +65,93 @@ function showLiveHero(data) {
 function showDefaultHero() {
     $('#liveHero').hide();
     $('#defaultHero').fadeIn();
+    loadNextSchedule();
+}
+
+// 다음 방송 — 오프라인일 때만 쓴다. 방송 중이면 히어로가 통째로 바뀐다.
+let nextScheduleTimer = null;
+
+function loadNextSchedule() {
+    const today = new Date();
+    const until = new Date(today.getTime() + 120 * 24 * 60 * 60 * 1000);
+
+    $.ajax({
+        url: '/schedule/list',
+        type: 'GET',
+        dataType: 'json',
+        timeout: 10000,
+        data: {
+            start: YetiUtil.formatDate(today, 'date'),
+            end: YetiUtil.formatDate(until, 'date')
+        },
+        success: function (events) {
+            showNextSchedule(pickNextSchedule(events));
+        }
+        // 실패하면 기본 문구가 그대로 남는다
+    });
+}
+
+/** 아직 시작하지 않은 일정 중 가장 이른 것 */
+function pickNextSchedule(events) {
+    if (!$.isArray(events)) return null;
+
+    const now = Date.now();
+    let best = null;
+    let bestAt = Infinity;
+
+    $.each(events, function (i, event) {
+        const at = YetiUtil.parseDate(event.start);
+        if (!at || at.getTime() <= now) return;
+        if (at.getTime() < bestAt) {
+            bestAt = at.getTime();
+            best = event;
+        }
+    });
+    return best;
+}
+
+function showNextSchedule(event) {
+    if (nextScheduleTimer) {
+        clearInterval(nextScheduleTimer);
+        nextScheduleTimer = null;
+    }
+    if (!event) return;
+
+    const at = YetiUtil.parseDate(event.start);
+    if (!at) return;
+
+    $('#heroNextTitle').text(event.title || '');
+    $('#heroOfflineCopy').hide();
+    $('#heroNext').prop('hidden', false);
+
+    const tick = function () {
+        const left = at.getTime() - Date.now();
+        if (left <= 0) {
+            // 시작 시각을 넘겼다 — 그 다음 일정으로 넘어간다
+            clearInterval(nextScheduleTimer);
+            nextScheduleTimer = null;
+            loadNextSchedule();
+            return;
+        }
+        $('#heroNextCountdown').text(formatTimeLeft(left));
+    };
+
+    tick();
+    // 분 단위로만 보여주므로 30초면 충분하다
+    nextScheduleTimer = setInterval(tick, 30000);
+}
+
+/** 남은 시간을 "2일 4시간" / "3시간 20분" / "12분" 으로 */
+function formatTimeLeft(ms) {
+    const totalMin = Math.floor(ms / 60000);
+    const days = Math.floor(totalMin / 1440);
+    const hours = Math.floor((totalMin % 1440) / 60);
+    const mins = totalMin % 60;
+
+    if (days > 0) return hours > 0 ? days + '일 ' + hours + '시간' : days + '일';
+    if (hours > 0) return mins > 0 ? hours + '시간 ' + mins + '분' : hours + '시간';
+    if (mins > 0) return mins + '분';
+    return '곧 시작';
 }
 
 function loadClips() {
@@ -389,14 +476,40 @@ function initVideoModal() {
     syncVideoRestoreLink();
 }
 
+// 더보기로 이어 받을 때 같은 달 머리말을 다시 찍지 않도록 마지막 값을 들고 있는다
+let lastVideoGroup = '';
+
+/** "2026-08" — 정렬·비교용 키 */
+function videoGroupKey(publishDate) {
+    const at = YetiUtil.parseDate(publishDate);
+    if (!at) return '';
+    return at.getFullYear() + '-' + ('0' + (at.getMonth() + 1)).slice(-2);
+}
+
+/** "2026년 8월" — 화면에 찍는 이름 */
+function videoGroupLabel(key) {
+    const parts = key.split('-');
+    return parts[0] + '년 ' + parseInt(parts[1], 10) + '월';
+}
+
 function renderVideos(videos, append) {
     const $container = $('#videosContainer');
 
     if (!append) {
         $container.empty();
+        lastVideoGroup = '';
     }
 
     $.each(videos, function(index, video) {
+        // 달이 바뀌는 자리에 머리말을 끼운다. 날짜를 못 읽은 항목은 앞 묶음에 남긴다
+        const group = videoGroupKey(video.publishDate);
+        if (group && group !== lastVideoGroup) {
+            lastVideoGroup = group;
+            $container.append(
+                '<h3 class="video-group">' + YetiUtil.escapeHtml(videoGroupLabel(group)) + '</h3>'
+            );
+        }
+
         const duration = formatVideoDuration(video.duration);
         const viewCount = YetiUtil.numberFormat(video.readCount || 0);
         const date = YetiUtil.formatMonthDay(video.publishDate);
