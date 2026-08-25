@@ -55,11 +55,7 @@
     <url-pattern>/*</url-pattern>
   </filter-mapping>
 
-  <!--
-    예전 .html 주소 → 확장자 없는 정규 주소 301.
-    staticResourceCacheFilter 다음에 둬서 301 응답에도 보안 헤더가 실리고,
-    adminLoginFilter 앞에 둬서 관리자 페이지도 로그인 검사 전에 주소부터 정리된다.
-  -->
+  <!-- 옛 .html → 정규 주소 301. 보안 헤더 뒤, 로그인 검사 앞에 둔다 -->
   <filter>
     <filter-name>legacyHtmlRedirectFilter</filter-name>
     <filter-class>com.irion.common.filter.LegacyHtmlRedirectFilter</filter-class>
@@ -88,26 +84,15 @@
   <session-config>
     <session-timeout>30</session-timeout>
 
-    <!--
-      세션 쿠키 보호. SameSite 는 Servlet 4.0 스펙에 없어 META-INF/context.xml 에 둔다.
-
-      secure 때문에 로컬 http://localhost:8080 의 사파리에서는 관리자 로그인이
-      유지되지 않는다 (크롬·파이어폭스는 localhost 를 신뢰할 수 있는 출처로 본다).
-    -->
+    <!-- SameSite 는 스펙에 없어 META-INF/context.xml 에 있다.
+      secure 탓에 로컬 http 사파리에서는 관리자 로그인이 유지되지 않는다 -->
     <cookie-config>
       <http-only>true</http-only>
       <secure>true</secure>
     </cookie-config>
 
-    <!--
-      세션 추적을 쿠키로만 한다.
-
-      톰캣 기본값은 COOKIE + URL 이라, 쿠키를 받지 않는 클라이언트에는
-      주소에 ;jsessionid=... 가 붙는다. 그 주소가 공유되거나 Referer 로
-      새어 나가면 세션이 통째로 넘어간다.
-
-      스키마상 cookie-config 다음에 와야 한다.
-    -->
+    <!-- 톰캣 기본값(COOKIE+URL)은 주소에 ;jsessionid= 를 붙인다 — 공유되면 세션이 넘어간다.
+      스키마상 cookie-config 다음에 와야 한다 -->
     <tracking-mode>COOKIE</tracking-mode>
   </session-config>
 

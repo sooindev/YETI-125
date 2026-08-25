@@ -20,7 +20,6 @@ public class JsonResult {
         this.data = data;
     }
 
-    // 성공 응답
     public static JsonResult success() {
         return new JsonResult(true, "성공");
     }
@@ -33,12 +32,10 @@ public class JsonResult {
         return new JsonResult(true, message, data);
     }
 
-    // 실패 응답
     public static JsonResult fail(String message) {
         return new JsonResult(false, message);
     }
 
-    // Getter & Setter
     public boolean isSuccess() {
         return success;
     }

@@ -3,13 +3,8 @@ package com.irion.common.util;
 import java.util.Date;
 
 /**
- * 조회 기간 제한.
- *
- * 목록 API 의 start / end 는 클라이언트가 정하는 값이라, 상한이 없으면
- * 요청 한 줄로 테이블 전체를 훑게 만들 수 있다.
- *
- * 거부하지 않고 끝 날짜를 당긴다. 두 목록 API 는 FullCalendar 가 그대로 먹는
- * 배열을 돌려주기로 되어 있어서 오류 응답을 끼워 넣으면 달력이 깨진다.
+ * 조회 기간 제한. start/end 는 클라이언트 값이라 상한이 없으면 테이블 전체를 훑게 된다.
+ * 거부 대신 끝 날짜를 당긴다 — 오류 응답을 주면 FullCalendar 가 깨진다.
  */
 public final class DateRange {
 

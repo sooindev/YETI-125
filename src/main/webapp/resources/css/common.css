@@ -1,17 +1,9 @@
-/* ============================================================
-   YETI-125 — IRION ARCHIVE
-   Editorial design system — pastel light
-   Bright sky background · sky-blue main · pink accent
-   ============================================================ */
+/* YETI-125 디자인 시스템 — 파스텔 라이트, 하늘색 메인 / 분홍 포인트 */
 
 /* ---- Fonts ------------------------------------------------- */
 /* Anton  — compressed display  | JetBrains Mono — body/meta    */
 
-/* ---- Tokens ------------------------------------------------
-   Light pastel palette. The --ink* names are kept as stable
-   surface tokens so every page reads from the same scale —
-   they now describe a light theme (pale → near-white → ink).
-   ------------------------------------------------------------ */
+/* ---- 토큰 — --ink* 는 표면 스케일 이름이다 (pale → near-white → ink) ---- */
 :root {
     /* surfaces — pale to bright */
     --ink:        #f3f8fc;  /* page background — pale sky */
@@ -64,10 +56,7 @@
     --gutter:   clamp(20px, 4vw, 56px);
     --head-h:   76px;
 
-    /* 노치·다이나믹 아일랜드 영역.
-       HTML 의 viewport-fit=cover 와 짝을 이룬다. 이게 없으면 사파리가
-       안전 영역을 레터박스로 남겨, 헤더 위에 배경이 닿지 않는 빈 띠가
-       생긴다. 지원하지 않는 브라우저에서는 0px 로 떨어진다. */
+    /* 노치 영역. viewport-fit=cover 와 짝 — 없으면 헤더 위에 빈 띠가 남는다 */
     --safe-top:   env(safe-area-inset-top, 0px);
     --head-total: calc(var(--head-h) + var(--safe-top));
     --ease:     cubic-bezier(0.16, 1, 0.3, 1);
@@ -77,11 +66,7 @@
     color-scheme: light;
 }
 
-/* ---- Dark theme --------------------------------------------
-   Same token names, night values. The palette keeps the sky /
-   pink pairing but lifts the accents so they stay legible on a
-   deep ground, and inverts the surface ramp (ink → raise).
-   ------------------------------------------------------------ */
+/* ---- 다크 테마 — 같은 토큰에 야간 값. 액센트는 한 단계 밝힌다 ---- */
 :root[data-theme="dark"] {
     /* surfaces — deep to raised */
     --ink:        #0e161d;
@@ -127,9 +112,7 @@
     color-scheme: dark;
 }
 
-/* No-JS fallback: follow the OS when no explicit choice is stored.
-   theme-init.js normally stamps data-theme before first paint, so
-   this only applies when scripting is off. */
+/* JS 가 꺼졌을 때만 쓰인다 — 평소에는 theme-init.js 가 첫 페인트 전에 data-theme 을 찍는다 */
 @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
         --ink:        #0e161d;
@@ -191,10 +174,7 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
-/* ---- Grain overlay ----------------------------------------
-   A fixed SVG turbulence layer over the whole viewport.
-   On a light background it reads as a subtle paper grain —
-   multiply blend at low opacity so it darkens just slightly. */
+/* ---- 그레인 — 화면 전체에 깔리는 SVG 노이즈 레이어 ---- */
 body::after {
     content: "";
     position: fixed;
@@ -280,21 +260,10 @@ img { display: block; max-width: 100%; }
 }
 
 
-/* ---- 대체 폰트 보정 ----------------------------------------------
-   웹폰트가 도착하는 순간 글자 폭이 달라지면 레이아웃이 흔들린다.
-   size-adjust 로 대체 폰트를 미리 같은 폭에 맞춰둔다.
-
-   비율은 운영 사이트에서 캔버스로 직접 측정한 값이다.
-     Anton        : Impact 대비      →  93.8%
-     Noto Sans KR : 시스템 한글 대비  → 106.4%
-
-   JetBrains Mono 는 Menlo·Consolas 와 0.3% 차이라 보정이 필요 없다.
-   대신 토큰 스택에 이름을 직접 적는다 — @font-face 의 local() 은 크롬에서
-   PostScript 이름만 맞히는 경우가 있어 조용히 실패할 수 있다.
-
-   local() 만 쓰므로 내려받는 파일은 없다. 'Anton Fallback'(Impact)에는
-   한글이 없어 한글은 뒤의 'Noto Sans KR' → 'KR Fallback' 이 받는다.
-   ---------------------------------------------------------------- */
+/* ---- 대체 폰트 보정 ----
+   웹폰트가 도착할 때 폭이 바뀌면 레이아웃이 흔들린다. size-adjust 비율은
+   운영 사이트에서 캔버스로 직접 잰 값이다 (Anton 93.8%, Noto Sans KR 106.4%).
+   local() 만 쓰므로 내려받는 파일은 없다. ---- */
 
 @font-face {
     font-family: 'Anton Fallback';
@@ -346,22 +315,16 @@ img { display: block; max-width: 100%; }
     color: var(--bone-faint);
 }
 
-/* ============================================================
-   Header
-   ============================================================ */
+/* Header */
 .header {
     position: fixed;
     top: 0; left: 0; right: 0;
-    /* 안전 영역까지 배경이 닿도록 헤더를 그만큼 키우고, 안쪽 내용은
-       그 아래에서 시작하게 한다. 다이나믹 아일랜드 주변에 배경 없는
-       띠가 남지 않는다. */
+    /* 안전 영역까지 배경이 닿도록 헤더를 키우고 내용은 그 아래에서 시작한다 */
     height: var(--head-total);
     padding-top: var(--safe-top);
     z-index: 1000;
 
-    /* 최상단에서는 배경 없이 페이지에 묻혀 있다가, 스크롤이 시작되면
-       흐린 배경과 hairline 이 배어 나온다 (is-stuck). 바가 처음부터
-       띠처럼 얹혀 있는 것보다 자연스럽게 읽힌다. */
+    /* 최상단에서는 묻혀 있다가 스크롤이 시작되면 흐린 배경이 배어 나온다 (is-stuck) */
     background: transparent;
     border-bottom: 1px solid transparent;
 
@@ -384,21 +347,13 @@ img { display: block; max-width: 100%; }
     border-bottom-color: var(--ink-line);
 }
 
-/* 반투명 배경은 뒤를 흐리게 만드는 backdrop-filter 가 있어야 성립한다.
-   카카오톡·네이버 인앱 브라우저 등 미지원 환경에서는 스크롤한 본문이
-   헤더 글자와 겹쳐 보이므로, 그런 곳에서는 불투명 배경으로 떨어뜨린다. */
+/* backdrop-filter 미지원(인앱 브라우저)에서는 본문이 헤더 글자와 겹쳐 보여 불투명으로 떨어뜨린다 */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
     .header.is-stuck { background: var(--ink); }
 }
 
-/* 접힘 규칙 — 현재는 사용하지 않는다.
-   상단바는 항상 고정이며, 이 클래스를 붙이는 코드는 없다. 자동 접힘을
-   되살리고 싶을 때를 위해 남겨둔다 (common.js 의 initHeaderScrollState 참고).
-
-   opacity 를 함께 떨어뜨리는 이유: iOS 사파리는 backdrop-filter 가 걸린
-   요소를 transform 으로 밀어내면 흐림 레이어가 제자리에 남아 상단에 얇게
-   비쳐 보인다. 요소 전체가 투명해지면 그 잔상까지 같이 사라진다.
-   노치 영역(safe-area)과 테두리·반올림 오차만큼 조금 더 올린다. */
+/* 접힘 규칙 — 지금은 붙이는 코드가 없다. 되살릴 때를 위해 남겨둔다.
+   opacity 를 같이 떨어뜨리는 것은 iOS 사파리에서 흐림 잔상이 남기 때문이다. */
 .header.is-hidden {
     transform: translateY(calc(-100% - env(safe-area-inset-top, 0px) - 3px));
     opacity: 0;
@@ -472,10 +427,7 @@ img { display: block; max-width: 100%; }
 .nav-link.active::after { transform: scaleX(1); }
 .nav-link.active { color: var(--frost); }
 
-/* ---- Theme toggle ------------------------------------------
-   Squared hairline button matching the editorial button style.
-   Both icons live in the DOM; the inactive one is hidden so the
-   swap costs no layout and needs no JS beyond the attribute. */
+/* ---- 테마 토글 — 아이콘 셋 모두 DOM 에 두고 하나만 보인다 (레이아웃 비용 없음) ---- */
 .theme-toggle {
     display: inline-flex;
     align-items: center;
@@ -506,9 +458,7 @@ img { display: block; max-width: 100%; }
     stroke-linecap: round;
     stroke-linejoin: round;
 }
-/* 아이콘은 지금 칠해진 색이 아니라 사용자가 고른 모드를 보여준다.
-   시스템 따름 + OS 다크면 화면은 어둡지만 아이콘은 자동이어야 한다.
-   data-mode 는 theme-init.js 가 버튼에 찍는다. */
+/* 아이콘은 칠해진 색이 아니라 고른 모드를 보여준다. data-mode 는 theme-init.js 가 찍는다 */
 .theme-toggle[data-mode="system"] .icon-auto { display: block; }
 .theme-toggle[data-mode="light"]  .icon-sun  { display: block; }
 .theme-toggle[data-mode="dark"]   .icon-moon { display: block; }
@@ -543,9 +493,7 @@ img { display: block; max-width: 100%; }
 .mobile-menu-btn.active span:nth-child(2) { opacity: 0; }
 .mobile-menu-btn.active span:nth-child(3) { transform: translateY(-7.5px) rotate(-45deg); width: 100%; }
 
-/* ============================================================
-   Section scaffold — asymmetric header row
-   ============================================================ */
+/* Section scaffold — asymmetric header row */
 .section {
     padding: clamp(72px, 11vw, 150px) 0;
     position: relative;
@@ -601,9 +549,7 @@ img { display: block; max-width: 100%; }
 }
 .section-title .title-icon { display: none; }
 
-/* ============================================================
-   Buttons — squared, mono, hairline
-   ============================================================ */
+/* Buttons — squared, mono, hairline */
 .btn {
     display: inline-flex;
     align-items: center;
@@ -650,9 +596,7 @@ img { display: block; max-width: 100%; }
 .btn-arrow { transition: transform var(--t-fast); }
 .btn:hover .btn-arrow { transform: translateX(4px); }
 
-/* ============================================================
-   Modal — slab panel, no rounding
-   ============================================================ */
+/* Modal — slab panel, no rounding */
 .modal {
     display: none;
     position: fixed;
@@ -702,20 +646,9 @@ img { display: block; max-width: 100%; }
     border-color: var(--rose);
 }
 
-/* ============================================================
-   Toast
-   ============================================================ */
-/*
-   토스트
-
-   숨김 상태에서도 상자가 화면에 남아 있었다. translateY(140%) 로만
-   내렸는데, 글자가 없을 때 높이가 30px 남짓이라 42px 밖에 내려가지
-   않는다. bottom: 32px 을 감안하면 상자 윗부분 20px 과 그림자가 화면
-   하단 가운데에 늘 떠 있었고, position: fixed 라 그 띠의 클릭도 가로챘다.
-
-   높이에 기대지 않고 "제 높이 + 아래 여백" 만큼 내려 화면 밖으로 완전히
-   뺀다. 글자 길이에 따라 높이가 두 줄로 늘어나도 그대로 성립한다.
-   opacity 와 pointer-events 로 한 번 더 눌러둔다. */
+/* Toast */
+/* 높이에 기대지 않고 "제 높이 + 아래 여백" 만큼 내린다 — % 로만 내리면
+   상자 윗부분이 화면에 남아 클릭을 가로챈다 */
 .toast {
     /* 아이폰 홈 인디케이터 영역을 피한다 (footer 와 같은 처리) */
     --toast-offset: calc(32px + env(safe-area-inset-bottom, 0px));
@@ -751,9 +684,7 @@ img { display: block; max-width: 100%; }
 .toast.error { border-left-color: var(--t-collab); }
 .toast.success { border-left-color: var(--t-chat); }
 
-/* ============================================================
-   Footer
-   ============================================================ */
+/* Footer */
 .footer {
     border-top: 1px solid var(--ink-line);
     /* viewport-fit=cover 로 화면 끝까지 쓰게 되면서 아래쪽 홈 인디케이터
@@ -822,9 +753,7 @@ img { display: block; max-width: 100%; }
 }
 .footer-text a:hover { opacity: 0.6; }
 
-/* ============================================================
-   Responsive
-   ============================================================ */
+/* Responsive */
 @media (max-width: 900px) {
     .sec-head,
     .footer-grid {
@@ -841,9 +770,7 @@ img { display: block; max-width: 100%; }
     /* allow aside copy to wrap on narrow screens */
     .aside--nowrap { white-space: normal; }
 
-    /* 데스크톱의 여백 리듬을 그대로 쓰면 작은 화면에서는 헤드라인과
-       본문 사이가 한 화면의 1/8 가까이 비어버린다. 섹션 간 호흡은
-       유지하되 눈에 보이는 정보 밀도를 올린다. */
+    /* 데스크톱 여백을 그대로 쓰면 작은 화면에서 한 화면의 1/8 이 빈다 */
     .section { padding: 48px 0; }
 
     .mobile-menu-btn {
@@ -862,9 +789,7 @@ img { display: block; max-width: 100%; }
         margin-left: auto;
         margin-right: 0.8rem;
         width: 42px; height: 42px;
-        /* 옆의 햄버거는 테두리 없이 진한 막대(--bone)로 그려지는데 토글만
-           흐린 테두리(대비 1.4)에 옅은 아이콘(대비 5.1)이라 나란히 두면
-           보이지 않는다. 같은 무게로 맞춘다. */
+        /* 옆 햄버거(--bone)와 무게를 맞춘다 — 흐린 테두리로 두면 나란히 놓였을 때 안 보인다 */
         border: none;
         color: var(--bone);
     }

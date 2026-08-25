@@ -11,12 +11,7 @@ import java.util.Date;
 
 import static org.junit.Assert.*;
 
-/**
- * 저장 직전 기본값 채우기.
- *
- * INSERT/UPDATE 가 컬럼을 직접 지정하면 schema.sql 의 DEFAULT 는 쓰이지 않는다.
- * NOT NULL 컬럼이 null 로 내려가면 그대로 DB 오류다.
- */
+/** 저장 직전 기본값 채우기. 컬럼을 직접 지정하면 schema.sql 의 DEFAULT 가 안 쓰인다. */
 public class ScheduleServiceImplTest {
 
     /** DB 로 내려가기 직전의 VO 를 붙잡아 두는 가짜 매퍼 */
@@ -113,10 +108,7 @@ public class ScheduleServiceImplTest {
         assertEquals("N", captor.saved.getAllDayYn());
     }
 
-    /**
-     * 'Y' 로 채우면 숨겨둔 일정이 공개되고 'N' 이면 공개하던 일정이 사라진다.
-     * 비운 채로 넘겨 SQL 이 그 컬럼을 건드리지 않게 한다.
-     */
+    /** 채워 넣으면 숨긴 일정이 공개되거나 그 반대가 된다. 비운 채로 넘긴다. */
     @Test
     public void 수정할_때_공개여부가_없으면_비운_채로_넘긴다() {
         Captor captor = new Captor();
@@ -150,7 +142,6 @@ public class ScheduleServiceImplTest {
         assertEquals("N", captor.saved.getDisplayYn());
     }
 
-    // ========================================
 
     /** 가짜 매퍼를 꽂은 서비스. 스프링 없이 필드에 직접 넣는다. */
     private static ScheduleService service(Captor captor) {

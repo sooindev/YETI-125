@@ -1,11 +1,6 @@
-/* ============================================================
-   YETI-125 — Admin
-   Login + schedule management
-   ============================================================ */
+/* YETI-125 — Admin — Login + schedule management */
 
-/* ============================================================
-   Shared form controls
-   ============================================================ */
+/* Shared form controls */
 .field {
     display: flex;
     flex-direction: column;
@@ -64,9 +59,7 @@
 
 .field-row {
     display: grid;
-    /* datetime-local 은 내부 UI 때문에 최소 폭이 크다. 1fr 로 두면 그리드
-       트랙이 그 max-content 폭까지 늘어나 모달 밖으로 삐져나가므로
-       minmax(0, 1fr) 로 트랙을 묶어둔다. */
+    /* datetime-local 은 최소 폭이 커서 1fr 이면 모달 밖으로 삐져나간다 — minmax(0,1fr) 로 묶는다 */
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 16px;
 }
@@ -132,9 +125,7 @@
 
 .btn-block { width: 100%; justify-content: center; }
 
-/* ============================================================
-   Login page — split stage
-   ============================================================ */
+/* Login page — split stage */
 .login-page { min-height: 100vh; }
 
 .login-stage {
@@ -226,9 +217,7 @@
 }
 .login-back:hover { color: var(--frost); }
 
-/* ============================================================
-   Admin schedule page
-   ============================================================ */
+/* Admin schedule page */
 .admin-header .logout-btn:hover { color: var(--t-collab); }
 
 .admin-main {
@@ -304,10 +293,7 @@
     border-left-style: dashed !important;
 }
 
-/* ============================================================
-   FullCalendar theme override (scoped to .calendar-wrapper)
-   Mirrors schedule.css so admin reads identically.
-   ============================================================ */
+/* FullCalendar 테마 덮어쓰기 — schedule.css 와 같은 규칙 */
 .calendar-wrapper {
     --fc-border-color: var(--ink-line);
     --fc-page-bg-color: transparent;
@@ -452,9 +438,7 @@
 /* highlight selection */
 .fc .fc-highlight { background: var(--frost-glow); }
 
-/* ============================================================
-   Responsive
-   ============================================================ */
+/* Responsive */
 @media (max-width: 820px) {
     .login-stage { grid-template-columns: 1fr; }
     .login-aside {
@@ -475,11 +459,8 @@
 }
 
 @media (max-width: 560px) {
-    /* 월간 격자의 칸 폭이 40px 남짓이라 시간·제목이 칸 밖으로 새어나간다.
-       좁은 화면에서는 "이 날에 무엇이 있다"를 유형 색 막대로만 알리고,
-       내용 확인과 수정은 목록 뷰에서 한다.
-       색은 .fc-daygrid-event-dot 의 인라인 border-color 에 들어 있으므로,
-       그 점을 가로로 늘려 막대로 쓴다. */
+    /* 칸 폭이 40px 남짓이라 유형 색 막대로만 알린다. 색은 .fc-daygrid-event-dot 의
+       인라인 border-color 라, 그 점을 늘려 막대로 쓴다 */
     .fc-daygrid-event .fc-event-time,
     .fc-daygrid-event .fc-event-title,
     .fc-daygrid-event .fc-event-title-container { display: none; }

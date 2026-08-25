@@ -1,8 +1,4 @@
-/* ============================================================
-   YETI-125 — Door Intro
-   Two slabs split apart to reveal the site.
-   JS toggles: .opening → .fading → .hidden
-   ============================================================ */
+/* 문 열기 인트로 — JS 가 .opening → .fading → .hidden 으로 토글한다 */
 
 .door-intro {
     position: fixed;
@@ -91,16 +87,9 @@
 .door-intro.opening .door-content { opacity: 0; transform: scale(0.96); }
 .door-intro.opening .door-meta { opacity: 0; }
 
-/* ---- 폰트 도착 전 ------------------------------------------
-   문짝(배경)은 그대로 두고 글자만 미룬다. 문이 닫혀 있는 동안이라
-   기다리는 티가 나지 않는다.
-
-   animation: none 으로 붙잡아 두었다가 클래스가 빠지는 순간 처음부터
-   재생시킨다. opacity 만 감추면 기다리는 사이 애니메이션이 혼자 끝나
-   글자가 툭 나타난다.
-
-   fonts-pending 은 theme-init.js 가 붙인다.
-   ------------------------------------------------------------ */
+/* ---- 폰트 도착 전 — 문짝은 두고 글자만 미룬다.
+   animation:none 으로 붙잡았다 클래스가 빠질 때 처음부터 재생한다 (opacity 만으로는
+   기다리는 사이 애니메이션이 혼자 끝난다). fonts-pending 은 theme-init.js 가 붙인다 ---- */
 .fonts-pending .door-index,
 .fonts-pending .door-title,
 .fonts-pending .door-subtitle,
@@ -137,9 +126,7 @@
 
 .door-title {
     font-family: var(--f-display);
-    /* Anton 은 400 만 있다. .display 규칙과 같게 못박아, 태그가 h1 이든
-       p 든 브라우저 기본 굵기에 끌려가지 않게 한다.
-       (문서당 h1 하나 원칙에 맞춰 이 요소는 p 로 바꿨다) */
+    /* Anton 은 400 만 있다 — 태그 기본 굵기에 끌려가지 않도록 못박는다 */
     font-weight: 400;
     font-size: clamp(5rem, 22vw, 19rem);
     line-height: 0.86;

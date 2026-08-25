@@ -9,16 +9,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * 로그인 시도 제한.
- *
- * IP 가 아니라 계정 기준으로 센다 — 프록시 뒤라 IP 를 믿기 어렵고, 계정
- * 기준이면 여러 IP 로 나눠 들어와도 같은 카운터에 걸린다. 대신 남의 계정을
- * 잠가버릴 수 있으므로 영구 잠금이 아니라 시간이 지나면 풀린다.
- *
- * 아이디는 공격자가 지어내는 값이고 /admin/loginProc 는 인증도 CSRF 도 거치지
- * 않는 자리다. 항목 수와 키 길이 양쪽에 상한을 둔다.
- *
- * 톰캣 하나 기준이다. 서버를 늘리면 공유 저장소로 옮겨야 한다.
+ * 로그인 시도 제한. IP 는 프록시 뒤라 못 믿으므로 계정 기준으로 세고, 시간이 지나면 풀린다.
+ * 아이디는 공격자가 지어내는 값이라 항목 수와 키 길이에 상한을 둔다.
+ * 톰캣 하나 기준 — 서버를 늘리면 공유 저장소로 옮겨야 한다.
  */
 public class LoginAttemptGuard {
 
@@ -69,8 +62,7 @@ public class LoginAttemptGuard {
                 makeRoom(now);
             }
             if (attempts.size() >= MAX_TRACKED) {
-                // 전부 잠금 상태라 자리를 못 만들었다. 잠금을 밀어내면서까지
-                // 받아주면 가짜 아이디로 진짜 잠금을 씻어낼 수 있다
+                // 잠금을 밀어내면서까지 받아주면 가짜 아이디로 진짜 잠금을 씻어낼 수 있다
                 return;
             }
             attempt = attempts.computeIfAbsent(key, k -> new Attempt());
@@ -93,10 +85,7 @@ public class LoginAttemptGuard {
         attempts.remove(key(loginId));
     }
 
-    /**
-     * 자리 만들기 — 만료된 항목을 먼저 지우고, 그래도 넘치면 잠기지 않은
-     * 것 중 오래된 순으로 잘라낸다. 잠금이 살아 있는 항목은 건드리지 않는다.
-     */
+    /** 만료된 것부터 지우고, 넘치면 잠기지 않은 것 중 오래된 순으로 자른다. */
     private void makeRoom(long now) {
         Iterator<Map.Entry<String, Attempt>> it = attempts.entrySet().iterator();
         while (it.hasNext()) {

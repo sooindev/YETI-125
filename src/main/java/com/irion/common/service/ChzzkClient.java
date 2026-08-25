@@ -17,11 +17,8 @@ import java.util.Map;
 import java.util.function.Function;
 
 /**
- * 치지직 공개 API 클라이언트.
- *
- * HTTP 호출과 응답 파싱만 담당한다. 캐시·페이지네이션은 LiveFeedService.
- * 파싱은 반드시 ObjectMapper 로 — 문자열을 직접 자르면 JSON 이스케이프를
- * 몰라 제목에 큰따옴표가 든 항목이 잘려나간다.
+ * 치지직 공개 API 클라이언트. 호출과 파싱만 담당하고 캐시는 LiveFeedService 가 맡는다.
+ * 파싱은 반드시 ObjectMapper 로 — 직접 자르면 제목에 큰따옴표가 든 항목이 깨진다.
  */
 @Component
 public class ChzzkClient {
@@ -41,10 +38,7 @@ public class ChzzkClient {
     /** ObjectMapper 는 스레드 안전하므로 하나만 두고 공유한다 */
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    /**
-     * 클립 한 페이지와 다음 커서. chzzk 의 클립 페이징은 offset 이 아니라
-     * 커서라, 응답의 clipUID·readCount 를 같은 이름으로 되돌려줘야 한다.
-     */
+    /** 클립 한 페이지와 다음 커서. offset 이 아니라 clipUID·readCount 를 되돌려주는 방식이다. */
     public static final class ClipPage {
         private final List<Map<String, Object>> clips;
         private final String nextClipUID;
@@ -129,10 +123,6 @@ public class ChzzkClient {
         return (root == null) ? null : parseArray(root, this::parseVideo);
     }
 
-    // ========================================
-    // 파싱
-    // ========================================
-
     // 테스트에서 응답 조각을 직접 넣어보므로 package-private
     Map<String, Object> parseClip(JsonNode json) {
         String clipUID = text(json, "clipUID");
@@ -209,16 +199,7 @@ public class ChzzkClient {
         return (found == null || !found.isNumber()) ? "" : found.asText();
     }
 
-    // ========================================
-    // HTTP
-    // ========================================
-
-    /**
-     * API 호출. 실패하면 null.
-     *
-     * 200 이 아니어도 errorStream 을 비워야 연결이 keep-alive 풀로 돌아간다.
-     * disconnect() 는 예외로 끝났을 때만 — 정상 경로에서 부르면 재사용을 막는다.
-     */
+    /** API 호출, 실패하면 null. 스트림을 비워야 연결이 풀로 돌아간다. */
     private JsonNode fetchApi(String apiUrl) {
         HttpURLConnection conn = null;
         try {

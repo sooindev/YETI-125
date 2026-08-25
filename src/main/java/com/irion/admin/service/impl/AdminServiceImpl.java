@@ -23,8 +23,7 @@ public class AdminServiceImpl implements AdminService {
     public AdminVO login(String adminLoginId, String password) {
         AdminVO admin = adminMapper.selectAdminByLoginId(adminLoginId);
 
-        // 없는 아이디여도 검증에 드는 시간을 그대로 쓴다 — 곧장 돌아서면
-        // 응답 시간만으로 계정 존재 여부가 드러난다
+        // 없는 아이디에도 같은 시간을 쓴다 — 안 그러면 응답 시간으로 계정 존재가 드러난다
         if (admin == null) {
             PasswordUtil.matchesDummy(password);
             return null;
@@ -36,8 +35,7 @@ public class AdminServiceImpl implements AdminService {
 
         adminMapper.updateLastLoginDate(admin.getAdminId());
 
-        // 반복 횟수를 올렸으면 여기서 다시 해시한다. 원문을 아는 시점은
-        // 로그인 성공뿐이다. 실패해도 로그인은 그대로 성공시킨다
+        // 원문을 아는 시점은 로그인 성공뿐이다. 재해시에 실패해도 로그인은 성공시킨다
         if (PasswordUtil.needsUpgrade(admin.getAdminPassword())) {
             try {
                 adminMapper.updatePassword(admin.getAdminId(), PasswordUtil.encode(password));

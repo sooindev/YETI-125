@@ -30,8 +30,7 @@
   <meta name="twitter:image:alt" content="버추얼 스트리머 이리온 프로필 이미지">
 
 <jsp:include page="/WEB-INF/views/common/head-assets.jsp"/>
-  <!-- 구조화 데이터 (schema.org) — 검색엔진이 사이트의 주제와
-       인물, 페이지 관계를 이해하도록 명시한다. -->
+  <!-- 구조화 데이터 (schema.org) -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -167,17 +166,7 @@
 
   <!-- ===== Default Hero (오프라인) ===== -->
   <section id="defaultHero" class="hero">
-    <!--
-      상단 마키.
-
-      문구 사이를 넓게 띄워 한 번에 하나만 지나가게 한다. 좁게 이어 붙이면
-      같은 단어가 화면에 두세 번씩 동시에 보여 어지럽다.
-
-      트랙을 -50% 밀고 처음으로 되돌리는 방식이라 반복 횟수는 짝수여야
-      되돌아가는 순간이 눈에 띄지 않는다. 간격은 CSS 의 --marquee-gap.
-
-      장식이라 스크린 리더에는 읽히지 않게 한다.
-    -->
+    <!-- 상단 마키. 트랙을 -50% 밀었다 되돌리는 방식이라 반복 횟수는 짝수여야 한다 -->
     <div class="hero-noise-line" aria-hidden="true">
       <div class="hero-noise-track">
         <span>IRION ARCHIVE · 125 · 설녀 VTUBER · NON-COMMERCIAL FAN ARCHIVE</span>

@@ -7,18 +7,9 @@ import javax.servlet.http.HttpSession;
 
 import static org.junit.Assert.*;
 
-/**
- * 관리자 영역 CSRF 방어.
- *
- *   1. 상태를 바꾸는 메서드만 검사하고 조회는 통과시키는가
- *   2. 토큰이 없거나 틀리면 막는가
- *   3. 로그인 예외를 경로 조작으로 빌려쓸 수 없는가
- */
+/** CSRF 방어 — 상태 변경만 검사하는가, 토큰이 틀리면 막는가, 로그인 예외를 빌려쓸 수 없는가. */
 public class CsrfFilterTest {
 
-    // ========================================
-    // 검사 대상
-    // ========================================
 
     @Test
     public void 조회는_토큰_없이_통과한다() throws Exception {
@@ -99,9 +90,6 @@ public class CsrfFilterTest {
         assertEquals(403, response.status);
     }
 
-    // ========================================
-    // 로그인 예외
-    // ========================================
 
     /** 로그인 시점에는 세션이 없어 토큰을 줄 수가 없다 */
     @Test
@@ -130,9 +118,6 @@ public class CsrfFilterTest {
         assertPassed(request("/admin/schedule/../loginProc").method("POST"));
     }
 
-    // ========================================
-    // 막는 방식
-    // ========================================
 
     @Test
     public void AJAX_에는_JSON_으로_알려준다() throws Exception {

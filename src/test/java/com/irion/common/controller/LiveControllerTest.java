@@ -106,7 +106,6 @@ public class LiveControllerTest {
         assertEquals("원본을 비워도 응답이 흔들리면 안 된다", 3, list(page, "clips").size());
     }
 
-    // ── 헬퍼 ─────────────────────────────────────
 
     private static List<Map<String, Object>> items(int count) {
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();

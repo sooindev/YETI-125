@@ -20,11 +20,9 @@ public class AdminLoginInterceptor implements HandlerInterceptor {
 
         HttpSession session = request.getSession(false);
 
-        // 로그인 안 된 경우
         if (session == null || session.getAttribute("adminUser") == null) {
             logger.debug("Admin not logged in, redirecting to login page");
 
-            // AJAX 요청인 경우
             if (RequestUtil.isAjaxRequest(request)) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.setContentType("application/json;charset=UTF-8");
@@ -32,7 +30,6 @@ public class AdminLoginInterceptor implements HandlerInterceptor {
                 return false;
             }
 
-            // 일반 요청인 경우
             response.sendRedirect(request.getContextPath() + "/admin/admin-login");
             return false;
         }

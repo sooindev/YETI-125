@@ -1,6 +1,4 @@
-/* ================================================
-   Irion Fansite - Schedule Calendar (jQuery)
-   ================================================ */
+/* 방송 일정 캘린더 */
 
 let calendar;
 
@@ -9,7 +7,6 @@ $(document).ready(function() {
     loadUpcomingEvents();
 });
 
-// 캘린더 초기화
 function initCalendar() {
     const calendarEl = document.getElementById('calendar');
 
@@ -29,7 +26,6 @@ function initCalendar() {
         height: 'auto',
         dayMaxEvents: 3,
         moreLinkText: '개 더보기',
-        // 날짜 표시에서 "일" 제거
         dayCellContent: function(arg) {
             return arg.date.getDate();
         },
@@ -42,7 +38,6 @@ function initCalendar() {
         eventDidMount: function(info) {
             $(info.el).attr('title', info.event.title);
 
-            // 일정 타입에 따라 왼쪽 보더 색상 설정
             const type = info.event.extendedProps.type;
             const colors = {
                 'JUSTCHAT': '#7fb58a',
@@ -51,7 +46,6 @@ function initCalendar() {
                 'COLLAB': '#d68fb0'
             };
 
-            // 타입이 소문자로 올 수도 있으니 대문자로 변환
             const upperType = type ? type.toUpperCase() : '';
             const color = colors[upperType] || '#8c8fd6';
             info.el.style.borderLeftColor = color;
@@ -61,7 +55,6 @@ function initCalendar() {
     calendar.render();
 }
 
-// 일정 데이터 로드
 function loadSchedules(start, end, callback) {
     $.ajax({
         url: '/schedule/list',
@@ -95,12 +88,10 @@ function loadSchedules(start, end, callback) {
     });
 }
 
-// 다가오는 일정 로드
 function loadUpcomingEvents() {
     const today = new Date();
     const start = formatDateToISO(today);
 
-    // 30일 후
     const futureDate = new Date();
     futureDate.setDate(futureDate.getDate() + 30);
     const end = formatDateToISO(futureDate);
@@ -117,7 +108,6 @@ function loadUpcomingEvents() {
             if (data && data.length > 0) {
                 const now = new Date();
 
-                // 이미 지난 일정 필터링
                 const futureEvents = data.filter(function(event) {
                     const startDate = new Date(event.start);
                     const endDate = event.end ? new Date(event.end) : null;
@@ -138,12 +128,10 @@ function loadUpcomingEvents() {
                 });
 
                 if (futureEvents.length > 0) {
-                    // 시작일 기준 정렬
                     futureEvents.sort(function(a, b) {
                         return new Date(a.start) - new Date(b.start);
                     });
 
-                    // 최대 6개만 표시
                     const upcomingEvents = futureEvents.slice(0, 6);
                     renderUpcomingEvents(upcomingEvents);
                     $('#upcomingEmpty').hide();
@@ -164,17 +152,8 @@ function loadUpcomingEvents() {
     });
 }
 
-/*
- * 다가오는 일정 렌더링
- *
- * 인라인 onclick 에 값을 박아 넣지 않는다. 속성값은 브라우저가 HTML 을
- * 디코드한 뒤에야 JS 로 파싱되므로, escapeHtml 이 만든 &#039; 가 그 시점에
- * 아포스트로피로 되살아나 문자열 리터럴이 끊긴다. 제목에 ' 가 든 일정은
- * onclick 자체가 SyntaxError 라 눌러도 아무 일도 일어나지 않았다.
- *
- * 원본 이벤트는 배열에 그대로 두고 카드에는 인덱스만 남긴다. 이스케이프는
- * 화면에 글자를 찍는 순간 한 번만 한다.
- */
+// 카드에는 인덱스만 남기고 원본은 배열에 둔다. 인라인 onclick 에 값을 박으면
+// escapeHtml 이 만든 &#039; 가 되살아나 제목에 ' 가 든 일정에서 SyntaxError 가 났다.
 let upcomingEventsData = [];
 
 function renderUpcomingEvents(events) {
@@ -235,15 +214,7 @@ function openUpcomingDetail(index) {
     });
 }
 
-/*
- * 다가오는 일정을 구조화 데이터로 내보낸다.
- *
- * 일정은 DB 에서 받아 그리므로 HTML 에는 글자가 남지 않는다. 검색엔진이
- * "이리온 방송 일정" 같은 질의에서 실제 일정을 알아볼 수 있도록,
- * 받아온 뒤 schema.org/Event 를 문서에 심는다.
- *
- * 지난 일정은 넣지 않는다. 온라인 방송이므로 장소는 VirtualLocation 이다.
- */
+// 일정은 DB 에서 받아 그리므로 HTML 에 글자가 남지 않는다. 검색엔진용으로 schema.org/Event 를 심는다.
 function publishEventSchema(events) {
     const CHANNEL = 'https://chzzk.naver.com/63368ec9081dc85e61d0e4310b7e1602';
 
@@ -276,7 +247,6 @@ function publishEventSchema(events) {
     document.head.appendChild(tag);
 }
 
-// 유형별 클래스
 function getTypeClass(type) {
     switch (type) {
         case 'COLLAB': return 'type-collab';
@@ -287,7 +257,6 @@ function getTypeClass(type) {
     }
 }
 
-// 유형 이름
 function getScheduleTypeName(type) {
     switch (type) {
         case 'COLLAB': return '합방';
@@ -298,13 +267,11 @@ function getScheduleTypeName(type) {
     }
 }
 
-// 월 이름 (짧은 형식)
 function getMonthName(month) {
     const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
     return months[month];
 }
 
-// 날짜를 ISO 형식으로 변환
 function formatDateToISO(date) {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -312,7 +279,6 @@ function formatDateToISO(date) {
     return `${year}-${month}-${day}`;
 }
 
-// 시간 포맷
 function formatTime(date) {
     const hours = date.getHours();
     const minutes = String(date.getMinutes()).padStart(2, '0');
@@ -321,7 +287,6 @@ function formatTime(date) {
     return `${ampm} ${displayHours}:${minutes}`;
 }
 
-// 날짜/시간 포맷
 function formatDateTime(date) {
     if (!(date instanceof Date)) {
         date = new Date(date);
@@ -333,7 +298,6 @@ function formatDateTime(date) {
     return `${year}년 ${month}월 ${day}일 ${time}`;
 }
 
-// 날짜 포맷 (한국어)
 function formatDateKorean(date) {
     if (!(date instanceof Date)) {
         date = new Date(date);
@@ -344,12 +308,7 @@ function formatDateKorean(date) {
     return `${year}년 ${month}월 ${day}일`;
 }
 
-/*
- * 일정 상세 보기
- *
- * 상세 HTML 을 만드는 곳은 여기 하나뿐이다. 들어오는 값은 항상 원본이고,
- * 이스케이프는 이 함수 안에서만 한다. 이스케이프된 값을 다시 넘기지 말 것.
- */
+// 상세 HTML 을 만드는 유일한 곳. 들어오는 값은 항상 원본이고 이스케이프는 여기서만 한다.
 function showScheduleDetailFrom(data) {
     const typeName = getScheduleTypeName(data.type || 'STREAM');
     const description = data.description || '';
@@ -396,7 +355,6 @@ function showScheduleDetailFrom(data) {
     YetiUtil.openModal('scheduleModal');
 }
 
-// 캘린더 이벤트 클릭
 function showScheduleDetail(event) {
     showScheduleDetailFrom({
         title: event.title,
@@ -409,6 +367,4 @@ function showScheduleDetail(event) {
     });
 }
 
-// 모달을 열고 닫는 일, 바깥 클릭과 ESC 처리는 common.js (YetiUtil) 가 맡는다.
-// 예전에는 여기서 같은 이름의 전역 함수를 다시 정의해 common.js 것을
-// 덮어썼다. overflow 복원값도 '' 와 'auto' 로 서로 달랐다.
+// 모달 열고 닫기는 common.js(YetiUtil) 가 맡는다 — 여기서 같은 이름으로 다시 정의하지 말 것.

@@ -5,12 +5,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-/**
- * 정적 JS/CSS 의 Content-Type 에 charset 을 붙인다 (비-ASCII 문자 표시용).
- *
- * /resources/* 아래에는 css/js/이미지뿐이라 다른 확장자 분기는 두지 않는다.
- * 매핑을 넓히면 그때 추가할 것.
- */
+/** 정적 JS/CSS 의 Content-Type 에 charset 을 붙인다. /resources/* 에는 css/js/이미지뿐이다. */
 public class StaticResourceEncodingFilter implements Filter {
 
     @Override

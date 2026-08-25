@@ -7,13 +7,7 @@ import java.security.SecureRandom;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-/**
- * CSRF 토큰 발급/검증.
- *
- * 로그인할 때 세션에 심고, 화면은 /admin/csrf-token 으로 받아 상태를 바꾸는
- * 요청마다 X-CSRF-Token 헤더에 싣는다. 응답 본문은 동일 출처 정책 때문에
- * 다른 사이트에서 읽을 수 없다.
- */
+/** CSRF 토큰. 로그인 때 세션에 심고, 화면이 /admin/csrf-token 으로 받아 헤더에 싣는다. */
 public final class CsrfTokens {
 
     public static final String SESSION_KEY = "csrfToken";

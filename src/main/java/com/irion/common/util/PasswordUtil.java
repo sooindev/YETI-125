@@ -10,13 +10,9 @@ import java.security.SecureRandom;
 import java.util.Base64;
 
 /**
- * 비밀번호 해시 (PBKDF2-HMAC-SHA256).
+ * 비밀번호 해시 (PBKDF2-HMAC-SHA256). 포맷: {@code pbkdf2$<반복>$<salt>$<hash>}
  *
- * 저장 포맷: {@code pbkdf2$<반복횟수>$<salt(Base64)>$<hash(Base64)>}
- *
- * 옛 형식(salt:hash, SHA-256 1회)은 더 이상 검증하지 않는다. 옛 해시가 담긴
- * 백업을 되살리면 그 계정은 로그인할 수 없으니, {@link #main} 으로 해시를
- * 새로 만들어 tb_admin.admin_password 에 넣어야 한다.
+ * 옛 형식(salt:hash)은 검증하지 않는다 — 옛 백업을 되살리면 {@link #main} 으로 해시를 새로 넣어야 한다.
  */
 public class PasswordUtil {
 
@@ -70,8 +66,7 @@ public class PasswordUtil {
                 return MessageDigest.isEqual(expected, pbkdf2(rawPassword, salt, iterations));
             }
 
-            // 아는 형식이 아니다. 화면에는 "비밀번호가 틀렸다" 로만 보이므로
-            // 진짜 원인(옛 형식 해시)을 로그로 남긴다
+            // 화면에는 "비밀번호가 틀렸다" 로만 보이므로 진짜 원인을 로그에 남긴다
             logger.error("Unsupported password hash format in storage — "
                     + "expected the pbkdf2$ prefix. Re-issue the hash with PasswordUtil.main");
 
@@ -83,12 +78,7 @@ public class PasswordUtil {
         }
     }
 
-    /**
-     * 없는 계정에도 검증과 같은 시간을 쓴다. 언제나 false.
-     *
-     * 건너뛰면 있는 아이디 ~100ms, 없는 아이디 ~1ms 로 갈려서
-     * 응답 시간만으로 계정 존재 여부가 드러난다.
-     */
+    /** 없는 계정에도 같은 시간을 쓴다(언제나 false). 안 하면 응답 시간으로 계정 존재가 드러난다. */
     public static boolean matchesDummy(String rawPassword) {
         return matches(rawPassword, DUMMY_HASH);
     }
@@ -100,10 +90,7 @@ public class PasswordUtil {
         return encode(Base64.getEncoder().encodeToString(random));
     }
 
-    /**
-     * 다시 해시해서 저장해야 하는가. ITERATIONS 를 올리면 기존 해시가 전부 걸린다.
-     * 원문을 아는 시점은 로그인 성공뿐이라 호출부가 그 자리에서 저장한다.
-     */
+    /** 다시 해시해야 하는가. 원문을 아는 시점은 로그인 성공뿐이라 호출부가 그 자리에서 저장한다. */
     public static boolean needsUpgrade(String encodedPassword) {
         if (encodedPassword == null || !encodedPassword.startsWith(PREFIX_PBKDF2)) {
             return true;

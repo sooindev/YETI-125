@@ -109,10 +109,7 @@
       <div class="profile-hero-grid">
 
         <div class="profile-portrait">
-          <!-- 이 이미지만 width/height 를 붙이지 않는다.
-               .profile-portrait img 가 aspect-ratio: 4/5 로 자리를 이미 잡아두는데,
-               속성으로 height 를 주면 그 값이 이겨서 882px 짜리 세로로 늘어난다.
-               (원본은 882x882 정사각이고 object-fit: cover 로 잘라 쓴다) -->
+          <!-- 이 이미지만 width/height 를 붙이지 않는다 — CSS 의 aspect-ratio 를 속성값이 이겨버린다 -->
           <img src="/resources/images/Irion-profile.jpg" alt="이리온">
           <span class="portrait-tag idx">FILE / IRION-125</span>
         </div>

@@ -6,20 +6,11 @@ import javax.servlet.http.HttpSession;
 
 import static org.junit.Assert.*;
 
-/**
- * 관리자 영역 인증 필터.
- *
- *   1. 공개 경로 세 개만 열려 있고 나머지는 세션을 요구하는가
- *   2. 경로를 비틀어 공개 경로처럼 보이게 만들 수 없는가
- *   3. 막을 때 AJAX 에는 401, 브라우저에는 리다이렉트를 주는가
- */
+/** 관리자 인증 필터 — 공개 경로만 열려 있는가, 경로를 비틀어 뚫을 수 없는가, 막는 방식이 맞는가. */
 public class AdminLoginFilterTest {
 
     private static final String LOGIN_PAGE = "/admin/admin-login";
 
-    // ========================================
-    // 공개 경로
-    // ========================================
 
     @Test
     public void 로그인_페이지는_세션_없이_열린다() throws Exception {
@@ -43,9 +34,6 @@ public class AdminLoginFilterTest {
         assertPassed(request("/live/status").ajax(), null);
     }
 
-    // ========================================
-    // 보호 경로
-    // ========================================
 
     @Test
     public void 세션이_없으면_로그인_화면으로_보낸다() throws Exception {
@@ -79,16 +67,8 @@ public class AdminLoginFilterTest {
         assertEquals("컨텍스트 경로를 붙여 돌려보내야 한다", "/yeti" + LOGIN_PAGE, response.redirect);
     }
 
-    // ========================================
-    // 경로를 비틀어 들어오는 요청
-    // ========================================
 
-    /**
-     * 아래 경로들이 컨테이너에서 실제로 매핑되는 대상은 admin-schedule.html 이다.
-     *
-     * 정규화된 경로를 보는지, 화이트리스트를 정확히 일치로 따지는지 둘 다 본다.
-     * 부분 문자열 판정으로 되돌리면 6개, 정규화만 빼면 2개가 깨진다.
-     */
+    /** 정규화된 경로를 보는지, 화이트리스트를 정확히 일치로 따지는지 둘 다 본다. */
     @Test
     public void 상위_경로_기호로_우회할_수_없다() throws Exception {
         assertBlocked("/admin/loginProc/../admin-schedule.html");
@@ -120,9 +100,6 @@ public class AdminLoginFilterTest {
         assertBlocked("/admin/loginProc/extra");
     }
 
-    // ========================================
-    // 막는 방식
-    // ========================================
 
     /** jQuery 가 302 를 따라가 200 을 받으면 화면은 세션이 끊긴 것을 모른다 */
     @Test

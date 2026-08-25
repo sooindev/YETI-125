@@ -1,13 +1,5 @@
 <%@ page pageEncoding="UTF-8" %>
-<%--
-  공개 페이지 상단바.
-
-  지금 보고 있는 페이지는 active 파라미터로 알린다 — index / schedule / info.
-
-    <jsp:include page="/WEB-INF/views/common/header.jsp">
-      <jsp:param name="active" value="schedule"/>
-    </jsp:include>
---%>
+<%-- 공개 페이지 상단바. 지금 페이지는 active 파라미터로 알린다 — index / schedule / info --%>
 <header class="header">
   <div class="header-inner">
     <a href="/" class="logo">

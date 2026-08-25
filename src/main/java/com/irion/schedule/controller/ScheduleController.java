@@ -44,7 +44,6 @@ public class ScheduleController {
         return events;
     }
 
-    /** 일정 상세 조회 */
     @GetMapping("/{scheduleId}")
     @ResponseBody
     public JsonResult getSchedule(@PathVariable Long scheduleId) {

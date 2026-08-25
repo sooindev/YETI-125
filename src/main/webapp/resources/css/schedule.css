@@ -1,12 +1,8 @@
-/* ============================================================
-   YETI-125 — Schedule page
-   ============================================================ */
+/* YETI-125 — Schedule page */
 
 main { padding-top: var(--head-total); }
 
-/* ============================================================
-   Page masthead
-   ============================================================ */
+/* Page masthead */
 .page-masthead {
     padding: clamp(56px, 9vw, 130px) 0 clamp(36px, 5vw, 64px);
     border-bottom: 1px solid var(--ink-line);
@@ -44,9 +40,7 @@ main { padding-top: var(--head-total); }
     word-break: keep-all;
 }
 
-/* ============================================================
-   Schedule grid — calendar (7) + upcoming rail (5)
-   ============================================================ */
+/* Schedule grid — calendar (7) + upcoming rail (5) */
 .sched-grid {
     display: grid;
     grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr);
@@ -67,9 +61,7 @@ main { padding-top: var(--head-total); }
     min-width: 0;
 }
 
-/* ============================================================
-   Legend
-   ============================================================ */
+/* Legend */
 .legend {
     display: flex;
     align-items: center;
@@ -98,10 +90,7 @@ main { padding-top: var(--head-total); }
     display: block;
 }
 
-/* ============================================================
-   FullCalendar theme override
-   Recolour the lib to the ink/frost system.
-   ============================================================ */
+/* FullCalendar 테마 덮어쓰기 — ink/frost 토큰으로 다시 칠한다 */
 .calendar-wrapper {
     --fc-border-color: var(--ink-line);
     --fc-page-bg-color: transparent;
@@ -272,12 +261,7 @@ main { padding-top: var(--head-total); }
     color: var(--bone-dim);
 }
 
-/* ============================================================
-   Upcoming list
-   JS renders: .upcoming-item > .upcoming-date(.upcoming-month,
-   .upcoming-day) + .upcoming-info(.upcoming-type.type-*,
-   .upcoming-item-title, .upcoming-time)
-   ============================================================ */
+/* 다가오는 일정 목록 — schedule.js 가 그린다 */
 .upcoming-head { margin-bottom: 28px; }
 .upcoming-head .kicker { margin-bottom: 14px; }
 .upcoming-title {
@@ -380,12 +364,7 @@ main { padding-top: var(--head-total); }
     color: var(--bone-dim);
 }
 
-/* ============================================================
-   Detail modal content
-   JS renders: .detail-header(.detail-color,.detail-title) +
-   .detail-row(.detail-icon,.detail-content(.detail-label,
-   .detail-value))
-   ============================================================ */
+/* 상세 모달 내용 — schedule.js 가 그린다 */
 #scheduleDetail { padding: 36px 30px 30px; }
 
 .detail-header {
@@ -430,9 +409,7 @@ main { padding-top: var(--head-total); }
     line-height: 1.6;
 }
 
-/* ============================================================
-   Responsive
-   ============================================================ */
+/* Responsive */
 @media (max-width: 920px) {
     .masthead-grid { grid-template-columns: 1fr; gap: 28px; }
     .masthead-aside {
@@ -452,9 +429,7 @@ main { padding-top: var(--head-total); }
 @media (max-width: 560px) {
     .page-masthead { padding: 36px 0 24px; }
 
-    /* 칸 폭이 40px 남짓이라 시간·제목이 칸 밖으로 새어나간다. 좁은 화면에서는
-       유형 색 막대로만 표시하고, 자세한 내용은 날짜를 눌러 모달에서 본다.
-       (색은 .fc-daygrid-event-dot 의 인라인 border-color 에 들어 있다) */
+    /* 칸 폭이 40px 남짓이라 유형 색 막대로만 표시한다 (색은 dot 의 인라인 border-color) */
     .fc-daygrid-event .fc-event-time,
     .fc-daygrid-event .fc-event-title,
     .fc-daygrid-event .fc-event-title-container { display: none; }

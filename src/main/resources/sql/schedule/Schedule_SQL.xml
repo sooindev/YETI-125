@@ -90,13 +90,7 @@
     </insert>
 
     <!-- 일정 수정 -->
-    <!--
-      일정 수정
-
-      display_yn 만 값이 실려 왔을 때만 덮어쓴다. 나머지는 빠지면 서비스가
-      기본값을 채우지만, 공개 여부는 기본값을 정할 수가 없다 — 'Y' 면 숨겨둔
-      일정이 공개되고 'N' 이면 공개하던 일정이 사라진다.
-    -->
+    <!-- display_yn 은 값이 실려 왔을 때만 덮어쓴다 — 기본값을 정하면 숨긴 일정이 공개되거나 그 반대가 된다 -->
     <update id="updateSchedule" parameterType="ScheduleVO">
         UPDATE tb_schedule
         <set>

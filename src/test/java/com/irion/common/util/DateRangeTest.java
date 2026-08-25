@@ -7,12 +7,7 @@ import java.util.Date;
 
 import static org.junit.Assert.*;
 
-/**
- * 조회 기간 상한.
- *
- * 예전에는 start / end 를 그대로 SQL 로 내려보내서, 요청 한 줄로 100년치를
- * 훑게 만들 수 있었다.
- */
+/** 조회 기간 상한. 전에는 요청 한 줄로 100년치를 훑게 만들 수 있었다. */
 public class DateRangeTest {
 
     @Test

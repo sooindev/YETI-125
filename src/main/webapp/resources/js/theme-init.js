@@ -1,9 +1,5 @@
 /**
- * First-paint init — <head>에서 동기로 로드된다.
- *
- *   1. 테마: data-theme 확정 (고른 모드 → 시스템 설정 → 라이트)
- *   2. 폰트: 문 인트로 텍스트를 폰트가 준비될 때까지 미룸
- *
+ * 첫 페인트 전에 도는 초기화 — 테마 확정과 폰트 대기. <head>에서 동기로 로드된다.
  * 다른 스크립트는 </body> 앞이라 첫 페인트 뒤에 실행돼 이 일을 못 맡는다.
  */
 (function () {
@@ -12,20 +8,11 @@
     var KEY = 'yeti-theme';
     var root = document.documentElement;
 
-    /*
-     * 모드와 테마는 다른 값이다.
-     *
-     *   모드  = 사용자가 고른 것    — system | light | dark
-     *   테마  = 지금 화면에 칠한 색 — light | dark
-     *
-     * system 모드에서는 둘이 갈린다. OS 가 다크면 테마는 dark 지만
-     * 모드는 여전히 system 이다. 버튼 아이콘은 모드를, <html> 은
-     * 테마를 따라간다.
-     */
+    // 모드(고른 것: system|light|dark)와 테마(칠한 색: light|dark)는 다르다.
+    // 버튼 아이콘은 모드를, <html> 은 테마를 따라간다.
     var MODES = ['system', 'light', 'dark'];
 
-    // 저장값이 없으면 시스템을 따른다. light/dark 만 저장하므로
-    // 예전에 테마를 골라둔 방문자의 값도 그대로 유효하다.
+    // 저장값이 없으면 시스템을 따른다. 예전 방문자의 light/dark 값도 그대로 유효하다.
     function storedMode() {
         try {
             var v = localStorage.getItem(KEY);
@@ -75,16 +62,8 @@
     // 첫 페인트 전에 확정
     apply(storedMode());
 
-    /*
-     * 폰트 준비 표시.
-     *
-     * .door-title 은 최대 304px 이라 폰트가 바뀌는 것이 그대로 보인다.
-     * 폭은 common.css 의 size-adjust 로 맞춰뒀지만 글자 모양까지 같지는 않다.
-     * 문이 닫혀 있는 동안이므로 텍스트만 미룬다 — 문짝은 곧바로 그려진다.
-     *
-     * 기다리는 대상은 Anton + JetBrains Mono(합쳐서 1.1KB)뿐이다.
-     * Noto Sans KR(90.8KB)까지 기다리면 문이 늦게 열린다.
-     */
+    // 인트로 텍스트만 폰트를 기다린다. 대상은 Anton + JetBrains Mono(1.1KB)뿐 —
+    // Noto Sans KR(90.8KB)까지 기다리면 문이 늦게 열린다.
     var FONTS_TIMEOUT_MS = 1500;
     var fontsSettled = false;
 
@@ -100,8 +79,7 @@
     // 폰트 서버가 막히면 영영 오지 않는다
     setTimeout(fontsReady, FONTS_TIMEOUT_MS);
 
-    // @font-face 는 스타일시트 파싱 뒤에 등록된다. 그전에 물어보면
-    // "기다릴 폰트가 없다" 는 답이 돌아온다
+    // @font-face 는 스타일시트 파싱 뒤에 등록된다 — 그전에 물으면 "없다" 는 답이 온다
     document.addEventListener('DOMContentLoaded', function () {
         if (!document.fonts || !document.fonts.load) {
             fontsReady();

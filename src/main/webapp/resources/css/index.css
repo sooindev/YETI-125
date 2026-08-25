@@ -1,13 +1,8 @@
-/* ============================================================
-   YETI-125 — Index page
-   ============================================================ */
+/* YETI-125 — Index page */
 
 main { padding-top: var(--head-total); }
 
-/* ============================================================
-   Hero — offline state
-   12-col asymmetric: oversized wordmark + status rail
-   ============================================================ */
+/* Hero — offline state — 12-col asymmetric: oversized wordmark + status rail */
 .hero {
     position: relative;
     min-height: calc(100vh - var(--head-total));
@@ -18,24 +13,9 @@ main { padding-top: var(--head-total); }
     overflow: hidden;
 }
 
-/* ------------------------------------------------------------
-   marquee strip across the top of the hero
-
-   바깥(.hero-noise-line)이 화면 폭 전체를 차지하는 창이고,
-   안쪽(.hero-noise-track)이 그 뒤로 흘러가는 띠다.
-
-   예전에는 창 없이 문구 하나에 바로 애니메이션을 걸었다. 그러면 요소
-   폭이 글자 폭(654px)에 그쳐 화면의 왼쪽 45%에만 머물고, -50%(327px)
-   만큼 밀렸다가 제자리로 튀었다. -50% 는 내용을 복제해 뒀을 때 쓰는
-   방식이라 복제가 없으면 성립하지 않는다.
-   ------------------------------------------------------------ */
+/* 히어로 상단 흐르는 띠 — 바깥(.hero-noise-line)이 창, 안쪽(.hero-noise-track)이 흘러가는 띠다 */
 .hero-noise-line {
-    /*
-      문구 사이 간격.
-
-      화면 폭에 비례시킨다. 고정값으로 두면 넓은 화면에서 문구가 두 개씩
-      들어차 다시 빽빽해진다. 어느 폭에서든 한 번에 하나 남짓만 보이도록.
-    */
+    /* 문구 간격은 화면 폭에 비례 — 고정값이면 넓은 화면에서 두 개씩 들어찬다 */
     --marquee-gap: clamp(160px, 52vw, 1400px);
 
     position: absolute;
@@ -180,9 +160,7 @@ main { padding-top: var(--head-total); }
     width: 100%;
 }
 
-/* ============================================================
-   Live hero — shown when broadcasting
-   ============================================================ */
+/* Live hero — shown when broadcasting */
 .live-hero {
     padding: clamp(48px, 7vw, 110px) 0;
     border-bottom: 1px solid var(--ink-line);
@@ -254,9 +232,7 @@ main { padding-top: var(--head-total); }
 .live-thumb:hover .live-thumb-cta { opacity: 1; transform: translateY(0); }
 .play-icon { font-size: 0.7rem; }
 
-/* ============================================================
-   Section heading flip variant
-   ============================================================ */
+/* Section heading flip variant */
 .sec-head--flip {
     grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
     direction: rtl;
@@ -264,13 +240,7 @@ main { padding-top: var(--head-total); }
 .sec-head--flip > * { direction: ltr; }
 .sec-head--flip .sec-head__aside { text-align: left; justify-self: start; }
 
-/* ============================================================
-   Media cards — clips & videos
-   Uniform 3-column grid for steady, readable scanning.
-   JS renders: a.clip-card > .clip-thumbnail(img,.clip-duration,
-   .clip-play-overlay>.clip-play-icon) + .clip-info(.clip-title,
-   .clip-meta>.clip-meta-item)  — same shape for .video-*
-   ============================================================ */
+/* 미디어 카드 — 클립·다시보기 공통. 균일한 3열 그리드 */
 .card-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -412,9 +382,7 @@ main { padding-top: var(--head-total); }
     margin-top: 32px;
 }
 
-/* ============================================================
-   Community slab
-   ============================================================ */
+/* Community slab */
 .community-slab {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -465,9 +433,7 @@ main { padding-top: var(--head-total); }
 }
 .community-slab:hover .btn-arrow { transform: translateX(4px); }
 
-/* ============================================================
-   Link list — channels & links
-   ============================================================ */
+/* Link list — channels & links */
 .link-list { list-style: none; }
 .link-list li { border-top: 1px solid var(--ink-line); }
 .link-list li:last-child { border-bottom: 1px solid var(--ink-line); }
@@ -513,9 +479,7 @@ main { padding-top: var(--head-total); }
     transform: translate(3px, -3px);
 }
 
-/* ============================================================
-   Responsive
-   ============================================================ */
+/* Responsive */
 @media (max-width: 900px) {
     .hero-grid { grid-template-columns: 1fr; gap: 36px; }
     .hero-side {
@@ -548,11 +512,7 @@ main { padding-top: var(--head-total); }
     .card-grid { grid-template-columns: 1fr; }
 }
 
-/* ============================================================
-   Clip modal — 치지직 공식 임베드 플레이어
-   카드를 누르면 치지직으로 나가지 않고 이 안에서 재생한다.
-   iframe은 16:9 슬롯을 그대로 채우고, 원본 링크만 밖으로 남긴다.
-   ============================================================ */
+/* 클립 모달 — 치지직 공식 임베드로 사이트 안에서 재생 */
 .clip-modal-content {
     max-width: 880px;
     padding: 18px;
@@ -597,10 +557,7 @@ main { padding-top: var(--head-total); }
 .clip-modal-origin:hover { color: var(--frost-deep); }
 .clip-modal-origin:hover .btn-arrow { transform: translateX(4px); }
 
-/* ---- 터치 기기 -------------------------------------------------
-   폭이 아니라 포인터로 가른다. 가로로 눕힌 폰은 폭이 800px을 넘어
-   좁은 화면 쿼리를 벗어나지만, 누르는 것은 여전히 손가락이다.
-   ----------------------------------------------------------------- */
+/* ---- 터치 기기 — 폭이 아니라 포인터로 가른다 (눕힌 폰은 폭이 800px 을 넘는다) ---- */
 @media (pointer: coarse) {
     .clip-modal-title {
         /* 긴 제목은 두 줄에서 자른다 — 세 줄이 되면 플레이어가 밀려난다 */
@@ -629,10 +586,7 @@ main { padding-top: var(--head-total); }
     }
 }
 
-/* ---- 좁은 화면 --------------------------------------------------
-   데스크톱 대화상자를 그대로 줄이면 여백만 남고 플레이어가 손톱만
-   해진다. 여백보다 화면 크기를 우선한다.
-   ----------------------------------------------------------------- */
+/* ---- 좁은 화면 — 여백보다 플레이어 크기를 우선한다 ---- */
 @media (max-width: 720px) {
     /* 바깥 거터(--gutter 최소 20px)를 줄여 폭을 플레이어에 몰아준다 */
     #clipModal { padding: 10px; }
@@ -649,10 +603,7 @@ main { padding-top: var(--head-total); }
     #clipModal .modal-close { top: 8px; right: 8px; }
 }
 
-/* ---- 눕힌 화면 --------------------------------------------------
-   16:9 슬롯에 제목과 링크까지 얹으면 세로를 넘긴다. 비율을 풀고
-   높이를 화면에 맞춘다. 남는 폭은 플레이어가 레터박스한다.
-   ----------------------------------------------------------------- */
+/* ---- 눕힌 화면 — 16:9 를 풀고 높이를 화면에 맞춘다 ---- */
 @media (max-height: 520px) and (orientation: landscape) {
     #clipModal { padding: 8px; }
     .clip-modal-content { padding: 10px; gap: 8px; }
@@ -675,11 +626,7 @@ main { padding-top: var(--head-total); }
     }
 }
 
-/* ============================================================
-   Leave modal — 다시보기는 치지직으로 나간다
-   클립과 달리 임베드 경로가 없어 사이트 안에서 재생할 수 없다.
-   나가기 전에 어디로 가는지 알리고 한 번 물어본다.
-   ============================================================ */
+/* 이동 확인 모달 — 다시보기는 임베드 경로가 없어 치지직으로 나간다 */
 .leave-modal-content {
     max-width: 460px;
     padding: 26px;
@@ -783,9 +730,7 @@ main { padding-top: var(--head-total); }
     color: var(--frost-deep);
     border-color: var(--frost);
 }
-/* hidden 속성은 브라우저 기본 스타일시트의 [hidden]{display:none} 으로
-   동작한다. 위에서 display 를 지정하는 순간 작성자 규칙이 이겨서
-   숨김이 풀린다. 여기서 명시적으로 다시 눌러준다. */
+/* 위에서 display 를 지정하면 [hidden] 기본 규칙을 이겨 숨김이 풀린다 — 다시 눌러준다 */
 .aside-restore[hidden] { display: none; }
 /* 머리말이 우측 정렬이라 각주도 같은 모서리에 붙인다 */
 .sec-head__aside .aside-restore { margin-left: auto; }

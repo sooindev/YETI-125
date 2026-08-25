@@ -14,12 +14,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
-/**
- * 치지직 목록의 캐시 계층.
- *
- * ChzzkClient 가 가져온 것을 담아두고, 만료되면 한 스레드만 갱신한다.
- * 컨트롤러는 여기서 받은 목록을 잘라 응답으로 만들기만 한다.
- */
+/** 치지직 목록 캐시. 만료되면 한 스레드만 갱신한다. */
 @Service
 public class LiveFeedService {
 
@@ -33,10 +28,7 @@ public class LiveFeedService {
     // 다시보기 — 현재 18개뿐이지만 쌓이면 한 페이지를 넘는다
     private static final int VIDEO_MAX_PAGES = 20;
 
-    /**
-     * 다시보기에서 감출 항목. 제목은 바뀔 수 있으므로 videoNo 로 거른다.
-     * 이 사이트에서만 숨기는 것이고 치지직에는 그대로 남아 있다.
-     */
+    /** 이 사이트에서만 감출 다시보기. 제목은 바뀌므로 videoNo 로 거른다. */
     private static final Set<String> HIDDEN_VIDEO_NOS = Collections.unmodifiableSet(
             new HashSet<String>(Arrays.asList(
                     "319019" // 이리온의 재채기.mp4 (2024-02-29)
@@ -45,10 +37,7 @@ public class LiveFeedService {
     @Autowired
     private ChzzkClient chzzk;
 
-    // 캐시
-    // 이 빈은 싱글턴이라 여러 요청 스레드가 동시에 접근한다.
-    // 값과 적재 시각을 스냅샷 하나로 묶어 참조만 교체하고, 갱신은
-    // 락으로 한 스레드에만 맡긴다. (아래 cached() 참고)
+    // 싱글턴이라 여러 스레드가 함께 쓴다. 참조만 교체하고 갱신은 락으로 한 스레드에만 맡긴다.
     private final AtomicReference<Snapshot<Map<String, Object>>> liveStatusCache = new AtomicReference<>();
     private final AtomicReference<Snapshot<ClipFeed>> clipsCache = new AtomicReference<>();
     private final AtomicReference<Snapshot<List<Map<String, Object>>>> videosCache = new AtomicReference<>();
@@ -57,18 +46,10 @@ public class LiveFeedService {
     private final Object clipsLock = new Object();
     private final Object videosLock = new Object();
 
-    /**
-     * 지금 클립을 이어 받는 중인가.
-     *
-     * 확장은 외부 API 를 최대 10회 부르므로 락을 쥔 채로 하면 한 스레드가
-     * 수십 초간 락을 잡는다. 락 밖에서 하고, 이미 받아오는 중이면 다른
-     * 스레드는 기다리지 않고 지금 있는 만큼만 받아간다.
-     */
+    /** 클립을 이어 받는 중인가. 확장은 락 밖에서 하고, 겹치면 있는 만큼만 준다. */
     private final AtomicBoolean clipsExtending = new AtomicBoolean(false);
 
-    /**
-     * 클립 목록 조각과 다음 커서. chzzk 의 클립 페이징은 offset 이 아니라 커서다.
-     */
+    /** 클립 조각과 다음 커서. chzzk 의 클립 페이징은 offset 이 아니라 커서다. */
     public static final class ClipFeed {
         private final List<Map<String, Object>> clips;
         private final String nextClipUID;
@@ -88,24 +69,18 @@ public class LiveFeedService {
             return nextClipUID != null && !nextClipUID.isEmpty();
         }
 
-        /** 아직 더 받아올 여지가 있는가 — 커서가 남았고 상한에도 닿지 않았다 */
+        /** 커서가 남았고 상한에도 닿지 않았는가 */
         public boolean canGrow() {
             return hasNext() && clips.size() < CLIP_MAX;
         }
     }
-
-    // ========================================
-    // 조회
-    // ========================================
 
     /** 방송 상태. 못 가져오면 null. */
     public Map<String, Object> getLiveStatus() {
         return cached(liveStatusCache, liveStatusLock, LIVE_CACHE_DURATION, chzzk::fetchLiveStatus);
     }
 
-    /**
-     * 클립 목록을 need 개까지 채워서 돌려준다. 못 가져오면 null.
-     */
+    /** 클립을 need 개까지 채워서 돌려준다. 못 가져오면 null. */
     public ClipFeed getClips(int need) {
         ClipFeed feed = cached(clipsCache, clipsLock, CACHE_DURATION, this::loadClips);
         return (feed == null) ? null : extendClips(feed, need);
@@ -116,24 +91,16 @@ public class LiveFeedService {
         return cached(videosCache, videosLock, CACHE_DURATION, this::loadVideos);
     }
 
-    // ========================================
-    // 적재
-    // ========================================
-
     /** 인기 클립 첫 묶음 로드 */
     private ClipFeed loadClips() {
         ClipFeed feed = new ClipFeed(new ArrayList<Map<String, Object>>(), null, null);
         feed = fetchMoreClips(feed, CLIP_INITIAL_PAGES);
 
-        // 한 건도 못 모았으면 API 장애로 보고 실패를 알린다.
-        // (빈 목록을 캐시해 두면 장애가 10분간 굳어버린다)
+        // 빈 목록을 캐시하면 장애가 10분간 굳는다
         return feed.clips.isEmpty() ? null : feed;
     }
 
-    /**
-     * 캐시 목록을 need 개까지 늘린다. 늘리는 동안 적재 시각을 새로 찍어,
-     * 더보기를 누르는 사이에 TTL 이 끝나 처음부터 다시 쌓이는 일을 막는다.
-     */
+    /** need 개까지 늘린다. 적재 시각을 새로 찍어 더보기 도중 TTL 만료를 막는다. */
     private ClipFeed extendClips(ClipFeed feed, int need) {
         if (feed.clips.size() >= need || !feed.hasNext() || feed.clips.size() >= CLIP_MAX) {
             return feed;
@@ -166,8 +133,7 @@ public class LiveFeedService {
                 Snapshot<ClipFeed> snapshot = clipsCache.get();
                 ClipFeed current = (snapshot != null) ? snapshot.value : null;
 
-                // 받아오는 사이 다른 스레드가 목록을 다시 쌓았으면 우리 커서는
-                // 지난 세대라 이어 붙일 수 없다. 새 것을 두고 우리 결과는 버린다
+                // 받는 사이 목록이 다시 쌓였으면 우리 커서는 지난 세대다
                 if (current != null && current != base) {
                     return current;
                 }
@@ -224,10 +190,7 @@ public class LiveFeedService {
         return new ClipFeed(clips, uid, readCount);
     }
 
-    /**
-     * 다시보기 로드. 한 페이지(50개)에 맞춰두면 쌓였을 때 조용히 잘리므로
-     * 페이지가 빌 때까지 이어 받는다.
-     */
+    /** 다시보기 로드. 한 페이지에 맞추면 쌓였을 때 잘리므로 빌 때까지 이어 받는다. */
     private List<Map<String, Object>> loadVideos() {
         List<Map<String, Object>> videos = new ArrayList<Map<String, Object>>();
         Set<String> ids = new HashSet<String>();
@@ -255,14 +218,7 @@ public class LiveFeedService {
         return videos.isEmpty() ? null : videos;
     }
 
-    // ========================================
-    // 캐시
-    // ========================================
-
-    /**
-     * 값과 적재 시각을 함께 담는 불변 스냅샷. 각각 필드로 두면
-     * "새 값 + 옛 시각" 같은 어긋난 조합이 잠깐 보인다.
-     */
+    /** 값과 적재 시각을 함께 담는다. 따로 두면 "새 값 + 옛 시각" 조합이 보인다. */
     private static final class Snapshot<T> {
         final T value;
         final long loadedAt;
@@ -277,13 +233,7 @@ public class LiveFeedService {
         }
     }
 
-    /**
-     * 캐시에서 읽되 만료됐으면 갱신한다.
-     *
-     * 갱신은 락으로 묶어 한 스레드만 수행하므로, 만료 순간 요청이 몰려도
-     * 외부 API 는 한 번만 호출된다. 갱신에 실패하면 만료된 값이라도 돌려준다
-     * — 외부 API 가 흔들려도 화면이 비지 않게. 값이 아예 없을 때만 null.
-     */
+    /** 만료면 갱신한다. 갱신은 한 스레드만, 실패하면 만료된 값이라도 돌려준다. */
     private <T> T cached(AtomicReference<Snapshot<T>> ref, Object lock,
                          long ttl, Supplier<T> loader) {
 
@@ -293,7 +243,7 @@ public class LiveFeedService {
         }
 
         synchronized (lock) {
-            // 락을 기다리는 동안 다른 스레드가 이미 갱신했을 수 있다
+            // 기다리는 동안 다른 스레드가 갱신했을 수 있다
             snapshot = ref.get();
             if (snapshot != null && snapshot.isFresh(ttl)) {
                 return snapshot.value;

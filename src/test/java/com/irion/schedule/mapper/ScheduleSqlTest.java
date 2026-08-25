@@ -16,13 +16,7 @@ import java.util.Date;
 
 import static org.junit.Assert.*;
 
-/**
- * 매퍼 XML 이 만들어내는 SQL 문장.
- *
- * updateSchedule 의 display_yn 조건이 잘못 짜이면 SET 절에 쉼표가 남거나
- * 컬럼이 그대로 들어간다. 서비스 계층 테스트는 매퍼가 가짜라 잡지 못한다.
- * DB 없이 XML 만 읽혀 생성된 문장을 직접 본다.
- */
+/** 매퍼 XML 이 만드는 SQL 문장. 서비스 테스트는 매퍼가 가짜라 못 잡아 DB 없이 문장만 본다. */
 public class ScheduleSqlTest {
 
     private static final String NS = "com.irion.schedule.mapper.ScheduleMapper.";
@@ -107,7 +101,6 @@ public class ScheduleSqlTest {
         assertTrue(sql.contains("del_yn = 'Y'"));
     }
 
-    // ========================================
 
     private static String updateSql(ScheduleVO schedule) {
         return normalize(sqlOf("updateSchedule", schedule));

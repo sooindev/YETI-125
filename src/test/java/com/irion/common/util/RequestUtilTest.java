@@ -11,12 +11,7 @@ import java.util.Map;
 
 import static org.junit.Assert.*;
 
-/**
- * 경로 정규화 / AJAX 판정.
- *
- * 예전 필터는 uri.contains("/admin/login") 으로 공개 경로를 가렸다.
- * getRequestURI() 는 정규화 전 원본이라 아래 케이스들이 뚫렸다.
- */
+/** 경로 정규화 / AJAX 판정. getRequestURI() 는 정규화 전 원본이라 contains 판정은 뚫린다. */
 public class RequestUtilTest {
 
     @Test
@@ -61,7 +56,6 @@ public class RequestUtilTest {
         assertEquals("/", RequestUtil.normalizedPath(request("/", "")));
     }
 
-    // ── AJAX 판정 ────────────────────────────────
 
     @Test
     public void X_Requested_With_를_본다() {
@@ -99,7 +93,6 @@ public class RequestUtilTest {
                 request("/admin/admin-schedule.html", "", new HashMap<String, String>(), null)));
     }
 
-    // ── 헬퍼 ─────────────────────────────────────
 
     private static HttpServletRequest request(String uri, String contextPath) {
         return request(uri, contextPath, new HashMap<String, String>(), null);
