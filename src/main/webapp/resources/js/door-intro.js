@@ -48,8 +48,6 @@
 
             intro.classList.add('opening');
 
-            playDoorSound();
-
             setTimeout(function() {
                 intro.classList.add('fading');
                 rememberIntroShown();
@@ -87,7 +85,4 @@
             }
         });
     });
-
-    function playDoorSound() {
-    }
 })();

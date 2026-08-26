@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  테스트 전용 로그 설정. logback 은 클래스패스에 이 파일이 있으면 logback.xml 대신 쓴다.
+
+  운영 설정(src/main/resources/logback.xml)은 파일로도 남기는데, 그 경로가
+  ${catalina.base:-.}/logs 라서 톰캣 밖에서 돌리면 프로젝트 폴더에 logs/ 가 생겼다.
+  테스트는 화면에만 찍고 파일은 남기지 않는다.
+-->
+<configuration>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- 실패를 볼 수 있을 만큼만. 정상 동작까지 찍으면 테스트 출력이 묻힌다 -->
+    <logger name="com.irion" level="WARN"/>
+
+    <root level="WARN">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+</configuration>

@@ -15,10 +15,15 @@
   <properties>
     <java.version>1.8</java.version>
     <spring.version>5.3.39</spring.version>
-    <mybatis.version>3.5.13</mybatis.version>
+    <mybatis.version>3.5.19</mybatis.version>
     <mybatis-spring.version>2.1.1</mybatis-spring.version>
-    <mariadb.version>3.1.4</mariadb.version>
-    <jackson.version>2.15.2</jackson.version>
+    <mariadb.version>3.5.10</mariadb.version>
+    <jackson.version>2.22.2</jackson.version>
+    <!--
+      여기부터 셋(validator·slf4j·logback)은 일부러 안 올린다 — 다음 계열이
+      jakarta 네임스페이스나 자바 11 이상을 요구해 지금 조합에서 못 쓴다.
+      아래 dependency 에 직접 적힌 HikariCP 4.0.3 도 같은 이유다 (5.1.0 은 자바 11 이상).
+    -->
     <hibernate-validator.version>6.2.5.Final</hibernate-validator.version>
     <slf4j.version>1.7.36</slf4j.version>
     <logback.version>1.2.13</logback.version>

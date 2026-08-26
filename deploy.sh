@@ -2,38 +2,58 @@
 #
 # YETI-125 배포 스크립트 — 맥에서 실행한다.
 #
-#   ./deploy.sh              빌드 → 전송 → 교체 → 검증 (확인 후 진행)
+#   ./deploy.sh              테스트 → 빌드 → 전송 → 교체 → 검증 (확인 후 진행)
 #   ./deploy.sh -y           확인 없이 바로 진행
 #   ./deploy.sh --build-only 빌드까지만 (전송·배포 안 함)
+#   ./deploy.sh --skip-tests 테스트를 건너뛴다 (급할 때만)
 #
 # 배포 후 검증에 실패하면 백업으로 자동 롤백한다.
 # 운영 DB 설정은 mvn -Pprod 프로파일이 넣어주므로 손으로 바꿀 것이 없다.
 #
+# 배포 대상 서버는 저장소에 적지 않는다 — 공개 저장소이기 때문이다.
+# deploy.env (.gitignore 대상) 또는 환경변수로 넘긴다. deploy.env.example 참고.
+#
 set -euo pipefail
 
-SERVER="root@1.201.123.155"
-WEBAPPS="/var/lib/tomcat9/webapps"
+cd "$(dirname "$0")"
+
+# 저장소에 없는 파일이다. 없으면 환경변수로 넘겼는지 아래에서 확인한다.
+# shellcheck source=/dev/null
+[ -f deploy.env ] && . ./deploy.env
+
+SERVER="${YETI_DEPLOY_SERVER:-}"
 WAR="target/yeti-125.war"
 
 ASSUME_YES=0
 BUILD_ONLY=0
+SKIP_TESTS=0
 for arg in "$@"; do
   case "$arg" in
     -y|--yes)     ASSUME_YES=1 ;;
     --build-only) BUILD_ONLY=1 ;;
+    --skip-tests) SKIP_TESTS=1 ;;
     *) echo "알 수 없는 옵션: $arg"; exit 2 ;;
   esac
 done
 
-cd "$(dirname "$0")"
-
 say() { printf '\n\033[1m▶ %s\033[0m\n' "$1"; }
 die() { printf '\n\033[31m✗ %s\033[0m\n' "$1" >&2; exit 1; }
 
+[ -n "$SERVER" ] || die "배포 대상 서버가 지정되지 않았습니다.
+    deploy.env 를 만들어 YETI_DEPLOY_SERVER=사용자@주소 를 적으세요.
+    deploy.env.example 을 복사해 쓰면 됩니다:  cp deploy.env.example deploy.env"
+
 # ─────────────────────────────────────────────────────────────
-say "1/5  운영용 빌드"
-# -Pprod 가 운영 설정을 넣고, 설정이 비어 있으면 빌드 자체가 실패한다
-mvn -q clean package -DskipTests -Pprod
+# 테스트를 건너뛰면 깨진 코드가 그대로 운영에 올라간다.
+# 예전에는 늘 -DskipTests 였다 — 손으로 mvn test 를 칠 때만 확인이 됐다.
+if [ "$SKIP_TESTS" = "1" ]; then
+  say "1/5  운영용 빌드 (테스트 건너뜀)"
+  mvn -q clean package -DskipTests -Pprod
+else
+  say "1/5  운영용 빌드 (테스트 포함)"
+  # -Pprod 가 운영 설정을 넣고, 설정이 비어 있으면 빌드 자체가 실패한다
+  mvn -q clean package -Pprod || die "테스트 또는 빌드가 실패했습니다. 배포를 중단합니다."
+fi
 
 [ -f "$WAR" ] || die "war 가 생성되지 않았습니다: $WAR"
 

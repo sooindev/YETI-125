@@ -109,8 +109,10 @@ function loadUpcomingEvents() {
                 const now = new Date();
 
                 const futureEvents = data.filter(function(event) {
-                    const startDate = new Date(event.start);
-                    const endDate = event.end ? new Date(event.end) : null;
+                    // 서버는 "2026-05-20 08:00:00" 형식으로 준다 — 브라우저에 맡기지 말고 공용 파서로 읽는다
+                    const startDate = YetiUtil.parseDate(event.start);
+                    if (!startDate) return false;
+                    const endDate = event.end ? YetiUtil.parseDate(event.end) : null;
 
                     // 종료 시간이 있으면 종료 시간 기준, 없으면 시작 시간 기준
                     if (endDate) {
@@ -129,7 +131,7 @@ function loadUpcomingEvents() {
 
                 if (futureEvents.length > 0) {
                     futureEvents.sort(function(a, b) {
-                        return new Date(a.start) - new Date(b.start);
+                        return YetiUtil.parseDate(a.start) - YetiUtil.parseDate(b.start);
                     });
 
                     const upcomingEvents = futureEvents.slice(0, 6);
@@ -162,7 +164,8 @@ function renderUpcomingEvents(events) {
     upcomingEventsData = events.slice();
 
     $.each(events, function(index, event) {
-        const startDate = new Date(event.start);
+        const startDate = YetiUtil.parseDate(event.start);
+        if (!startDate) return;
         const month = getMonthName(startDate.getMonth());
         const day = startDate.getDate();
         const time = event.allDay ? '종일' : formatTime(startDate);
@@ -218,11 +221,16 @@ function openUpcomingDetail(index) {
 function publishEventSchema(events) {
     const CHANNEL = 'https://chzzk.naver.com/63368ec9081dc85e61d0e4310b7e1602';
 
-    const items = events.slice(0, 20).map(function (event) {
+    const items = [];
+    events.slice(0, 20).forEach(function (event) {
+        const startAt = YetiUtil.parseDate(event.start);
+        // 날짜를 못 읽으면 건너뛴다 — toISOString() 이 예외를 던져 뒤가 통째로 멈춘다
+        if (!startAt) return;
+
         const node = {
             '@type': 'Event',
             name: event.title,
-            startDate: new Date(event.start).toISOString(),
+            startDate: startAt.toISOString(),
             eventAttendanceMode: 'https://schema.org/OnlineEventAttendanceMode',
             eventStatus: 'https://schema.org/EventScheduled',
             location: { '@type': 'VirtualLocation', url: CHANNEL },
@@ -230,9 +238,10 @@ function publishEventSchema(events) {
             organizer: { '@type': 'Person', name: '이리온', url: CHANNEL },
             url: 'https://yeti-125.com/schedule'
         };
-        if (event.end) node.endDate = new Date(event.end).toISOString();
+        const endAt = event.end ? YetiUtil.parseDate(event.end) : null;
+        if (endAt) node.endDate = endAt.toISOString();
         if (event.description) node.description = event.description;
-        return node;
+        items.push(node);
     });
 
     if (!items.length) return;
@@ -287,10 +296,10 @@ function formatTime(date) {
     return `${ampm} ${displayHours}:${minutes}`;
 }
 
-function formatDateTime(date) {
-    if (!(date instanceof Date)) {
-        date = new Date(date);
-    }
+function formatDateTime(value) {
+    const date = YetiUtil.parseDate(value);
+    if (!date) return '';
+
     const year = date.getFullYear();
     const month = date.getMonth() + 1;
     const day = date.getDate();
@@ -298,10 +307,10 @@ function formatDateTime(date) {
     return `${year}년 ${month}월 ${day}일 ${time}`;
 }
 
-function formatDateKorean(date) {
-    if (!(date instanceof Date)) {
-        date = new Date(date);
-    }
+function formatDateKorean(value) {
+    const date = YetiUtil.parseDate(value);
+    if (!date) return '';
+
     const year = date.getFullYear();
     const month = date.getMonth() + 1;
     const day = date.getDate();
@@ -313,12 +322,14 @@ function showScheduleDetailFrom(data) {
     const typeName = getScheduleTypeName(data.type || 'STREAM');
     const description = data.description || '';
 
-    let dateText = formatDateTime(new Date(data.start));
+    let dateText = formatDateTime(data.start);
     if (data.end) {
-        dateText += ' ~ ' + formatDateTime(new Date(data.end));
+        const endText = formatDateTime(data.end);
+        if (endText) dateText += ' ~ ' + endText;
     }
     if (data.allDay) {
-        dateText = formatDateKorean(new Date(data.start)) + ' (종일)';
+        const dayText = formatDateKorean(data.start);
+        dateText = dayText ? dayText + ' (종일)' : '';
     }
 
     const html = `

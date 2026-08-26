@@ -1,7 +1,6 @@
 package com.irion.schedule.controller;
 
 import com.irion.common.util.DateRange;
-import com.irion.common.util.JsonResult;
 import com.irion.schedule.service.ScheduleService;
 import com.irion.schedule.vo.ScheduleVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,18 +41,5 @@ public class ScheduleController {
         }
 
         return events;
-    }
-
-    @GetMapping("/{scheduleId}")
-    @ResponseBody
-    public JsonResult getSchedule(@PathVariable Long scheduleId) {
-        ScheduleVO schedule = scheduleService.getSchedule(scheduleId);
-
-        // 일정 없거나 비공개
-        if (schedule == null || !"Y".equals(schedule.getDisplayYn())) {
-            return JsonResult.fail("일정을 찾을 수 없습니다.");
-        }
-
-        return JsonResult.success("조회 성공", schedule);
     }
 }
