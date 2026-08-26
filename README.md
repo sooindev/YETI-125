@@ -106,7 +106,7 @@ chzzk API와 연동해 실시간 방송 상태를 보여주고,
 
 | 영역 | |
 |------|---|
-| 백엔드 | Java 8 · Spring Framework 5.3 · MyBatis |
+| 백엔드 | Java (빌드 타깃 8 · 실행 11 이상) · Spring Framework 5.3 · MyBatis |
 | 데이터베이스 | MariaDB · HikariCP |
 | 프론트엔드 | HTML5 · CSS3 · JavaScript · jQuery 3.7 |
 | 라이브러리 | FullCalendar 6.1 · Jackson · Hibernate Validator |
@@ -359,7 +359,12 @@ CVSS 7.0 이상이 나오면 빌드를 실패시키고, 보고서는
 
 ## 시작하기
 
-JDK 8 이상, Maven 3.6 이상, MariaDB 10 이상, Apache Tomcat 9 이상이 필요합니다.
+**JDK 11 이상**, Maven 3.6 이상, MariaDB 10 이상, Apache Tomcat 9 이상이 필요합니다.
+
+바이트코드는 자바 8 타깃으로 컴파일되지만, 실행 환경은 자바 11 이상이어야 합니다.
+톰캣이 JSP 를 실행 중에 컴파일할 때 쓰는 ECJ 가 11 이상을 요구하기 때문입니다
+(자바 8 서버에 올리면 모든 페이지가 500 이 됩니다 — [트러블슈팅](#자바-8-서버에서-모든-페이지가-500-이-되는-문제) 참고).
+`deploy.sh` 는 배포 전에 서버 자바 버전을 확인하고 11 미만이면 중단합니다.
 
 #### 1. 저장소 클론
 
@@ -421,10 +426,14 @@ password="비밀번호"
 `[client]` 는 모든 mariadb 클라이언트에 적용되어 소켓 인증까지 끌려갑니다.
 
 테스트는 빌드에 포함되어 있고 따로 돌릴 수도 있습니다.
+DB 는 필요 없습니다 — 스프링 컨텍스트를 띄우지 않습니다.
 
 ```bash
 mvn test
 ```
+
+`main` 에 올리거나 PR 을 열면 깃허브 액션이 같은 테스트를 자동으로 돌립니다
+(`.github/workflows/test.yml`). 실패하면 어느 테스트가 깨졌는지 보고서가 남습니다.
 
 #### 5. 접속
 
@@ -451,23 +460,42 @@ mvn clean package -Pprod   # 운영 배포용
 
 운영 설정이 채워지지 않았거나 주소가 로컬을 가리키면 **빌드 단계에서 중단됩니다.**
 
+배포 대상 서버 주소는 저장소에 두지 않습니다 — 공개 저장소이기 때문입니다.
+`deploy.env` 에 적거나 환경변수로 넘깁니다. 이 파일은 `.gitignore` 대상입니다.
+
+```bash
+cp deploy.env.example deploy.env
+# YETI_DEPLOY_SERVER=사용자@서버주소
+```
+
 배포는 스크립트 한 줄로 끝납니다.
-빌드 → 전송 → 교체 → 검증 순으로 진행하고, 검증에 실패하면 직전 백업으로 자동 롤백합니다.
+테스트 → 빌드 → 서버 자바 확인 → 전송 → 교체 → 검증 순으로 진행하고,
+검증에 실패하면 직전 백업으로 자동 롤백합니다.
 
 ```bash
 ./deploy.sh
+./deploy.sh --skip-tests   # 급할 때만
 ```
+
+테스트는 배포 경로에 포함되어 있습니다.
+예전에는 `-DskipTests` 로 빌드해서 손으로 `mvn test` 를 칠 때만 확인이 됐고,
+깨진 코드가 그대로 운영에 올라갈 수 있었습니다.
 
 ```mermaid
 flowchart TD
-    A(["./deploy.sh"]) --> B["mvn clean package -Pprod"]
+    A(["./deploy.sh"]) --> T{"배포 대상 확인\ndeploy.env"}
+    T -->|없음| Z2(["배포 중단"])
+    T -->|있음| B["mvn clean package -Pprod\n(테스트 포함)"]
+    B -->|테스트 실패| Z3(["배포 중단"])
     B --> C{"설정 가드\nCHANGE_ME · db.url 검사"}
     C -->|실패| X(["빌드 중단"])
     C -->|통과| D["war 내용 재확인"]
-    D --> E["scp → 서버"]
+    D --> J{"서버 자바 확인\n11 이상"}
+    J -->|미만| Z(["배포 중단"])
+    J -->|통과| E["scp → 서버"]
     E --> F["기존 ROOT.war 백업"]
     F --> G["교체 후 톰캣 재기동"]
-    G --> H{"헬스체크\n/schedule/list"}
+    G --> H{"헬스체크\nAPI + 페이지 4곳"}
     H -->|200| I(["외부 접근 확인\nhttps://yeti-125.com"])
     H -->|실패| R["백업으로 자동 롤백"]
     R --> Y(["이전 버전으로 복구"])
@@ -503,11 +531,18 @@ YETI-125/
 │   │       │   └── views/     페이지 JSP — 홈, 일정, 프로필, 관리자
 │   │       │       └── common/  상단바 · 바닥글 · 테마 토글 · head 공통 조각
 │   │       └── resources/     css · js · images
-│   └── test/java/com/irion/   비밀번호 · 로그인 검증 · 시도 제한 · 일정 저장
-│                              치지직 파싱 · 페이지네이션 · 입력 검증 · 조회 기간
+│   └── test/
+│       ├── java/com/irion/    비밀번호 · 로그인 검증 · 시도 제한 · 일정 저장
+│       │                      치지직 파싱 · 페이지네이션 · 입력 검증 · 조회 기간
+│       │                      JSON 날짜 형식(설정과 VO 가 어긋나지 않는지)
+│       └── resources/         logback-test.xml — 테스트는 파일 로그를 남기지 않는다
+├── .github/
+│   ├── workflows/test.yml 푸시·PR 마다 mvn test
+│   └── dependabot.yml     주간 의존성 감시
 ├── docs/screenshots/      README 용 화면 캡처
 ├── run-local.sh           로컬 빌드 · 배포 · 기동 확인
-├── deploy.sh              빌드 · 전송 · 배포 · 롤백
+├── deploy.sh              테스트 · 빌드 · 전송 · 배포 · 롤백
+├── deploy.env.example     배포 대상 서버 설정 예시 (실제 값은 deploy.env)
 └── pom.xml
 ```
 
@@ -586,6 +621,21 @@ CSS 명세상 한 축에 `hidden`을 주면 다른 축의 `overflow`가 자동�
 본문이 비어 있어 원래 오류가 완전히 가려집니다.
 
 404 · 500 페이지를 실제로 만들어 채웠습니다.
+
+#### 자바 8 서버에서 모든 페이지가 500 이 되는 문제
+
+war 는 정상이고 API 도 응답하는데, 브라우저로 여는 페이지마다 500 이 났습니다.
+
+JSP 는 미리 컴파일되지 않고 첫 요청 때 톰캣이 컴파일합니다.
+톰캣 9 가 그 일에 쓰는 ECJ 가 자바 11 이상을 요구해서,
+자바 8 서버에서는 JSP 가 하나도 컴파일되지 않았습니다.
+`/schedule/list` 같은 JSON API 는 JSP 를 거치지 않아 멀쩡히 200 을 돌려줬고,
+그래서 헬스체크는 통과하는데 사이트는 죽어 있는 상태가 됐습니다.
+
+배포 스크립트에 두 가지를 넣었습니다.
+전송 전에 서버 자바 버전을 읽어 11 미만이면 배포를 중단하고,
+헬스체크는 API 하나가 아니라 실제 페이지(`/` · `/schedule` · `/info` · `/admin/admin-login`)까지
+함께 확인합니다. 하나라도 200 이 아니면 직전 백업으로 롤백합니다.
 
 #### 수정한 CSS·JS가 반영되지 않는 문제
 

@@ -38,9 +38,22 @@
 
     <!-- ObjectMapper 설정 (이모티콘 출력 지원) -->
     <bean id="objectMapper" class="org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean">
+        <!--
+          ScheduleVO 의 @JsonFormat 과 같은 모양('T' 구분)으로 맞춘다.
+          목록 API 는 VO 가 아니라 Map 을 내보내 애너테이션을 타지 않으므로,
+          여기가 어긋나면 같은 일정이 주소에 따라 두 형식으로 나간다.
+
+          시간대를 비워두면 JVM 기본값을 따라간다 — 서버 시간대가 바뀌면
+          @JsonFormat(Asia/Seoul) 쪽과 조용히 어긋나므로 여기서도 못 박는다.
+        -->
         <property name="dateFormat">
             <bean class="java.text.SimpleDateFormat">
-                <constructor-arg value="yyyy-MM-dd HH:mm:ss"/>
+                <constructor-arg value="yyyy-MM-dd'T'HH:mm:ss"/>
+                <property name="timeZone">
+                    <bean class="java.util.TimeZone" factory-method="getTimeZone">
+                        <constructor-arg value="Asia/Seoul"/>
+                    </bean>
+                </property>
             </bean>
         </property>
         <property name="featuresToDisable">

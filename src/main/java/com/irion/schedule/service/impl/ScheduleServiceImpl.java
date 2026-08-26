@@ -28,12 +28,6 @@ public class ScheduleServiceImpl implements ScheduleService {
         return scheduleMapper.selectDisplayScheduleList(startDate, endDate);
     }
 
-    /** 일정 상세 조회 */
-    @Override
-    public ScheduleVO getSchedule(Long scheduleId) {
-        return scheduleMapper.selectScheduleById(scheduleId);
-    }
-
     /** 일정 등록 */
     @Override
     @Transactional

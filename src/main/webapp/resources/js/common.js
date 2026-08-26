@@ -169,34 +169,6 @@ $(document).on('keydown', function(e) {
     }
 });
 
-function apiRequest(url, method, data, callback) {
-    const options = {
-        url: url,
-        type: method || 'GET',
-        contentType: 'application/json',
-        dataType: 'json',
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest'
-        },
-        success: function(response) {
-            if (callback) callback(response);
-        },
-        error: function(xhr) {
-            if (xhr.status === 401) {
-                window.location.href = '/admin/admin-login';
-                return;
-            }
-            if (callback) callback(null);
-        }
-    };
-
-    if (data && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
-        options.data = JSON.stringify(data);
-    }
-
-    $.ajax(options);
-}
-
 // 이전 타이머를 지우고 다시 건다 — 안 그러면 두 번째 토스트가 첫 번째 타이머에 걸린다
 let toastTimer = null;
 

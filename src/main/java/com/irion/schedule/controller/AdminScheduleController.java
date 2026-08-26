@@ -54,18 +54,6 @@ public class AdminScheduleController {
         return events;
     }
 
-    @GetMapping("/{scheduleId}")
-    @ResponseBody
-    public JsonResult getSchedule(@PathVariable Long scheduleId) {
-        ScheduleVO schedule = scheduleService.getSchedule(scheduleId);
-
-        if (schedule == null) {
-            return JsonResult.fail("일정을 찾을 수 없습니다.");
-        }
-
-        return JsonResult.success("조회 성공", schedule);
-    }
-
     @PostMapping("")
     @ResponseBody
     public JsonResult createSchedule(@Valid @RequestBody ScheduleVO scheduleVO, BindingResult binding) {

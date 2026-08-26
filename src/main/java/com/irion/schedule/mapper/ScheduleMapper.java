@@ -14,8 +14,6 @@ public interface ScheduleMapper {
 
     List<ScheduleVO> selectDisplayScheduleList(@Param("startDate") Date startDate, @Param("endDate") Date endDate);
 
-    ScheduleVO selectScheduleById(@Param("scheduleId") Long scheduleId);
-
     int insertSchedule(ScheduleVO scheduleVO);
 
     int updateSchedule(ScheduleVO scheduleVO);

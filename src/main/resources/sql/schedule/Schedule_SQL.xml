@@ -47,25 +47,6 @@
         ORDER BY start_date ASC
     </select>
 
-    <!-- 일정 상세 조회 -->
-    <select id="selectScheduleById" parameterType="Long" resultType="ScheduleVO">
-        SELECT schedule_id
-               ,title
-               ,description
-               ,schedule_type
-               ,start_date
-               ,end_date
-               ,all_day_yn
-               ,display_yn
-               ,color
-               ,reg_date
-               ,mod_date
-               ,del_yn
-        FROM tb_schedule
-        WHERE schedule_id = #{scheduleId}
-          AND del_yn = 'N'
-    </select>
-
     <!-- 일정 등록 -->
     <insert id="insertSchedule" parameterType="ScheduleVO" useGeneratedKeys="true" keyProperty="scheduleId">
         INSERT INTO tb_schedule (
