@@ -2,10 +2,10 @@
 #
 # YETI-125 배포 스크립트 — 맥에서 실행한다.
 #
-#   ./deploy.sh              테스트 → 빌드 → 전송 → 교체 → 검증 (확인 후 진행)
-#   ./deploy.sh -y           확인 없이 바로 진행
-#   ./deploy.sh --build-only 빌드까지만 (전송·배포 안 함)
-#   ./deploy.sh --skip-tests 테스트를 건너뛴다 (급할 때만)
+#   ./scripts/deploy.sh              테스트 → 빌드 → 전송 → 교체 → 검증 (확인 후 진행)
+#   ./scripts/deploy.sh -y           확인 없이 바로 진행
+#   ./scripts/deploy.sh --build-only 빌드까지만 (전송·배포 안 함)
+#   ./scripts/deploy.sh --skip-tests 테스트를 건너뛴다 (급할 때만)
 #
 # 배포 후 검증에 실패하면 백업으로 자동 롤백한다.
 # 운영 DB 설정은 mvn -Pprod 프로파일이 넣어주므로 손으로 바꿀 것이 없다.
@@ -15,7 +15,7 @@
 #
 set -euo pipefail
 
-cd "$(dirname "$0")"
+cd "$(dirname "$0")/.."
 
 # 저장소에 없는 파일이다. 없으면 환경변수로 넘겼는지 아래에서 확인한다.
 # shellcheck source=/dev/null

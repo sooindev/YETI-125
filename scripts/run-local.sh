@@ -2,12 +2,12 @@
 #
 # YETI-125 로컬 실행 스크립트 — 맥에서 실행한다.
 #
-#   ./run-local.sh              빌드 → 로컬 톰캣에 ROOT 로 배포 → 기동 → 확인
-#   ./run-local.sh --skip-build 빌드 없이 기존 war 로 재배포
-#   ./run-local.sh --stop       로컬 톰캣 정지
-#   ./run-local.sh --logs       catalina.out 실시간 보기
+#   ./scripts/run-local.sh              빌드 → 로컬 톰캣에 ROOT 로 배포 → 기동 → 확인
+#   ./scripts/run-local.sh --skip-build 빌드 없이 기존 war 로 재배포
+#   ./scripts/run-local.sh --stop       로컬 톰캣 정지
+#   ./scripts/run-local.sh --logs       catalina.out 실시간 보기
 #
-# 운영 배포는 이 스크립트가 아니라 ./deploy.sh 를 쓴다.
+# 운영 배포는 이 스크립트가 아니라 ./scripts/deploy.sh 를 쓴다.
 #
 set -euo pipefail
 
@@ -20,7 +20,7 @@ URL="http://localhost:8080"
 # 로컬 DB 접속 정보. 비밀번호는 여기 두지 않는다.
 #   ~/.my.cnf 의 [client] password="..." (큰따옴표 필수 — # 는 주석이라 거기서 잘린다.
 #   user= 는 넣지 말 것, 모든 mariadb 클라이언트에 적용된다)
-#   또는 YETI_DB_PASSWORD=... ./run-local.sh
+#   또는 YETI_DB_PASSWORD=... ./scripts/run-local.sh
 DB_NAME="${YETI_DB_NAME:-for_125}"
 DB_USER="${YETI_DB_USER:-yeti}"
 CHECK="$URL/schedule/list?start=2020-01-01&end=2030-12-31"
@@ -36,7 +36,7 @@ for arg in "$@"; do
   esac
 done
 
-cd "$(dirname "$0")"
+cd "$(dirname "$0")/.."
 
 say() { printf '\n\033[1m▶ %s\033[0m\n' "$1"; }
 die() { printf '\n\033[31m✗ %s\033[0m\n' "$1" >&2; exit 1; }
@@ -119,8 +119,8 @@ if [ "$CODE" = "200" ]; then
   printf '\n\033[32m✓ 실행 중\033[0m\n'
   printf '   사이트   : %s\n' "$URL"
   printf '   관리자   : %s/admin/admin-login\n' "$URL"
-  printf '   로그     : ./run-local.sh --logs\n'
-  printf '   정지     : ./run-local.sh --stop\n\n'
+  printf '   로그     : ./scripts/run-local.sh --logs\n'
+  printf '   정지     : ./scripts/run-local.sh --stop\n\n'
 else
-  die "기동 확인 실패 (HTTP ${CODE:-무응답}) — 로그를 확인하세요: ./run-local.sh --logs"
+  die "기동 확인 실패 (HTTP ${CODE:-무응답}) — 로그를 확인하세요: ./scripts/run-local.sh --logs"
 fi

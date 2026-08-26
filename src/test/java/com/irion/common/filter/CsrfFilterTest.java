@@ -1,5 +1,7 @@
 package com.irion.common.filter;
 
+import com.irion.testsupport.FakeHttp;
+
 import com.irion.common.util.CsrfTokens;
 import org.junit.Test;
 

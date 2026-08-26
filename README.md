@@ -364,7 +364,7 @@ CVSS 7.0 이상이 나오면 빌드를 실패시키고, 보고서는
 바이트코드는 자바 8 타깃으로 컴파일되지만, 실행 환경은 자바 11 이상이어야 합니다.
 톰캣이 JSP 를 실행 중에 컴파일할 때 쓰는 ECJ 가 11 이상을 요구하기 때문입니다
 (자바 8 서버에 올리면 모든 페이지가 500 이 됩니다 — [트러블슈팅](#자바-8-서버에서-모든-페이지가-500-이-되는-문제) 참고).
-`deploy.sh` 는 배포 전에 서버 자바 버전을 확인하고 11 미만이면 중단합니다.
+`scripts/deploy.sh` 는 배포 전에 서버 자바 버전을 확인하고 11 미만이면 중단합니다.
 
 #### 1. 저장소 클론
 
@@ -375,11 +375,11 @@ cd YETI-125
 
 #### 2. 데이터베이스 준비
 
-`src/main/resources/sql/schema.sql` 을 실행해 `for_125` 데이터베이스와
+`docs/db/schema.sql` 을 실행해 `for_125` 데이터베이스와
 `tb_admin`, `tb_schedule` 테이블을 생성합니다.
 
 ```bash
-mysql -u root -p < src/main/resources/sql/schema.sql
+mysql -u root -p < docs/db/schema.sql
 ```
 
 #### 3. 접속 정보 설정
@@ -409,7 +409,7 @@ macOS에서는 위 과정을 스크립트 하나로 대신할 수 있습니다.
 빌드 → 로컬 톰캣에 ROOT로 배포 → DB 연동까지 확인합니다.
 
 ```bash
-./run-local.sh
+./scripts/run-local.sh
 ```
 
 DB 비밀번호는 스크립트에 두지 않습니다.
@@ -473,8 +473,8 @@ cp deploy.env.example deploy.env
 검증에 실패하면 직전 백업으로 자동 롤백합니다.
 
 ```bash
-./deploy.sh
-./deploy.sh --skip-tests   # 급할 때만
+./scripts/deploy.sh
+./scripts/deploy.sh --skip-tests   # 급할 때만
 ```
 
 테스트는 배포 경로에 포함되어 있습니다.
@@ -483,7 +483,7 @@ cp deploy.env.example deploy.env
 
 ```mermaid
 flowchart TD
-    A(["./deploy.sh"]) --> T{"배포 대상 확인\ndeploy.env"}
+    A(["./scripts/deploy.sh"]) --> T{"배포 대상 확인\ndeploy.env"}
     T -->|없음| Z2(["배포 중단"])
     T -->|있음| B["mvn clean package -Pprod\n(테스트 포함)"]
     B -->|테스트 실패| Z3(["배포 중단"])
@@ -500,6 +500,43 @@ flowchart TD
     H -->|실패| R["백업으로 자동 롤백"]
     R --> Y(["이전 버전으로 복구"])
 ```
+
+### 데이터베이스 백업
+
+운영 서버에서 `scripts/db-backup.sh` 가 cron 으로 돕니다.
+일정은 전부 관리자가 손으로 넣은 것이라 잃으면 되돌릴 방법이 없습니다.
+
+| | |
+|---|---|
+| 설치 위치 | `/usr/local/sbin/yeti-db-backup.sh` |
+| 보관 위치 | `/var/backups/yeti-125` (권한 600) |
+| 로그 | `/var/log/yeti-db-backup.log` |
+| 보관 개수 | 14개 — 넘으면 오래된 것부터 지웁니다 |
+
+```bash
+sudo install -m 700 scripts/db-backup.sh /usr/local/sbin/yeti-db-backup.sh
+sudo crontab -e
+# 매일 새벽 4시
+0 4 * * * /usr/local/sbin/yeti-db-backup.sh >> /var/log/yeti-db-backup.log 2>&1
+```
+
+스크립트에 비밀번호가 없습니다.
+우분투의 MariaDB `root` 는 `unix_socket` 인증이라 root 로 실행하면 그냥 붙습니다.
+
+덤프는 `--single-transaction` 으로 InnoDB 를 잠그지 않고 일관된 시점을 뜨고,
+`--quick` 으로 한 행씩 흘려보냅니다 (2GB 서버라 메모리를 아껴야 합니다).
+
+**중간에 끊긴 덤프가 정상 백업인 척 남지 않도록** 먼저 `.part` 로 쓰고,
+`gzip -t` 로 압축이 온전한지 확인한 뒤에만 정식 이름으로 바꿉니다.
+
+복구는 이렇게 합니다.
+
+```bash
+gunzip -c /var/backups/yeti-125/for_125-20260826-040001.sql.gz | mysql for_125
+```
+
+> 옛 SHA-256 해시가 담긴 백업을 되살리면 그 관리자 계정은 로그인할 수 없습니다.
+> `PasswordUtil.main` 으로 해시를 새로 넣어야 합니다.
 
 <br>
 
@@ -519,10 +556,11 @@ YETI-125/
 │   │   │   ├── schedule/      방송 일정 — controller / service / mapper
 │   │   │   └── admin/         관리자 — 인증, 일정 관리
 │   │   ├── resources/
+│   │   │   ├── logback.xml    로그 설정 (클래스패스 최상단이어야 logback 이 찾는다)
 │   │   │   ├── spring/        Spring 설정
 │   │   │   ├── mybatis/       MyBatis 설정
 │   │   │   ├── properties/    DB 접속 정보 (로컬)
-│   │   │   └── sql/           스키마와 매퍼 SQL
+│   │   │   └── sql/           매퍼 SQL — MyBatis 가 읽는 *_SQL.xml 만 둔다
 │   │   ├── resources-prod/    DB 접속 정보 (운영) — mvn -Pprod 전용
 │   │   └── webapp/
 │   │       ├── META-INF/      톰캣 쿠키 처리기 (SameSite)
@@ -532,16 +570,23 @@ YETI-125/
 │   │       │       └── common/  상단바 · 바닥글 · 테마 토글 · head 공통 조각
 │   │       └── resources/     css · js · images
 │   └── test/
-│       ├── java/com/irion/    비밀번호 · 로그인 검증 · 시도 제한 · 일정 저장
-│       │                      치지직 파싱 · 페이지네이션 · 입력 검증 · 조회 기간
-│       │                      JSON 날짜 형식(설정과 VO 가 어긋나지 않는지)
+│       ├── java/com/irion/
+│       │   ├── testsupport/   FakeHttp — 필터·인터셉터 테스트가 함께 쓰는 서블릿 대역
+│       │   └── (본 코드와 같은 패키지 구조)
+│       │                      비밀번호 · 로그인 검증 · 시도 제한 · 인증 두 겹
+│       │                      일정 저장·조회 · 치지직 파싱 · 페이지네이션
+│       │                      입력 검증 · 조회 기간 · JSON 날짜 형식
 │       └── resources/         logback-test.xml — 테스트는 파일 로그를 남기지 않는다
 ├── .github/
 │   ├── workflows/test.yml 푸시·PR 마다 mvn test
 │   └── dependabot.yml     주간 의존성 감시
-├── docs/screenshots/      README 용 화면 캡처
-├── run-local.sh           로컬 빌드 · 배포 · 기동 확인
-├── deploy.sh              테스트 · 빌드 · 전송 · 배포 · 롤백
+├── scripts/
+│   ├── run-local.sh       로컬 빌드 · 배포 · 기동 확인 (맥)
+│   ├── deploy.sh          테스트 · 빌드 · 전송 · 배포 · 롤백 (맥 → 서버)
+│   └── db-backup.sh       DB 백업 (서버에서 cron 으로)
+├── docs/
+│   ├── db/schema.sql      최초 1회 실행하는 DDL — 실행 자원이 아니라 war 에 넣지 않는다
+│   └── screenshots/       README 용 화면 캡처
 ├── deploy.env.example     배포 대상 서버 설정 예시 (실제 값은 deploy.env)
 └── pom.xml
 ```

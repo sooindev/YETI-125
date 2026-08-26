@@ -1,4 +1,4 @@
-package com.irion.common.filter;
+package com.irion.testsupport;
 
 import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
@@ -10,14 +10,18 @@ import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.Map;
 
-/** 필터 테스트용 가짜 서블릿 객체. 목 프레임워크 대신 JDK 동적 Proxy 를 쓴다. */
-final class FakeHttp {
+/**
+ * 서블릿 가짜 객체. 목 프레임워크 대신 JDK 동적 Proxy 를 쓴다.
+ *
+ * 필터와 인터셉터 테스트가 함께 쓴다 — 한쪽 패키지에 두면 다른 쪽이 못 가져다 쓴다.
+ */
+public final class FakeHttp {
 
     private FakeHttp() {
     }
 
 
-    static final class Request {
+    public static final class Request {
         private String uri = "/";
         private String contextPath = "";
         private String method = "GET";
@@ -28,59 +32,59 @@ final class FakeHttp {
         private final Map<String, String> params = new HashMap<String, String>();
 
         /** getSession(true) 가 불렸는지 — 필터가 세션을 새로 만들면 안 된다 */
-        boolean sessionCreated;
+        public boolean sessionCreated;
 
-        Request uri(String value) {
+        public Request uri(String value) {
             this.uri = value;
             return this;
         }
 
-        Request contextPath(String value) {
+        public Request contextPath(String value) {
             this.contextPath = value;
             return this;
         }
 
-        Request method(String value) {
+        public Request method(String value) {
             this.method = value;
             return this;
         }
 
-        Request queryString(String value) {
+        public Request queryString(String value) {
             this.queryString = value;
             return this;
         }
 
-        Request session(HttpSession value) {
+        public Request session(HttpSession value) {
             this.session = value;
             return this;
         }
 
-        Request header(String name, String value) {
+        public Request header(String name, String value) {
             this.headers.put(name, value);
             return this;
         }
 
-        Request contentType(String value) {
+        public Request contentType(String value) {
             this.contentType = value;
             return this;
         }
 
-        Request param(String name, String value) {
+        public Request param(String name, String value) {
             this.params.put(name, value);
             return this;
         }
 
         /** 화면이 보내는 AJAX 요청 모양 */
-        Request ajax() {
+        public Request ajax() {
             return header("X-Requested-With", "XMLHttpRequest").header("Accept", "application/json");
         }
 
         /** 주소창으로 들어온 요청 모양 */
-        Request browser() {
+        public Request browser() {
             return header("Accept", "text/html,application/xhtml+xml");
         }
 
-        HttpServletRequest build() {
+        public HttpServletRequest build() {
             return (HttpServletRequest) Proxy.newProxyInstance(
                     HttpServletRequest.class.getClassLoader(),
                     new Class<?>[] { HttpServletRequest.class },
@@ -117,18 +121,18 @@ final class FakeHttp {
 
 
     /** 로그인 전 — 속성이 비어 있는 세션 */
-    static HttpSession session() {
+    public static HttpSession session() {
         return session(new HashMap<String, Object>());
     }
 
     /** 관리자로 로그인된 세션 */
-    static HttpSession loggedIn() {
+    public static HttpSession loggedIn() {
         Map<String, Object> attributes = new HashMap<String, Object>();
         attributes.put("adminUser", "관리자");
         return session(attributes);
     }
 
-    static HttpSession session(Map<String, Object> attributes) {
+    public static HttpSession session(Map<String, Object> attributes) {
         return (HttpSession) Proxy.newProxyInstance(
                 HttpSession.class.getClassLoader(),
                 new Class<?>[] { HttpSession.class },
@@ -149,23 +153,23 @@ final class FakeHttp {
     }
 
 
-    static final class Response {
-        int status = 200;
-        String redirect;
-        String contentType;
+    public static final class Response {
+        public int status = 200;
+        public String redirect;
+        public String contentType;
         private final Map<String, String> headers = new HashMap<String, String>();
         private final StringWriter written = new StringWriter();
 
-        String body() {
+        public String body() {
             return written.toString();
         }
 
         /** 301 은 sendRedirect 가 아니라 setStatus + Location 으로 나간다 */
-        String header(String name) {
+        public String header(String name) {
             return headers.get(name);
         }
 
-        HttpServletResponse build() {
+        public HttpServletResponse build() {
             return (HttpServletResponse) Proxy.newProxyInstance(
                     HttpServletResponse.class.getClassLoader(),
                     new Class<?>[] { HttpServletResponse.class },
@@ -200,11 +204,11 @@ final class FakeHttp {
     }
 
 
-    static final class Chain {
+    public static final class Chain {
         /** 필터가 요청을 다음으로 넘겼는가 */
-        boolean passed;
+        public boolean passed;
 
-        FilterChain build() {
+        public FilterChain build() {
             return (request, response) -> passed = true;
         }
     }

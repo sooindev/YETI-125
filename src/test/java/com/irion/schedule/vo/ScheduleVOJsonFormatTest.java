@@ -1,8 +1,7 @@
-package com.irion.schedule;
+package com.irion.schedule.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.irion.schedule.vo.ScheduleVO;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean;
@@ -28,7 +27,7 @@ import static org.junit.Assert.*;
  * 전역 dateFormat 을 쓴다. 둘이 어긋나면 프론트가 두 형식을 다 다뤄야 한다.
  * 한쪽만 고치는 일이 없도록 설정 파일에서 값을 직접 읽어 대조한다.
  */
-public class JsonDateFormatTest {
+public class ScheduleVOJsonFormatTest {
 
     private static String xmlPattern;
     private static String xmlTimeZone;
@@ -115,7 +114,7 @@ public class JsonDateFormatTest {
     }
 
     private static String readResource(String path) {
-        try (InputStream in = JsonDateFormatTest.class.getClassLoader().getResourceAsStream(path)) {
+        try (InputStream in = ScheduleVOJsonFormatTest.class.getClassLoader().getResourceAsStream(path)) {
             assertNotNull("설정 파일을 찾지 못했다: " + path, in);
             try (Scanner scanner = new Scanner(in, StandardCharsets.UTF_8.name())) {
                 return scanner.useDelimiter("\\A").next();

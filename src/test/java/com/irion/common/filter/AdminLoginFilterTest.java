@@ -1,5 +1,7 @@
 package com.irion.common.filter;
 
+import com.irion.testsupport.FakeHttp;
+
 import org.junit.Test;
 
 import javax.servlet.http.HttpSession;

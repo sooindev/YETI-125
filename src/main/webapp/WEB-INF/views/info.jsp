@@ -93,6 +93,9 @@
   </script>
   <link rel="stylesheet" href="/resources/css/common.css">
   <link rel="stylesheet" href="/resources/css/info.css">
+  <%-- scroll-animations.js 와 짝이다. 이게 없으면 .scroll-animate 가 정의되지 않아
+       요소가 처음부터 보이고 등장 효과가 나지 않는다 (index.jsp 와 같은 순서로 둔다) --%>
+  <link rel="stylesheet" href="/resources/css/scroll-animations.css">
 </head>
 <body>
 
