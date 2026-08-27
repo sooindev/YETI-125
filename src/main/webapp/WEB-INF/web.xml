@@ -50,9 +50,19 @@
     <filter-name>staticResourceCacheFilter</filter-name>
     <filter-class>com.irion.common.filter.StaticResourceCacheFilter</filter-class>
   </filter>
+  <!--
+    ERROR 를 함께 적는 이유 — 필터 기본값은 REQUEST 뿐이라, <error-page> 로 넘어가는
+    404·500 응답에는 이 필터가 아예 돌지 않았다. 그 두 페이지만 CSP 도 X-Frame-Options 도
+    없이 나갔다. 하필 500.jsp 는 바깥에서 온 주소를 "다시 시도" 링크로 되심는 페이지다
+    (그쪽에서도 이스케이프하지만, 겹겹이 두는 것이 이 필터의 존재 이유다).
+
+    REQUEST 를 같이 적어야 한다 — <dispatcher> 를 하나라도 쓰는 순간 기본값이 사라진다.
+  -->
   <filter-mapping>
     <filter-name>staticResourceCacheFilter</filter-name>
     <url-pattern>/*</url-pattern>
+    <dispatcher>REQUEST</dispatcher>
+    <dispatcher>ERROR</dispatcher>
   </filter-mapping>
 
   <!-- 옛 .html → 정규 주소 301. 보안 헤더 뒤, 로그인 검사 앞에 둔다 -->
