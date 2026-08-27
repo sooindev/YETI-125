@@ -115,32 +115,116 @@ public class LiveFeedServiceTest {
         LiveFeedService service = serviceWith(chzzk);
 
         int threads = 12;
-        CountDownLatch start = new CountDownLatch(1);
-        CountDownLatch done = new CountDownLatch(threads);
-        List<Thread> pool = new ArrayList<Thread>();
-
-        for (int i = 0; i < threads; i++) {
-            Thread thread = new Thread(() -> {
-                try {
-                    start.await();
-                    service.getLiveStatus();
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                } finally {
-                    done.countDown();
-                }
-            });
-            pool.add(thread);
-            thread.start();
-        }
-
-        start.countDown();
-        assertTrue("스레드가 끝나지 않았다", done.await(10, TimeUnit.SECONDS));
-        for (Thread thread : pool) {
-            thread.join();
-        }
+        runConcurrently(threads, service::getLiveStatus);
 
         assertEquals(threads + " 개가 동시에 들어와도 외부 호출은 한 번이어야 한다",
+                1, chzzk.liveCalls.get());
+    }
+
+    // ── 장애 백오프 ───────────────────────────────────────────
+
+    /**
+     * 실패를 적어두지 않으면 요청마다 락 안에서 5초 타임아웃을 처음부터 다시 기다린다.
+     * 한 번 실패했으면 잠깐은 두드리지 않는다.
+     */
+    @Test
+    public void 실패한_직후에는_다시_두드리지_않는다() throws Exception {
+        FakeChzzk chzzk = new FakeChzzk();
+        chzzk.liveStatus = liveStatus(true);
+        LiveFeedService service = serviceWith(chzzk);
+
+        service.getLiveStatus();
+        expire(service, "liveStatusCache");
+        chzzk.liveStatus = null; // 치지직 장애
+
+        service.getLiveStatus(); // 여기서 한 번 실패한다
+        int afterFailure = chzzk.liveCalls.get();
+
+        for (int i = 0; i < 10; i++) {
+            service.getLiveStatus();
+        }
+
+        assertEquals("실패 뒤 10번을 더 불러도 외부 호출은 그대로여야 한다",
+                afterFailure, chzzk.liveCalls.get());
+    }
+
+    /** 두드리지 않는 동안에도 낡은 값은 계속 내준다 — 화면이 비면 안 된다 */
+    @Test
+    public void 백오프_중에도_만료된_값은_계속_돌려준다() throws Exception {
+        FakeChzzk chzzk = new FakeChzzk();
+        chzzk.liveStatus = liveStatus(true);
+        LiveFeedService service = serviceWith(chzzk);
+
+        service.getLiveStatus();
+        expire(service, "liveStatusCache");
+        chzzk.liveStatus = null;
+
+        for (int i = 0; i < 5; i++) {
+            Map<String, Object> status = service.getLiveStatus();
+            assertNotNull("백오프 중에 null 이 나오면 화면이 오류로 떨어진다", status);
+            assertEquals(Boolean.TRUE, status.get("isLive"));
+        }
+    }
+
+    /** 백오프가 지나면 다시 시도한다 — 치지직이 돌아온 것을 알아채야 한다 */
+    @Test
+    public void 백오프가_지나면_다시_시도한다() throws Exception {
+        FakeChzzk chzzk = new FakeChzzk();
+        chzzk.liveStatus = liveStatus(true);
+        LiveFeedService service = serviceWith(chzzk);
+
+        service.getLiveStatus();
+        expire(service, "liveStatusCache");
+        chzzk.liveStatus = null;
+        service.getLiveStatus(); // 실패
+        int afterFailure = chzzk.liveCalls.get();
+
+        expireBackoff(service, "liveStatusCache");
+        chzzk.liveStatus = liveStatus(false); // 치지직 복구
+
+        Map<String, Object> status = service.getLiveStatus();
+
+        assertTrue("백오프가 지났으면 다시 불러야 한다", chzzk.liveCalls.get() > afterFailure);
+        assertEquals("새로 받은 값이어야 한다", Boolean.FALSE, status.get("isLive"));
+    }
+
+    /** 복구되면 실패 기록을 지워야 한다 — 안 지우면 다음 장애 때 백오프가 이미 지나 있다 */
+    @Test
+    public void 복구되면_실패_기록이_지워진다() throws Exception {
+        FakeChzzk chzzk = new FakeChzzk();
+        chzzk.liveStatus = liveStatus(true);
+        LiveFeedService service = serviceWith(chzzk);
+
+        service.getLiveStatus();
+        expire(service, "liveStatusCache");
+        chzzk.liveStatus = null;
+        service.getLiveStatus();
+
+        assertTrue("실패가 기록돼야 한다", failedAt(service, "liveStatusCache") > 0);
+
+        expireBackoff(service, "liveStatusCache");
+        chzzk.liveStatus = liveStatus(true); // 복구
+        service.getLiveStatus();
+
+        assertEquals("성공했으면 실패 기록이 지워져야 한다",
+                0L, failedAt(service, "liveStatusCache"));
+    }
+
+    /**
+     * 이 백오프가 막으려는 상황 그 자체.
+     * 치지직이 죽은 채로 요청이 몰리면, 예전에는 스레드마다 타임아웃을 처음부터 다시 기다렸다.
+     */
+    @Test
+    public void 장애_중_동시에_몰려도_외부는_한_번만_부른다() throws Exception {
+        FakeChzzk chzzk = new FakeChzzk();
+        chzzk.liveStatus = null;        // 치지직 장애
+        chzzk.liveDelayMillis = 200;    // 타임아웃 대역을 줄여서 흉내낸다
+        LiveFeedService service = serviceWith(chzzk);
+
+        int threads = 20;
+        runConcurrently(threads, service::getLiveStatus);
+
+        assertEquals("장애 중 " + threads + " 건이 몰려도 외부 호출은 한 번이어야 한다",
                 1, chzzk.liveCalls.get());
     }
 
@@ -223,9 +307,12 @@ public class LiveFeedServiceTest {
                 3, chzzk.clipCalls.get());
     }
 
-    /** 빈 목록을 캐시하면 장애가 10분간 굳는다 — 다음 요청이 다시 시도해야 한다 */
+    /**
+     * 빈 목록을 값으로 캐시하면 장애가 TTL(10분) 내내 굳는다.
+     * 실패 백오프(30초)만 지나면 다시 시도해야 한다 — 10분을 기다리지 않는다.
+     */
     @Test
-    public void 클립이_비면_캐시하지_않는다() throws Exception {
+    public void 클립이_비면_TTL_만큼_굳지_않는다() throws Exception {
         FakeChzzk chzzk = new FakeChzzk();
         chzzk.clipPage = call -> null; // 치지직 장애
         LiveFeedService service = serviceWith(chzzk);
@@ -234,7 +321,11 @@ public class LiveFeedServiceTest {
         int afterFirst = chzzk.clipCalls.get();
 
         assertNull(service.getClips(6));
-        assertTrue("빈 결과가 캐시되면 안 된다 — 다음 요청이 다시 시도해야 한다",
+        assertEquals("실패 직후에는 다시 두드리면 안 된다", afterFirst, chzzk.clipCalls.get());
+
+        expireBackoff(service, "clipsCache");
+        assertNull(service.getClips(6));
+        assertTrue("백오프가 지나면 다시 시도해야 한다 — TTL 10분을 기다리면 안 된다",
                 chzzk.clipCalls.get() > afterFirst);
     }
 
@@ -308,7 +399,7 @@ public class LiveFeedServiceTest {
 
     /** 첫 페이지부터 실패했으면 만료된 캐시로 폴백시켜야 한다 */
     @Test
-    public void 다시보기가_비면_캐시하지_않는다() throws Exception {
+    public void 다시보기가_비면_TTL_만큼_굳지_않는다() throws Exception {
         FakeChzzk chzzk = new FakeChzzk();
         chzzk.videoPage = page -> null;
         LiveFeedService service = serviceWith(chzzk);
@@ -317,7 +408,11 @@ public class LiveFeedServiceTest {
         int afterFirst = chzzk.videoCalls.get();
 
         assertNull(service.getVideos());
-        assertTrue("빈 결과가 캐시되면 안 된다", chzzk.videoCalls.get() > afterFirst);
+        assertEquals("실패 직후에는 다시 두드리면 안 된다", afterFirst, chzzk.videoCalls.get());
+
+        expireBackoff(service, "videosCache");
+        assertNull(service.getVideos());
+        assertTrue("백오프가 지나면 다시 시도해야 한다", chzzk.videoCalls.get() > afterFirst);
     }
 
     @Test
@@ -393,6 +488,34 @@ public class LiveFeedServiceTest {
 
     // ── 거들 ──────────────────────────────────────────────────
 
+    /** 여러 스레드를 같은 순간에 풀어 놓고 전부 끝나기를 기다린다 */
+    private static void runConcurrently(int threads, Runnable task) throws Exception {
+        CountDownLatch start = new CountDownLatch(1);
+        CountDownLatch done = new CountDownLatch(threads);
+        List<Thread> pool = new ArrayList<Thread>();
+
+        for (int i = 0; i < threads; i++) {
+            Thread thread = new Thread(() -> {
+                try {
+                    start.await();
+                    task.run();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                } finally {
+                    done.countDown();
+                }
+            });
+            pool.add(thread);
+            thread.start();
+        }
+
+        start.countDown();
+        assertTrue("스레드가 제시간에 끝나지 않았다", done.await(10, TimeUnit.SECONDS));
+        for (Thread thread : pool) {
+            thread.join();
+        }
+    }
+
     private static LiveFeedService serviceWith(FakeChzzk chzzk) throws Exception {
         LiveFeedService service = new LiveFeedService();
         Field field = LiveFeedService.class.getDeclaredField("chzzk");
@@ -401,29 +524,66 @@ public class LiveFeedServiceTest {
         return service;
     }
 
+    /** 가장 긴 TTL(10분)과 백오프(30초)보다 확실히 오래 전 */
+    private static final long LONG_AGO_MILLIS = TimeUnit.HOURS.toMillis(1);
+
     /**
      * 캐시를 만료시킨다. TTL 이 1~10분이라 기다릴 수 없어 적재 시각만 과거로 돌린다.
-     * Snapshot 은 값과 시각을 함께 들고 있으므로 값은 그대로 두고 새로 만든다.
+     * 실패 기록은 함께 지운다 — 만료와 백오프가 겹치면 무엇 때문에 안 부르는지 알 수 없다.
      */
-    @SuppressWarnings("unchecked")
     private static void expire(LiveFeedService service, String cacheField) throws Exception {
-        Field field = LiveFeedService.class.getDeclaredField(cacheField);
-        field.setAccessible(true);
-        AtomicReference<Object> ref = (AtomicReference<Object>) field.get(service);
+        rewriteSnapshot(service, cacheField,
+                System.currentTimeMillis() - LONG_AGO_MILLIS, 0L);
+    }
 
-        Object snapshot = ref.get();
-        assertNotNull(cacheField + " 이 아직 비어 있다 — 만료시킬 값이 없다", snapshot);
+    /** 실패 백오프만 풀어준다. 적재 시각은 건드리지 않는다 */
+    private static void expireBackoff(LiveFeedService service, String cacheField) throws Exception {
+        rewriteSnapshot(service, cacheField,
+                snapshotLong(service, cacheField, "loadedAt"),
+                System.currentTimeMillis() - LONG_AGO_MILLIS);
+    }
 
-        Class<?> snapshotType = snapshot.getClass();
-        Field valueField = snapshotType.getDeclaredField("value");
+    /** 실패 기록이 남아 있는가 — 복구 뒤 지워졌는지 확인할 때 쓴다 */
+    private static long failedAt(LiveFeedService service, String cacheField) throws Exception {
+        return snapshotLong(service, cacheField, "failedAt");
+    }
+
+    /** 값은 그대로 두고 시각만 바꿔 새 Snapshot 으로 갈아 끼운다 */
+    private static void rewriteSnapshot(LiveFeedService service, String cacheField,
+                                        long loadedAt, long failedAt) throws Exception {
+        Object snapshot = snapshotOf(service, cacheField);
+
+        Field valueField = snapshot.getClass().getDeclaredField("value");
         valueField.setAccessible(true);
 
-        Constructor<?> constructor = snapshotType.getDeclaredConstructor(Object.class, long.class);
+        Constructor<?> constructor = snapshot.getClass()
+                .getDeclaredConstructor(Object.class, long.class, long.class);
         constructor.setAccessible(true);
 
-        // 가장 긴 TTL(10분)보다 확실히 오래 전으로
-        long longAgo = System.currentTimeMillis() - TimeUnit.HOURS.toMillis(1);
-        ref.set(constructor.newInstance(valueField.get(snapshot), longAgo));
+        cacheRef(service, cacheField).set(
+                constructor.newInstance(valueField.get(snapshot), loadedAt, failedAt));
+    }
+
+    private static long snapshotLong(LiveFeedService service, String cacheField, String name)
+            throws Exception {
+        Object snapshot = snapshotOf(service, cacheField);
+        Field field = snapshot.getClass().getDeclaredField(name);
+        field.setAccessible(true);
+        return field.getLong(snapshot);
+    }
+
+    private static Object snapshotOf(LiveFeedService service, String cacheField) throws Exception {
+        Object snapshot = cacheRef(service, cacheField).get();
+        assertNotNull(cacheField + " 이 아직 비어 있다 — 손댈 값이 없다", snapshot);
+        return snapshot;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static AtomicReference<Object> cacheRef(LiveFeedService service, String cacheField)
+            throws Exception {
+        Field field = LiveFeedService.class.getDeclaredField(cacheField);
+        field.setAccessible(true);
+        return (AtomicReference<Object>) field.get(service);
     }
 
     /** 매 호출마다 새 클립 50개와 다음 커서를 주는, 끝나지 않는 목록 */

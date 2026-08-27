@@ -21,6 +21,15 @@ public class LiveFeedService {
     private static final long CACHE_DURATION = 10 * 60 * 1000; // 10분 (클립/비디오)
     private static final long LIVE_CACHE_DURATION = 1 * 60 * 1000; // 1분 (방송 상태)
 
+    /**
+     * 갱신에 실패한 뒤 다시 두드리기까지. 치지직이 죽으면 호출 하나가 5초(READ_TIMEOUT)를
+     * 통째로 쓰므로, 이 시간이 없으면 요청마다 그 5초를 처음부터 다시 기다린다.
+     *
+     * 가장 짧은 TTL(방송 상태 1분)보다 짧게 둔다 — 복구를 알아채는 데 걸리는 시간이
+     * 정상일 때의 갱신 주기보다 늦어지면 안 된다.
+     */
+    private static final long FAILURE_BACKOFF = 30 * 1000; // 30초
+
     private static final int CLIP_INITIAL_PAGES = 2;   // 첫 요청에 미리 담아둘 분량
     public static final int CLIP_MAX = 3000;           // 메모리 상한
     private static final int CLIP_PAGES_PER_REQUEST = 10; // 한 요청이 외부에 낼 수 있는 최대 호출
@@ -138,7 +147,8 @@ public class LiveFeedService {
                     return current;
                 }
 
-                clipsCache.set(new Snapshot<ClipFeed>(grown, System.currentTimeMillis()));
+                // 이어 받는 데 성공했으니 실패 기록도 지운다
+                clipsCache.set(new Snapshot<ClipFeed>(grown, System.currentTimeMillis(), 0L));
                 return grown;
             }
         } finally {
@@ -218,48 +228,74 @@ public class LiveFeedService {
         return videos.isEmpty() ? null : videos;
     }
 
-    /** 값과 적재 시각을 함께 담는다. 따로 두면 "새 값 + 옛 시각" 조합이 보인다. */
+    /**
+     * 값·적재 시각·마지막 실패 시각을 함께 담는다. 따로 두면 "새 값 + 옛 시각" 조합이 보인다.
+     * 실패 시각도 여기 둔다 — 값과 짝이 맞아야 "언제 받은 값을 언제부터 못 갱신하고 있는지"가 하나로 읽힌다.
+     */
     private static final class Snapshot<T> {
         final T value;
         final long loadedAt;
 
-        Snapshot(T value, long loadedAt) {
+        /** 마지막으로 갱신에 실패한 시각. 실패한 적이 없으면 0 */
+        final long failedAt;
+
+        Snapshot(T value, long loadedAt, long failedAt) {
             this.value = value;
             this.loadedAt = loadedAt;
+            this.failedAt = failedAt;
         }
 
+        /** 실패 기록은 값 없이도 남으므로 value 를 함께 본다 */
         boolean isFresh(long ttl) {
-            return System.currentTimeMillis() - loadedAt <= ttl;
+            return value != null && System.currentTimeMillis() - loadedAt <= ttl;
+        }
+
+        /** 방금 실패했는가 — 그렇다면 다시 두드리지 않는다 */
+        boolean inBackoff() {
+            return failedAt != 0 && System.currentTimeMillis() - failedAt < FAILURE_BACKOFF;
         }
     }
 
-    /** 만료면 갱신한다. 갱신은 한 스레드만, 실패하면 만료된 값이라도 돌려준다. */
+    /**
+     * 만료면 갱신한다. 갱신은 한 스레드만, 실패하면 만료된 값이라도 돌려준다.
+     *
+     * 실패를 적어두는 것이 중요하다. 안 적으면 치지직이 죽었을 때 요청마다 락 안에서
+     * 5초 타임아웃을 처음부터 다시 기다린다 — 스레드가 줄줄이 밀린다.
+     * 락 안에서도 백오프를 보는 이유는, 이미 락 앞에 줄 서 있던 스레드들이
+     * 첫 스레드의 실패를 보고 그 자리에서 물러나야 하기 때문이다.
+     */
     private <T> T cached(AtomicReference<Snapshot<T>> ref, Object lock,
                          long ttl, Supplier<T> loader) {
 
         Snapshot<T> snapshot = ref.get();
-        if (snapshot != null && snapshot.isFresh(ttl)) {
+        if (snapshot != null && (snapshot.isFresh(ttl) || snapshot.inBackoff())) {
             return snapshot.value;
         }
 
         synchronized (lock) {
-            // 기다리는 동안 다른 스레드가 갱신했을 수 있다
+            // 기다리는 동안 다른 스레드가 갱신했거나, 갱신에 실패했을 수 있다
             snapshot = ref.get();
-            if (snapshot != null && snapshot.isFresh(ttl)) {
+            if (snapshot != null && (snapshot.isFresh(ttl) || snapshot.inBackoff())) {
                 return snapshot.value;
             }
 
             try {
                 T loaded = loader.get();
                 if (loaded != null) {
-                    ref.set(new Snapshot<>(loaded, System.currentTimeMillis()));
+                    // 성공했으니 실패 기록도 지운다 — 치지직이 돌아왔다
+                    ref.set(new Snapshot<>(loaded, System.currentTimeMillis(), 0L));
                     return loaded;
                 }
             } catch (Exception ignored) {
-                // 아래에서 만료된 값으로 폴백한다
+                // 아래에서 실패를 적어두고 만료된 값으로 물러난다
             }
 
-            return snapshot != null ? snapshot.value : null;
+            // 값과 적재 시각은 그대로 두고 실패 시각만 새로 찍는다.
+            // 값을 버리면 백오프 동안 화면이 빈다.
+            T stale = (snapshot != null) ? snapshot.value : null;
+            long staleAt = (snapshot != null) ? snapshot.loadedAt : 0L;
+            ref.set(new Snapshot<>(stale, staleAt, System.currentTimeMillis()));
+            return stale;
         }
     }
 }
