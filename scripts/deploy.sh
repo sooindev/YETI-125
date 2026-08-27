@@ -122,7 +122,7 @@ set -uo pipefail
 WEBAPPS=/var/lib/tomcat9/webapps
 
 # API 하나만 보면 JSP 가 전부 깨져도 통과한다 (2026-08-24 장애).
-# DB 연동 · 페이지 렌더 · 관리자 입구를 함께 본다.
+# DB 연동 · 페이지 렌더 · 관리자 입구 · 오류 화면을 함께 본다.
 CHECKS="
 http://localhost:8080/schedule/list?start=2020-01-01&end=2030-12-31
 http://localhost:8080/
@@ -130,6 +130,9 @@ http://localhost:8080/schedule
 http://localhost:8080/info
 http://localhost:8080/admin/admin-login
 "
+
+# 오류 화면 검증용 주소. 아무 핸들러에도 걸리지 않아야 404 가 난다.
+ERROR_URL="http://localhost:8080/__deploy-check-404__"
 
 [ -f /tmp/yeti-125.war ] || { echo "전송된 war 가 없습니다"; exit 1; }
 
@@ -150,26 +153,56 @@ deploy_war() {
   systemctl start tomcat9
 }
 
-# 모든 주소가 200 이어야 통과. 하나라도 아니면 그 주소를 알려준다
+# 200 이어야 하는 주소들. 첫 실패만 알려주고 멈춘다
+check_pages() {
+  local url code
+  for url in $CHECKS; do
+    code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 3 "$url" || true)
+    if [ "$code" != "200" ]; then
+      echo "$url → ${code:-무응답} (기대 200)"
+      return 0
+    fi
+  done
+}
+
+# 오류 화면도 함께 본다.
+#
+# 200 페이지만 확인하면 놓치는 회귀가 있다 — 필터의 <dispatcher> 에 ERROR 가 빠지면
+# 404·500 페이지만 보안 헤더 없이 나가는데, 정상 페이지는 멀쩡해서 티가 안 난다
+# (트러블슈팅의 "404·500 페이지에만 보안 헤더가 붙지 않던 문제").
+#
+# 상태 코드만 보면 안 된다. 톰캣이 뜨긴 했는데 우리 앱이 아직 안 붙은 순간에도
+# 404 는 나온다 — 그때는 톰캣의 기본 404 라 헤더가 없다. 헤더까지 확인해야
+# "우리 오류 화면이 우리 필터를 타고 나왔다"가 증명된다.
+check_error_page() {
+  local head code
+  head=$(curl -s -D - -o /dev/null --max-time 3 "$ERROR_URL" || true)
+  code=$(printf '%s\n' "$head" | head -1 | awk '{print $2}')
+
+  if [ "$code" != "404" ]; then
+    echo "$ERROR_URL → ${code:-무응답} (기대 404)"
+  elif ! printf '%s\n' "$head" | grep -qi '^content-security-policy:'; then
+    echo "$ERROR_URL → 404 는 맞지만 보안 헤더가 없다 — web.xml 의 <dispatcher>ERROR</dispatcher> 확인"
+  fi
+}
+
+# 전부 통과해야 배포를 확정한다. 하나라도 아니면 그 주소를 알려준다
 wait_ok() {
-  local url code last=""
+  local failed=""
   for _ in $(seq 1 30); do
-    last=""
-    for url in $CHECKS; do
-      code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 3 "$url" || true)
-      [ "$code" = "200" ] || { last="$url → ${code:-무응답}"; break; }
-    done
-    [ -z "$last" ] && { echo "전체 200"; return 0; }
+    failed="$(check_pages)"
+    [ -n "$failed" ] || failed="$(check_error_page)"
+    [ -z "$failed" ] && { echo "정상 페이지 + 오류 화면 모두 통과"; return 0; }
     sleep 2
   done
-  echo "$last"
+  echo "$failed"
   return 1
 }
 
 echo "   새 war 배포 중..."
 deploy_war /tmp/yeti-125.war
 
-echo "   DB 연동까지 검증 중 (최대 60초)..."
+echo "   DB 연동 · 페이지 · 오류 화면까지 검증 중 (최대 60초)..."
 if CODE=$(wait_ok); then
   echo "   검증 통과 ($CODE)"
   exit 0
