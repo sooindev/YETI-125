@@ -39,6 +39,13 @@ chzzk API와 연동해 실시간 방송 상태를 보여주고,
 
 <br>
 
+> **처음 오셨다면 → [YETI-125 설계도](https://claude.ai/code/artifact/c8bf3548-904d-44b6-91d1-e9de9e328aac)**
+>
+> 폴더 구조와 요청 하나가 화면이 되기까지의 흐름을, 함수 단위까지 그림으로 풀어 쓴 해설서입니다.
+> 이 README 는 운영과 의사결정 기록에 집중하고, 구조 설명은 그쪽이 더 자세합니다.
+
+<br>
+
 ## 기능
 
 ### 홈
@@ -110,7 +117,7 @@ chzzk API와 연동해 실시간 방송 상태를 보여주고,
 | 데이터베이스 | MariaDB · HikariCP |
 | 프론트엔드 | HTML5 · CSS3 · JavaScript · jQuery 3.7 |
 | 라이브러리 | FullCalendar 6.1 · Jackson · Hibernate Validator |
-| 테스트 | JUnit 4 |
+| 테스트 | JUnit 4 (186개) |
 | 외부 API | [chzzk API](https://chzzk.naver.com/) · 클립 임베드 플레이어 |
 | 빌드 / 서버 | Maven · Apache Tomcat 9 |
 
@@ -150,7 +157,7 @@ flowchart LR
 
 ### 요청 처리 파이프라인
 
-필터 다섯 개가 순서대로 지나갑니다. 순서는 `web.xml` 의 `filter-mapping` 선언 순입니다.
+필터 여섯 개가 순서대로 지나갑니다. 순서는 `web.xml` 의 `filter-mapping` 선언 순입니다.
 
 `adminLoginFilter` 가 `DispatcherServlet` **앞에서** 도는 것이 중요합니다.
 정적 HTML까지 막아주는 대신, 인증 실패 응답을 이 필터가 직접 만들어야 합니다
@@ -162,8 +169,9 @@ flowchart TD
     E --> Q1{"/resources/* ?"}
     Q1 -->|예| SE["staticResourceEncodingFilter\nContent-Type charset"]
     Q1 -->|아니오| SC
-    SE --> SC["staticResourceCacheFilter\n/* · 캐시 재검증 + 보안 헤더"]
-    SC --> Q2{"/admin/* ?"}
+    SE --> SC["staticResourceCacheFilter\n/* · 캐시 재검증 + 보안 헤더\nREQUEST · ERROR"]
+    SC --> LR["legacyHtmlRedirectFilter\n/* · 옛 .html → 정규 주소 301"]
+    LR --> Q2{"/admin/* ?"}
     Q2 -->|아니오| DS
     Q2 -->|예| AL["adminLoginFilter\n세션 확인"]
     AL --> CF["csrfFilter\nPOST·PUT·DELETE 토큰 검증"]
@@ -171,6 +179,12 @@ flowchart TD
     DS --> IC["AdminLoginInterceptor\n/admin/** 재확인"]
     IC --> CT(["Controller"])
 ```
+
+`staticResourceCacheFilter` 만 `<dispatcher>` 를 두 개 선언합니다.
+필터 기본값은 `REQUEST` 뿐이라, 그대로 두면 `<error-page>` 로 넘어가는 404·500 응답에는
+이 필터가 아예 돌지 않아 **그 두 페이지만 보안 헤더 없이 나갑니다**
+(트러블슈팅의 "404·500 페이지에만 보안 헤더가 붙지 않던 문제" 참고).
+`<dispatcher>` 를 하나라도 쓰면 기본값이 사라지므로 `REQUEST` 를 함께 적어야 합니다.
 
 ### 데이터 모델
 
@@ -207,6 +221,26 @@ erDiagram
         char del_yn
     }
 ```
+
+### 치지직 연동과 캐시
+
+방송 상태·클립·다시보기는 우리 데이터가 아니라 매번 치지직에 물어야 하는 값입니다.
+호출 하나가 최대 5초(`READ_TIMEOUT`)를 쓰기 때문에 그대로 두면
+방문자 수만큼 그 시간이 곱해집니다. `LiveFeedService` 가 앞에서 이것을 흡수합니다.
+
+| 상태 | 하는 일 | 기준 |
+|---|---|---|
+| 캐시가 신선함 | 치지직을 부르지 않고 보관한 값을 준다 | 방송 상태 1분 · 클립/다시보기 10분 |
+| 만료됨 | **한 스레드만** 갱신하러 가고 나머지는 그 결과를 나눠 쓴다 | 락 + 이중 확인 |
+| 갱신 실패 | 오류 대신 **만료된 값이라도** 돌려준다 | 화면이 죽지 않게 |
+| 방금 실패함 | 잠시 동안은 다시 두드리지 않는다 | 30초 (`FAILURE_BACKOFF`) |
+
+마지막 줄이 없으면 치지직이 멈춘 동안 요청마다 락 안에서 5초를 처음부터 다시 기다립니다
+(트러블슈팅의 "치지직이 멈추면 요청마다 타임아웃을 다시 기다리는 문제" 참고).
+
+백오프는 가장 짧은 TTL(방송 상태 1분)보다 짧게 둡니다 —
+복구를 알아채는 데 걸리는 시간이 정상일 때의 갱신 주기보다 늦어지면 안 되기 때문입니다.
+갱신에 성공하면 실패 기록은 지웁니다.
 
 <br>
 
@@ -247,7 +281,7 @@ OS 모드를 바꿔도 새로고침 없이 그 자리에서 바뀝니다.
 | 무차별 대입 | 계정 기준 실패 횟수 제한 · 자동 해제 · 추적 항목 수 상한 |
 | 계정 열거 | 아이디 존재 여부와 무관하게 같은 시간을 들여 응답 |
 | 자원 남용 | 일정 조회 기간 상한 · 로그인 아이디 길이 상한 |
-| 응답 헤더 | CSP · HSTS · `X-Frame-Options` · `X-Content-Type-Options` |
+| 응답 헤더 | CSP · HSTS · `X-Frame-Options` · `X-Content-Type-Options` · `Referrer-Policy` (오류 페이지 포함) |
 | 외부 스크립트 | jQuery · FullCalendar 에 SRI 해시 |
 
 비밀번호 저장 포맷은 알고리즘 이름을 앞에 둡니다.
@@ -287,6 +321,15 @@ CSP 의 `script-src` 에는 `'unsafe-inline'` 이 없습니다.
 페이지에서 인라인 `onclick` 을 전부 걷어냈기 때문입니다.
 닫기 버튼 하나를 인라인으로 되돌리는 순간 이 방어가 통째로 무의미해지므로,
 새 핸들러는 `data-*` 속성과 이벤트 위임으로 붙입니다.
+
+이 규칙은 `StaticResourceCacheFilter` 가 **실제로 내보낸 응답 헤더**를 읽어 검사합니다
+(`StaticResourceCacheFilterTest`). `script-src` 에 `'unsafe-inline'` 이나 `'unsafe-eval'` 이
+들어오면 빌드가 깨집니다. 상수를 직접 읽지 않는 이유는, 그러면 필터가 헤더를 안 붙여도
+테스트가 통과하기 때문입니다. 같은 테스트가 `object-src 'none'` · `frame-ancestors 'none'` ·
+`base-uri 'self'` · `form-action 'self'` 처럼 빠져도 티가 안 나는 지시자들도 함께 못 박습니다.
+
+보안 헤더는 404·500 오류 페이지에도 붙습니다. 필터 기본 디스패치가 `REQUEST` 뿐이라
+예전에는 그 두 페이지만 빠져나갔습니다 (트러블슈팅 참고).
 
 `SameSite` 는 Servlet 4.0 의 `<cookie-config>` 에 항목이 없어
 `webapp/META-INF/context.xml` 의 톰캣 쿠키 처리기로 지정합니다.
@@ -576,6 +619,8 @@ YETI-125/
 │       │                      비밀번호 · 로그인 검증 · 시도 제한 · 인증 두 겹
 │       │                      일정 저장·조회 · 치지직 파싱 · 페이지네이션
 │       │                      입력 검증 · 조회 기간 · JSON 날짜 형식
+│       │                      치지직 캐시 · 장애 폴백 · 백오프 · 커서 페이징
+│       │                      보안 헤더 · CSP 지시자 · web.xml 매핑
 │       └── resources/         logback-test.xml — 테스트는 파일 로그를 남기지 않는다
 ├── .github/
 │   ├── workflows/test.yml 푸시·PR 마다 mvn test
@@ -695,6 +740,40 @@ JSP 는 미리 컴파일되지 않고 첫 요청 때 톰캣이 컴파일합니�
 `Cache-Control: no-cache` 를 지정했습니다.
 변경이 없으면 304만 오가므로 대역폭 부담은 거의 없습니다.
 
+확장자로만 거르면 `/schedule` 처럼 확장자 없는 페이지 주소가 빠져나가
+이 필터가 무의미해집니다. 마지막 `/` 뒤에 `.` 이 없으면 페이지 주소로 봅니다.
+
+#### 404·500 페이지에만 보안 헤더가 붙지 않던 문제
+
+응답 헤더를 훑어보다 발견했습니다. 모든 페이지에 CSP·`X-Frame-Options`·HSTS 가
+붙는데 오류 페이지 둘만 하나도 없었습니다. 필터 코드에는 조건 분기가 없었고
+`web.xml` 의 매핑도 `/*` 라 안 걸릴 이유가 없어 보였습니다.
+
+서블릿 명세 때문입니다. `filter-mapping` 에 `<dispatcher>` 를 적지 않으면
+기본값은 `REQUEST` **하나뿐**입니다. `<error-page>` 로 넘어가는 응답은
+`ERROR` 디스패치라서 필터 체인을 다시 타지 않습니다.
+매핑이 `/*` 든 아니든 상관이 없었던 것입니다.
+
+하필 `500.jsp` 는 바깥에서 온 주소(`javax.servlet.error.request_uri`)를
+"다시 시도" 링크로 되심는 페이지입니다. 그쪽에서도 `//` 를 막고 이스케이프하지만,
+겹겹이 두는 것이 이 필터의 존재 이유입니다.
+
+```xml
+<filter-mapping>
+  <filter-name>staticResourceCacheFilter</filter-name>
+  <url-pattern>/*</url-pattern>
+  <dispatcher>REQUEST</dispatcher>   <!-- 적는 순간 기본값이 사라진다 -->
+  <dispatcher>ERROR</dispatcher>
+</filter-mapping>
+```
+
+`REQUEST` 를 같이 적는 것이 중요합니다. `ERROR` 만 적으면 정반대로
+**일반 요청에서** 헤더가 사라집니다.
+
+설정 파일의 문제라 코드로는 드러나지 않습니다.
+`StaticResourceCacheFilterTest` 가 `web.xml` 을 직접 읽어 두 선언이 남아 있는지 확인합니다
+(`servlet-context.xml` 과 VO 를 대조하는 `ScheduleVOJsonFormatTest` 와 같은 방식입니다).
+
 #### 다시보기는 임베드되지 않는 문제
 
 클립과 같은 방식으로 다시보기도 사이트 안에서 재생하려 했으나 되지 않았습니다.
@@ -752,6 +831,41 @@ flowchart TD
     GT --> MG["락 안에서 병합 · 캐시 교체"]
     MG --> PG
 ```
+
+#### 치지직이 멈추면 요청마다 타임아웃을 다시 기다리는 문제
+
+치지직이 응답하지 않는 동안 사이트 전체가 느려졌습니다.
+캐시는 만료된 값으로 물러나도록 돼 있어서 화면이 죽지는 않았는데,
+응답이 오기까지 몇 초씩 걸렸습니다.
+
+`LiveFeedService.cached()` 가 **실패를 기억하지 않는 것**이 원인이었습니다.
+성공하면 값과 적재 시각을 남기지만, 실패하면 만료된 값을 돌려주고 아무것도 적지 않습니다.
+그래서 다음 요청은 여전히 "만료됨" 상태를 보고 락을 잡은 뒤
+5초 타임아웃을 처음부터 다시 기다립니다. 요청이 몰리면 그 5초가 줄줄이 직렬로 쌓입니다.
+
+`Snapshot` 에 `failedAt` 을 더해 값·적재 시각·실패 시각을 한 객체에 담았습니다.
+"값과 시각을 따로 두면 새 값 + 옛 시각 조합이 보인다"는 이유가 실패 시각에도 그대로 적용됩니다.
+
+**락 안에서도 백오프를 보는 것이 핵심입니다.** 이미 락 앞에 줄 서 있던 스레드들이
+첫 스레드의 실패를 보고 그 자리에서 물러나야 합니다. 락 밖에서만 확인하면
+줄 서 있던 것들은 그대로 통과해 각자 타임아웃을 기다립니다.
+
+값은 버리지 않습니다. 버리면 백오프 30초 동안 화면이 빕니다.
+
+같은 조건(동시 20건 · 타임아웃 대역 200ms)에서 3회씩 측정한 결과입니다.
+
+| | 외부 호출 | 벽시계 시간 |
+|---|---|---|
+| 고치기 전 | 20회 | 4073 · 4063 · 4080 ms |
+| 고친 뒤 | **1회** | **206 · 206 · 207 ms** |
+
+이 클래스는 테스트가 없었기 때문에 백오프를 넣기 **전에** 먼저 붙였습니다.
+TTL 이 1~10분이라 기다릴 수 없어, `Snapshot` 의 적재 시각만 과거로 돌리는
+리플렉션 헬퍼로 만료를 만듭니다.
+
+한 가지가 함께 바뀌었습니다. 치지직이 죽어 목록이 비면 예전에는 다음 요청이
+곧바로 다시 시도했는데, 이제 30초 동안은 두드리지 않습니다.
+**빈 목록이 TTL 10분 내내 굳지 않는다는 성질은 그대로입니다** — 기다리는 시간이 30초로 바뀐 것뿐입니다.
 
 #### hidden 속성을 붙였는데 계속 보이는 문제
 
