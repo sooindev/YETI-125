@@ -45,7 +45,9 @@ function checkLiveStatus() {
 }
 
 function showLiveHero(data) {
-    $('#liveTitle').text(data.liveTitle || '이리온 방송 중!');
+    const title = data.liveTitle || '이리온 방송 중!';
+    // 제목은 CSS 에서 세 줄에 자른다. 잘린 뒤를 마우스로도 볼 수 있게 원문을 남긴다
+    $('#liveTitle').text(title).attr('title', title);
     $('#liveLink').attr('href', YetiUtil.safeUrl(data.channelUrl));
 
     // .attr() 은 값을 그대로 넣는다. 스킴은 여기서도 확인한다.

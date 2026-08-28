@@ -148,7 +148,7 @@
           <span class="kicker live-kicker">
             <span class="live-dot"></span> On Air — Live
           </span>
-          <h2 id="liveTitle" class="live-title display">방송 중</h2>
+          <h2 id="liveTitle" class="live-title">방송 중</h2>
           <div class="live-stat">
             <span class="idx">VIEWERS</span>
             <span id="liveViewers" class="live-viewers"></span>

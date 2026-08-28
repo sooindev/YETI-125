@@ -182,10 +182,28 @@ main { padding-top: var(--head-total); }
     0%, 100% { opacity: 1; box-shadow: 0 0 0 0 var(--frost-glow); }
     50%      { opacity: 0.5; box-shadow: 0 0 0 7px transparent; }
 }
+/* 방송 제목만 길이를 모르는 실데이터다. 고정 워드마크용 .display 를 쓰지 않는다 —
+   Anton 에는 한글 글리프가 없어 폴백이 걸리고(영문만 Anton, 한글은 Noto),
+   uppercase 는 섞인 영문만 바꾸며, 줄높이 0.92 는 한글 잉크(줄상자의 102%)를
+   윗줄과 겹치게 만든다. 한글 본문 규칙(--f-kr · keep-all · 줄 자르기)을 따른다. */
 .live-title {
-    font-size: clamp(2.8rem, 6vw, 5.4rem);
+    font-family: var(--f-kr);
+    font-weight: 700;
+    /* 한 줄에 16~18자가 들어가는 크기. 보통 길이 제목이 세 줄 안에 다 들어간다 */
+    font-size: clamp(1.35rem, 0.95rem + 1.55vw, 2.05rem);
+    line-height: 1.4;
+    letter-spacing: -0.015em;
     color: var(--bone);
-    margin: 20px 0 28px;
+    margin: 18px 0 26px;
+    /* 한글은 단어 중간에서 끊지 않는다. 띄어쓰기 없는 긴 영문·URL 만 강제로 접는다 */
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+    /* 제목이 길어도 시청자 수와 썸네일이 화면 밖으로 밀려나지 않게 세 줄에서 자른다.
+       잘린 전체 제목은 index.js 가 title 속성으로 남긴다 */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 .live-stat {
     display: flex;
@@ -569,6 +587,14 @@ main { padding-top: var(--head-total); }
 
 @media (max-width: 560px) {
     .card-grid { grid-template-columns: 1fr; }
+}
+
+/* 눕힌 폰 — 세로가 390px 남짓이라 제목 세 줄이면 썸네일이 접힌 화면 밖으로 나간다 */
+@media (max-height: 520px) and (orientation: landscape) {
+    .live-title {
+        -webkit-line-clamp: 2;
+        margin: 12px 0 18px;
+    }
 }
 
 /* 클립 모달 — 치지직 공식 임베드로 사이트 안에서 재생 */
