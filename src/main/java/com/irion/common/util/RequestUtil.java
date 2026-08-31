@@ -32,6 +32,9 @@ public final class RequestUtil {
     /**
      * 컨텍스트 경로를 뗀 정규화 경로. 항상 "/" 로 시작한다.
      * getRequestURI() 원본으로 인증 예외를 판정하면 /admin/x/../admin-schedule 같은 요청에 뚫린다.
+     *
+     * 톰캣이 필터를 고르고 스프링이 컨트롤러를 고를 때 쓰는 경로와 같은 모양이어야 한다.
+     * 어긋나면 "필터는 딴 주소로 보고 통과시켰는데 스프링은 관리자 화면으로 보낸" 상태가 된다.
      */
     public static String normalizedPath(HttpServletRequest request) {
         String uri = request.getRequestURI();
@@ -40,6 +43,10 @@ public final class RequestUtil {
         String path = (contextPath != null && !contextPath.isEmpty() && uri.startsWith(contextPath))
                 ? uri.substring(contextPath.length())
                 : uri;
+
+        // 디코딩보다 먼저 떼야 한다 — 톰캣이 그 순서다.
+        // 뒤에 떼면 %3B 로 보낸 진짜 세미콜론까지 잘라내 이번엔 반대로 어긋난다.
+        path = stripPathParameters(path);
 
         try {
             path = URLDecoder.decode(path, "UTF-8");
@@ -67,5 +74,37 @@ public final class RequestUtil {
             normalized.append('/').append(segment);
         }
         return normalized.length() == 0 ? "/" : normalized.toString();
+    }
+
+    /**
+     * 경로 파라미터를 뗀다 — 세그먼트마다 ';' 부터 다음 '/' 까지.
+     *
+     * /admin;x=1/schedule 을 톰캣도 스프링도 /admin/schedule 로 읽는다.
+     * 여기서만 ';x=1' 을 들고 있으면 "/admin/" 으로 시작하지 않는 것처럼 보여
+     * 인증 검사를 통째로 건너뛴다.
+     */
+    static String stripPathParameters(String path) {
+        int semicolon = path.indexOf(';');
+        if (semicolon < 0) {
+            return path;
+        }
+
+        StringBuilder stripped = new StringBuilder(path.length());
+        int from = 0;
+
+        while (semicolon >= 0) {
+            stripped.append(path, from, semicolon);
+
+            int slash = path.indexOf('/', semicolon);
+            if (slash < 0) {
+                // 마지막 세그먼트였다 — 뒤는 전부 파라미터다
+                return stripped.toString();
+            }
+
+            from = slash;
+            semicolon = path.indexOf(';', slash);
+        }
+
+        return stripped.append(path.substring(from)).toString();
     }
 }

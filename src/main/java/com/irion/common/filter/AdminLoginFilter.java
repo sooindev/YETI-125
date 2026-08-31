@@ -34,7 +34,7 @@ public class AdminLoginFilter implements Filter {
         String contextPath = httpRequest.getContextPath();
         String path = RequestUtil.normalizedPath(httpRequest);
 
-        if (path.startsWith("/admin/") && !PUBLIC_PATHS.contains(path)) {
+        if (isAdminPath(path) && !PUBLIC_PATHS.contains(path)) {
 
             HttpSession session = httpRequest.getSession(false);
 
@@ -53,6 +53,14 @@ public class AdminLoginFilter implements Filter {
         }
 
         chain.doFilter(request, response);
+    }
+
+    /**
+     * 관리자 영역인가. "/admin/" 으로만 보면 정확히 "/admin" 인 요청이 빠져나간다 —
+     * 톰캣의 /admin/* 매핑과 스프링의 /admin/** 매핑은 둘 다 그것까지 관리자로 본다.
+     */
+    private static boolean isAdminPath(String path) {
+        return "/admin".equals(path) || path.startsWith("/admin/");
     }
 
     @Override

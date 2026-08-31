@@ -94,6 +94,24 @@ public class AdminLoginFilterTest {
         assertBlocked("/admin/loginProc/..\\admin-schedule.html");
     }
 
+    /**
+     * 톰캣은 /admin;x=1/schedule 을 /admin/* 매핑으로 이 필터에 넘기고,
+     * 스프링도 ';x=1' 을 떼고 관리자 컨트롤러로 보낸다. 필터만 딴 주소로 보면
+     * 인증 검사를 건너뛴 채 관리자 화면까지 흘러간다.
+     */
+    @Test
+    public void 경로_파라미터로_우회할_수_없다() throws Exception {
+        assertBlocked("/admin;x=1/schedule");
+        assertBlocked("/admin/schedule;jsessionid=ABC123");
+        assertBlocked("/admin;x=1/loginProc/../admin-schedule.html");
+    }
+
+    /** /admin 은 관리자 첫 화면으로 보내는 자리다 — 여기도 로그인 뒤에 볼 일이다 */
+    @Test
+    public void 슬래시_없는_admin_도_막는다() throws Exception {
+        assertBlocked("/admin");
+    }
+
     /** 반대 방향 — 공개 경로에 뭔가 덧붙인 것은 공개가 아니다 */
     @Test
     public void 공개_경로에_덧붙인_것은_공개가_아니다() throws Exception {
