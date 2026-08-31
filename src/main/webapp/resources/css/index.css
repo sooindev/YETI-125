@@ -361,6 +361,46 @@ main { padding-top: var(--head-total); }
     transform: scale(1.05);
 }
 
+/* 썸네일 대체 자리 — 19금 방송·다시보기는 치지직이 이미지 주소를 주지 않는다.
+   빈 src 로 깨진 아이콘을 띄우는 대신 이 자리를 채운다. 클립·다시보기 카드와
+   라이브 히어로가 모두 position: relative 라 inset 으로 그대로 덮인다. */
+.thumb-fallback {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background: var(--frost-soft);
+    /* 비어 있는 게 아니라 가려 둔 자리라는 표시 */
+    background-image: repeating-linear-gradient(-45deg,
+        rgba(var(--shadow-rgb), 0.05) 0 8px,
+        transparent 8px 16px);
+}
+.thumb-fallback-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px; height: 46px;
+    border: 2px solid var(--bone-faint);
+    border-radius: 50%;
+    font-family: var(--f-mono);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--bone-dim);
+}
+.thumb-fallback-note {
+    font-family: var(--f-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--bone-faint);
+}
+/* 히어로는 카드보다 훨씬 넓다 — 카드와 같은 크기로 두면 한가운데 점처럼 보인다 */
+.live-thumb .thumb-fallback-badge { width: 68px; height: 68px; font-size: 1.4rem; }
+.live-thumb .thumb-fallback-note { font-size: 0.82rem; }
+
 .clip-duration,
 .video-duration {
     position: absolute;

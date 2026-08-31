@@ -155,7 +155,10 @@
           </div>
         </div>
         <a id="liveLink" href="#" target="_blank" class="live-thumb">
-          <img id="liveThumbnail" src="" alt="방송 썸네일" width="1280" height="720">
+          <%-- src 를 비워두면 브라우저가 페이지 자신을 이미지로 받아 깨진 아이콘을 그린다.
+               19금 방송은 치지직이 주소를 주지 않으므로, 주소가 온 뒤에 index.js 가 켠다. --%>
+          <img id="liveThumbnail" alt="방송 썸네일" width="1280" height="720" style="display: none;">
+          <div id="liveThumbFallback"></div>
           <span class="live-thumb-cta">
             <span class="play-icon">▶</span> Watch Stream
           </span>

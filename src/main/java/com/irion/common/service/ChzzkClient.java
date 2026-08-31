@@ -84,7 +84,9 @@ public class ChzzkClient {
 
         if (isLive) {
             data.put("liveTitle", text(root, "liveTitle"));
+            // 19금 방송은 liveImageUrl 이 null 로 온다 — 화면이 대체 자리를 그릴 수 있게 adult 도 함께 넘긴다
             data.put("thumbnail", text(root, "liveImageUrl").replace("{type}", "480"));
+            data.put("adult", bool(root, "adult"));
             data.put("viewerCount", number(root, "concurrentUserCount"));
         }
 
@@ -133,6 +135,7 @@ public class ChzzkClient {
         clip.put("clipId", clipUID);
         clip.put("clipTitle", text(json, "clipTitle"));
         clip.put("thumbnailUrl", text(json, "thumbnailImageUrl"));
+        clip.put("adult", bool(json, "adult"));
         clip.put("viewCount", number(json, "readCount"));
         clip.put("duration", number(json, "duration"));
         clip.put("createdAt", text(json, "createdDate"));
@@ -149,6 +152,7 @@ public class ChzzkClient {
         video.put("videoNo", videoNo);
         video.put("videoTitle", text(json, "videoTitle"));
         video.put("thumbnailUrl", text(json, "thumbnailImageUrl"));
+        video.put("adult", bool(json, "adult"));
         video.put("duration", number(json, "duration"));
         video.put("readCount", number(json, "readCount"));
         video.put("publishDate", text(json, "publishDate"));
@@ -197,6 +201,12 @@ public class ChzzkClient {
     String number(JsonNode node, String key) {
         JsonNode found = node.findValue(key);
         return (found == null || !found.isNumber()) ? "" : found.asText();
+    }
+
+    /** 이름으로 참/거짓 찾기. 없으면 false — 모르는 건 제한 없음으로 본다 */
+    boolean bool(JsonNode node, String key) {
+        JsonNode found = node.findValue(key);
+        return found != null && found.isBoolean() && found.asBoolean();
     }
 
     /** API 호출, 실패하면 null. 스트림을 비워야 연결이 풀로 돌아간다. */

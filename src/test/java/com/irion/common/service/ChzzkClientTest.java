@@ -87,6 +87,21 @@ public class ChzzkClientTest {
         assertNull(client.parseClip(ChzzkClient.parse("{\"clipTitle\":\"제목뿐\"}")));
     }
 
+    /** 19금은 썸네일이 null 로 온다. 화면이 대체 자리를 그리려면 adult 가 함께 와야 한다 */
+    @Test
+    public void 연령제한_클립은_썸네일이_비고_adult_가_참이다() throws Exception {
+        JsonNode node = ChzzkClient.parse("{"
+                + "\"clipUID\":\"CLIP-19\","
+                + "\"clipTitle\":\"19금 클립\","
+                + "\"thumbnailImageUrl\":null,"
+                + "\"adult\":true}");
+
+        Map<String, Object> clip = client.parseClip(node);
+
+        assertEquals("", clip.get("thumbnailUrl"));
+        assertEquals(Boolean.TRUE, clip.get("adult"));
+    }
+
     @Test
     public void 다시보기_한_건을_통째로_파싱한다() throws Exception {
         JsonNode node = ChzzkClient.parse("{"
@@ -108,6 +123,28 @@ public class ChzzkClientTest {
     @Test
     public void videoNo_가_없으면_건너뛴다() throws Exception {
         assertNull(client.parseVideo(ChzzkClient.parse("{\"videoTitle\":\"제목뿐\"}")));
+    }
+
+    @Test
+    public void 연령제한_다시보기는_썸네일이_비고_adult_가_참이다() throws Exception {
+        JsonNode node = ChzzkClient.parse("{"
+                + "\"videoNo\":14931235,"
+                + "\"videoTitle\":\"주말 아침을 나랑 + 19금\","
+                + "\"thumbnailImageUrl\":null,"
+                + "\"adult\":true}");
+
+        Map<String, Object> video = client.parseVideo(node);
+
+        assertEquals("", video.get("thumbnailUrl"));
+        assertEquals(Boolean.TRUE, video.get("adult"));
+    }
+
+    /** adult 가 아예 없거나 참/거짓이 아니면 제한 없음으로 본다 */
+    @Test
+    public void adult_가_없으면_제한_없음이다() throws Exception {
+        assertEquals(Boolean.FALSE,
+                client.parseVideo(ChzzkClient.parse("{\"videoNo\":1}")).get("adult"));
+        assertFalse(client.bool(ChzzkClient.parse("{\"adult\":\"true\"}"), "adult"));
     }
 
     @Test
