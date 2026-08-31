@@ -91,6 +91,27 @@ public class ScheduleSqlTest {
         assertTrue("공개 일정만 나와야 한다: " + sql, sql.contains("display_yn = 'Y'"));
     }
 
+    /**
+     * 기간 조건은 상한·하한이 둘 다 살아 있어야 한다.
+     *
+     * `OR end_date IS NULL` 로 단발 일정을 살리면 그 일정에는 하한이 사라진다 —
+     * "종료일이 없으면 무조건 통과"라 시작일을 아예 안 보게 되어, 이틀치를 물어도
+     * 테이블 전체가 돌아왔다. DateRange 의 400일 상한도 같이 무의미해진다.
+     */
+    @Test
+    public void 기간_조건에_하한이_살아_있다() {
+        for (String statement : new String[] { "selectScheduleList", "selectDisplayScheduleList" }) {
+            String sql = normalize(sqlOf(statement, new ScheduleVO()));
+
+            assertTrue(statement + " 에 상한이 없다: " + sql,
+                    sql.contains("start_date <="));
+            assertTrue(statement + " 에 하한이 없다: " + sql,
+                    sql.contains("COALESCE(end_date, start_date) >="));
+            assertFalse(statement + " 의 하한이 end_date IS NULL 로 무력화된다: " + sql,
+                    sql.contains("end_date IS NULL"));
+        }
+    }
+
     /** 삭제는 행을 지우지 않고 표시만 한다 */
     @Test
     public void 삭제는_소프트_삭제다() {
