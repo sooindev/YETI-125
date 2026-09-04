@@ -169,7 +169,7 @@ function openAddModalWithDate(dateStr) {
     resetForm();
     $('#modalTitle').text('일정 추가');
     $('#deleteBtn').hide();
-    $('#startDate').val(dateStr + 'T00:00');
+    $('#startDate').val(dateStr + 'T08:00');
     YetiUtil.openModal('scheduleModal');
 }
 
