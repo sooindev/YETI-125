@@ -13,7 +13,7 @@
 <body class="login-page">
 
 <main class="login-stage">
-  <!-- left: oversized identity -->
+  <%-- left: oversized identity --%>
   <section class="login-aside">
     <div class="login-aside-top">
       <span class="logo-text">YETI</span>
@@ -23,7 +23,7 @@
     <div class="login-aside-foot idx">RESTRICTED ACCESS · ADMIN ONLY</div>
   </section>
 
-  <!-- right: form -->
+  <%-- right: form --%>
   <section class="login-panel">
     <div class="login-box">
       <span class="kicker">Authentication</span>

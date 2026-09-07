@@ -10,7 +10,7 @@
   <meta name="author" content="sooindev">
   <link rel="canonical" href="https://yeti-125.com/">
 
-  <!-- Open Graph (카카오톡 / 페이스북 등 공유 미리보기) -->
+  <%-- Open Graph (카카오톡 / 페이스북 등 공유 미리보기) --%>
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="YETI-125">
   <meta property="og:title" content="이리온(IRION) 팬사이트 — 치지직 버튜버 방송 일정·클립">
@@ -22,7 +22,7 @@
   <meta property="og:image:alt" content="버추얼 스트리머 이리온 프로필 이미지">
   <meta property="og:locale" content="ko_KR">
 
-  <!-- Twitter / X -->
+  <%-- Twitter / X --%>
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="이리온(IRION) 팬사이트 — 치지직 버튜버 방송 일정·클립">
   <meta name="twitter:description" content="치지직 스트리머 이리온의 비공식 팬사이트. 실시간 방송 상태, 클립, 다시보기, 방송 일정을 한곳에서.">
@@ -30,7 +30,7 @@
   <meta name="twitter:image:alt" content="버추얼 스트리머 이리온 프로필 이미지">
 
 <jsp:include page="/WEB-INF/views/common/head-assets.jsp"/>
-  <!-- 구조화 데이터 (schema.org) -->
+  <%-- 구조화 데이터 (schema.org) --%>
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -105,10 +105,12 @@
   <link rel="stylesheet" href="/resources/css/index.css">
   <link rel="stylesheet" href="/resources/css/door-intro.css">
   <link rel="stylesheet" href="/resources/css/scroll-animations.css">
+  <%-- 데뷔 3주년 축하 연출 (기념 주간 한정) --%>
+  <link rel="stylesheet" href="/resources/css/anniversary.css">
 </head>
 <body>
 
-<!-- ===== Door Intro ===== -->
+<%-- ===== Door Intro ===== --%>
 <div class="door-intro">
   <div class="door-container">
     <div class="door-panel door-left">
@@ -133,14 +135,14 @@
   <div class="door-meta door-meta-br">EST. 2023.09.12</div>
 </div>
 
-<!-- ===== Header ===== -->
+<%-- ===== Header ===== --%>
 <jsp:include page="/WEB-INF/views/common/header.jsp">
   <jsp:param name="active" value="index"/>
 </jsp:include>
 
 <main>
 
-  <!-- ===== Live Hero (방송 중) ===== -->
+  <%-- ===== Live Hero (방송 중) ===== --%>
   <section id="liveHero" class="live-hero" style="display: none;">
     <div class="shell">
       <div class="live-hero-grid">
@@ -167,9 +169,9 @@
     </div>
   </section>
 
-  <!-- ===== Default Hero (오프라인) ===== -->
+  <%-- ===== Default Hero (오프라인) ===== --%>
   <section id="defaultHero" class="hero">
-    <!-- 상단 마키. 트랙을 -50% 밀었다 되돌리는 방식이라 반복 횟수는 짝수여야 한다 -->
+    <%-- 상단 마키. 트랙을 -50% 밀었다 되돌리는 방식이라 반복 횟수는 짝수여야 한다 --%>
     <div class="hero-noise-line" aria-hidden="true">
       <div class="hero-noise-track">
         <span>IRION ARCHIVE · 125 · 설녀 VTUBER · NON-COMMERCIAL FAN ARCHIVE</span>
@@ -236,7 +238,7 @@
     </div>
   </section>
 
-  <!-- ===== Clips ===== -->
+  <%-- ===== Clips ===== --%>
   <section class="section media-section">
     <div class="shell">
       <div class="sec-head scroll-animate fade-in">
@@ -260,7 +262,7 @@
     </div>
   </section>
 
-  <!-- ===== Videos / 다시보기 ===== -->
+  <%-- ===== Videos / 다시보기 ===== --%>
   <section class="section media-section media-section--alt">
     <div class="shell">
       <div class="sec-head sec-head--flip scroll-animate fade-in">
@@ -287,7 +289,7 @@
     </div>
   </section>
 
-  <!-- ===== Community ===== -->
+  <%-- ===== Community ===== --%>
   <section class="section community-section">
     <div class="shell">
       <a href="https://chzzk.naver.com/63368ec9081dc85e61d0e4310b7e1602/community" target="_blank" class="community-slab scroll-animate fade-in">
@@ -305,7 +307,7 @@
     </div>
   </section>
 
-  <!-- ===== Quick Index / 채널 ===== -->
+  <%-- ===== Quick Index / 채널 ===== --%>
   <section class="section index-section">
     <div class="shell">
       <div class="sec-head scroll-animate fade-in">
@@ -370,7 +372,7 @@
 
 </main>
 
-<!-- ===== Clip Modal ===== -->
+<%-- ===== Clip Modal ===== --%>
 <div id="clipModal" class="modal">
   <div class="modal-content clip-modal-content">
     <button class="modal-close" data-close-modal="clipModal">&times;</button>
@@ -387,7 +389,7 @@
   </div>
 </div>
 
-<!-- ===== Video Leave Modal ===== -->
+<%-- ===== Video Leave Modal ===== --%>
 <div id="videoModal" class="modal">
   <div class="modal-content leave-modal-content">
     <button class="modal-close" data-close-modal="videoModal">&times;</button>
@@ -412,7 +414,7 @@
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-<!-- ===== Footer ===== -->
+<%-- ===== Footer ===== --%>
 <jsp:include page="/WEB-INF/views/common/footer.jsp"/>
 
 <jsp:include page="/WEB-INF/views/common/jquery.jsp"/>
@@ -420,5 +422,7 @@
 <script src="/resources/js/common.js"></script>
 <script src="/resources/js/scroll-animations.js"></script>
 <script src="/resources/js/index.js"></script>
+<%-- data-confetti 가 붙은 페이지에서만 폭죽이 터진다 (팝업·반짝이는 모든 페이지) --%>
+<script src="/resources/js/anniversary.js" data-confetti="on"></script>
 </body>
 </html>

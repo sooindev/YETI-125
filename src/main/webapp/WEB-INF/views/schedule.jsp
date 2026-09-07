@@ -10,7 +10,7 @@
   <meta name="author" content="sooindev">
   <link rel="canonical" href="https://yeti-125.com/schedule">
 
-  <!-- Open Graph -->
+  <%-- Open Graph --%>
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="YETI-125">
   <meta property="og:title" content="방송 일정 — YETI-125 이리온 팬사이트">
@@ -19,15 +19,15 @@
   <meta property="og:image" content="https://yeti-125.com/resources/images/Irion-profile.jpg">
   <meta property="og:locale" content="ko_KR">
 
-  <!-- Twitter / X -->
+  <%-- Twitter / X --%>
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="방송 일정 — YETI-125 이리온 팬사이트">
   <meta name="twitter:description" content="이리온의 방송 일정을 캘린더로 확인하세요.">
   <meta name="twitter:image" content="https://yeti-125.com/resources/images/Irion-profile.jpg">
 
 <jsp:include page="/WEB-INF/views/common/head-assets.jsp"/>
-  <!-- FullCalendar 6 은 CSS 를 JS 번들 안에서 주입한다. 별도 스타일시트가 없다. -->
-  <!-- 구조화 데이터 (schema.org) -->
+  <%-- FullCalendar 6 은 CSS 를 JS 번들 안에서 주입한다. 별도 스타일시트가 없다. --%>
+  <%-- 구조화 데이터 (schema.org) --%>
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -68,17 +68,19 @@
   </script>
   <link rel="stylesheet" href="/resources/css/common.css">
   <link rel="stylesheet" href="/resources/css/schedule.css">
+  <%-- 데뷔 3주년 축하 연출 (기념 주간 한정) --%>
+  <link rel="stylesheet" href="/resources/css/anniversary.css">
 </head>
 <body>
 
-<!-- ===== Header ===== -->
+<%-- ===== Header ===== --%>
 <jsp:include page="/WEB-INF/views/common/header.jsp">
   <jsp:param name="active" value="schedule"/>
 </jsp:include>
 
 <main>
 
-  <!-- ===== Page masthead ===== -->
+  <%-- ===== Page masthead ===== --%>
   <section class="page-masthead">
     <div class="shell">
       <div class="masthead-grid">
@@ -96,12 +98,12 @@
     </div>
   </section>
 
-  <!-- ===== Calendar + upcoming, asymmetric split ===== -->
+  <%-- ===== Calendar + upcoming, asymmetric split ===== --%>
   <section class="section sched-section">
     <div class="shell">
       <div class="sched-grid">
 
-        <!-- calendar column -->
+        <%-- calendar column --%>
         <div class="sched-cal">
           <div class="legend">
             <span class="legend-head idx">일정 유형</span>
@@ -125,7 +127,7 @@
           </div>
         </div>
 
-        <!-- upcoming column -->
+        <%-- upcoming column --%>
         <aside class="sched-upcoming">
           <div class="upcoming-head">
             <span class="kicker">Next Up</span>
@@ -144,7 +146,7 @@
 
 </main>
 
-<!-- ===== Detail Modal ===== -->
+<%-- ===== Detail Modal ===== --%>
 <div id="scheduleModal" class="modal">
   <div class="modal-content">
     <button class="modal-close" data-close-modal="scheduleModal">&times;</button>
@@ -152,7 +154,7 @@
   </div>
 </div>
 
-<!-- ===== Footer ===== -->
+<%-- ===== Footer ===== --%>
 <jsp:include page="/WEB-INF/views/common/footer.jsp"/>
 
 <jsp:include page="/WEB-INF/views/common/jquery.jsp"/>
@@ -161,5 +163,6 @@
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="/resources/js/common.js"></script>
 <script src="/resources/js/schedule.js"></script>
+<script src="/resources/js/anniversary.js"></script>
 </body>
 </html>

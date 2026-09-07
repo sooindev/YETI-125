@@ -7,13 +7,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Schedule Admin — YETI-125</title>
 <jsp:include page="/WEB-INF/views/common/head-assets.jsp"/>
-  <!-- FullCalendar 6 은 CSS 를 JS 번들 안에서 주입한다. 별도 스타일시트가 없다. -->
+  <%-- FullCalendar 6 은 CSS 를 JS 번들 안에서 주입한다. 별도 스타일시트가 없다. --%>
   <link rel="stylesheet" href="/resources/css/common.css">
   <link rel="stylesheet" href="/resources/css/admin.css">
 </head>
 <body>
 
-<!-- ===== Admin Header ===== -->
+<%-- ===== Admin Header ===== --%>
 <header class="header admin-header">
   <div class="header-inner">
     <a href="/admin/schedule" class="logo">
@@ -35,7 +35,7 @@
 <main class="admin-main">
   <div class="shell">
 
-    <!-- page header -->
+    <%-- page header --%>
     <div class="admin-pagehead">
       <div class="admin-pagehead-lead">
         <span class="kicker">Admin / Schedule</span>
@@ -46,7 +46,7 @@
       </button>
     </div>
 
-    <!-- calendar -->
+    <%-- calendar --%>
     <div class="admin-cal-wrap">
       <div class="calendar-wrapper">
         <div id="calendar"></div>
@@ -56,7 +56,7 @@
   </div>
 </main>
 
-<!-- ===== Add/Edit Modal ===== -->
+<%-- ===== Add/Edit Modal ===== --%>
 <div id="scheduleModal" class="modal">
   <div class="modal-content modal-large">
     <div class="modal-header">
@@ -125,7 +125,7 @@
   </div>
 </div>
 
-<!-- Toast -->
+<%-- Toast --%>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
 <jsp:include page="/WEB-INF/views/common/jquery.jsp"/>

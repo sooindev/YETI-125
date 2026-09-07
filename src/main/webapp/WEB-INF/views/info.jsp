@@ -10,7 +10,7 @@
   <meta name="author" content="sooindev">
   <link rel="canonical" href="https://yeti-125.com/info">
 
-  <!-- Open Graph -->
+  <%-- Open Graph --%>
   <meta property="og:type" content="profile">
   <meta property="og:site_name" content="YETI-125">
   <meta property="og:title" content="프로필 — 이리온(IRION)">
@@ -19,14 +19,14 @@
   <meta property="og:image" content="https://yeti-125.com/resources/images/Irion-profile.jpg">
   <meta property="og:locale" content="ko_KR">
 
-  <!-- Twitter / X -->
+  <%-- Twitter / X --%>
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="프로필 — 이리온(IRION)">
   <meta name="twitter:description" content="설녀 VTuber 이리온의 프로필. 캐릭터 설정, 데뷔일, 채널·SNS 링크.">
   <meta name="twitter:image" content="https://yeti-125.com/resources/images/Irion-profile.jpg">
 
 <jsp:include page="/WEB-INF/views/common/head-assets.jsp"/>
-  <!-- 구조화 데이터 (schema.org) -->
+  <%-- 구조화 데이터 (schema.org) --%>
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -96,23 +96,25 @@
   <%-- scroll-animations.js 와 짝이다. 이게 없으면 .scroll-animate 가 정의되지 않아
        요소가 처음부터 보이고 등장 효과가 나지 않는다 (index.jsp 와 같은 순서로 둔다) --%>
   <link rel="stylesheet" href="/resources/css/scroll-animations.css">
+  <%-- 데뷔 3주년 축하 연출 (기념 주간 한정) --%>
+  <link rel="stylesheet" href="/resources/css/anniversary.css">
 </head>
 <body>
 
-<!-- ===== Header ===== -->
+<%-- ===== Header ===== --%>
 <jsp:include page="/WEB-INF/views/common/header.jsp">
   <jsp:param name="active" value="info"/>
 </jsp:include>
 
 <main>
 
-  <!-- ===== Profile hero ===== -->
+  <%-- ===== Profile hero ===== --%>
   <section class="profile-hero">
     <div class="shell">
       <div class="profile-hero-grid">
 
         <div class="profile-portrait">
-          <!-- 이 이미지만 width/height 를 붙이지 않는다 — CSS 의 aspect-ratio 를 속성값이 이겨버린다 -->
+          <%-- 이 이미지만 width/height 를 붙이지 않는다 — CSS 의 aspect-ratio 를 속성값이 이겨버린다 --%>
           <img src="/resources/images/Irion-profile.jpg" alt="이리온">
           <span class="portrait-tag idx">FILE / IRION-125</span>
         </div>
@@ -132,7 +134,7 @@
 
       </div>
 
-      <!-- D-Day counters -->
+      <%-- D-Day counters --%>
       <div class="dday-row">
         <div class="dday-cell">
           <span class="dday-label idx">데뷔 — Debut</span>
@@ -163,7 +165,7 @@
     </div>
   </section>
 
-  <!-- ===== Detail spec sheet ===== -->
+  <%-- ===== Detail spec sheet ===== --%>
   <section class="section spec-section">
     <div class="shell">
       <div class="sec-head scroll-animate fade-in">
@@ -231,7 +233,7 @@
     </div>
   </section>
 
-  <!-- ===== Channels ===== -->
+  <%-- ===== Channels ===== --%>
   <section class="section channel-section">
     <div class="shell">
       <div class="sec-head sec-head--flip scroll-animate fade-in">
@@ -289,7 +291,7 @@
     </div>
   </section>
 
-  <!-- ===== About note ===== -->
+  <%-- ===== About note ===== --%>
   <section class="section about-section">
     <div class="shell">
       <div class="about-slab scroll-animate fade-in">
@@ -304,12 +306,13 @@
 
 </main>
 
-<!-- ===== Footer ===== -->
+<%-- ===== Footer ===== --%>
 <jsp:include page="/WEB-INF/views/common/footer.jsp"/>
 
 <jsp:include page="/WEB-INF/views/common/jquery.jsp"/>
 <script src="/resources/js/common.js"></script>
 <script src="/resources/js/scroll-animations.js"></script>
 <script src="/resources/js/info.js"></script>
+<script src="/resources/js/anniversary.js"></script>
 </body>
 </html>

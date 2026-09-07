@@ -63,6 +63,10 @@
     --t-fast:   0.32s var(--ease);
     --t-slow:   0.7s var(--ease);
 
+    /* 커서 그림 — 화살표 옆에 눈송이. 테마마다 화살표 색이 뒤집힌다 */
+    --cursor-1x: url("/resources/images/cursor-snow-32.png");
+    --cursor-2x: url("/resources/images/cursor-snow-64.png");
+
     color-scheme: light;
 }
 
@@ -109,6 +113,10 @@
     --grain-blend:   screen;
     --grain-opacity: 0.07;
 
+    /* 어두운 바탕에서는 화살표를 흰색으로 뒤집는다 */
+    --cursor-1x: url("/resources/images/cursor-snow-dark-32.png");
+    --cursor-2x: url("/resources/images/cursor-snow-dark-64.png");
+
     color-scheme: dark;
 }
 
@@ -148,6 +156,10 @@
 
         --grain-blend:   screen;
         --grain-opacity: 0.07;
+
+        /* 어두운 바탕에서는 화살표를 흰색으로 뒤집는다 */
+        --cursor-1x: url("/resources/images/cursor-snow-dark-32.png");
+        --cursor-2x: url("/resources/images/cursor-snow-dark-64.png");
 
         color-scheme: dark;
     }
@@ -218,6 +230,20 @@ body::before {
 }
 
 body.preload * { transition: none !important; }
+
+/* ---- 커서 — 기본 화살표에 눈송이를 얹는다 ------------------
+   핫스팟(1 1)은 화살표 끝이다. 32px 그림과 2배 화면용 64px 그림을 함께 주고,
+   image-set 을 모르는 브라우저는 첫 줄의 32px 그림을 쓴다.
+   버튼·링크의 cursor: pointer 는 그대로 둔다 — 손가락이 사라지면
+   "여기를 누를 수 있다" 는 신호까지 같이 사라진다.
+   ----------------------------------------------------------- */
+@media (hover: hover) and (pointer: fine) {
+    html {
+        cursor: var(--cursor-1x) 1 1, auto;
+        cursor: -webkit-image-set(var(--cursor-1x) 1x, var(--cursor-2x) 2x) 1 1, auto;
+        cursor: image-set(var(--cursor-1x) 1x, var(--cursor-2x) 2x) 1 1, auto;
+    }
+}
 
 /* ---- Selection / scrollbar -------------------------------- */
 ::selection { background: var(--frost); color: #fff; }
