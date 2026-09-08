@@ -238,6 +238,28 @@
     </div>
   </section>
 
+  <%--
+    3주년 방명록 안내 띠.
+    히어로 바로 다음에 두되 얇게 유지한다 — 라이브 중일 때는 위쪽 라이브 히어로가
+    주인공이라, 이 띠가 두꺼우면 방송 정보를 아래로 밀어낸다.
+    기념이 끝나 내릴 때는 이 <section> 하나와 index.css 의 .gb-band 블록을 지운다.
+  --%>
+  <section class="gb-band-section">
+    <div class="shell">
+      <a href="/guestbook" class="gb-band">
+        <span class="gb-band-mark" aria-hidden="true">3rd</span>
+        <span class="gb-band-text">
+          <span class="gb-band-kicker">Anniversary Guestbook</span>
+          <span class="gb-band-title">이리온에게 축하 한마디 남기기</span>
+        </span>
+        <span class="gb-band-cta">
+          <span class="gb-band-cta-label">방명록</span>
+          <span class="btn-arrow">→</span>
+        </span>
+      </a>
+    </div>
+  </section>
+
   <%-- ===== Clips ===== --%>
   <section class="section media-section">
     <div class="shell">
@@ -359,8 +381,16 @@
           </a>
         </li>
         <li>
-          <a href="https://cafe.naver.com/dlfldhs0809" target="_blank" class="link-row">
+          <a href="/guestbook" class="link-row">
             <span class="link-row-idx">06</span>
+            <span class="link-row-name">방명록</span>
+            <span class="link-row-desc">3주년 축하 한마디를 남겨 주세요</span>
+            <span class="link-row-arrow">→</span>
+          </a>
+        </li>
+        <li>
+          <a href="https://cafe.naver.com/dlfldhs0809" target="_blank" class="link-row">
+            <span class="link-row-idx">07</span>
             <span class="link-row-name">예티24</span>
             <span class="link-row-desc">네이버 팬카페</span>
             <span class="link-row-arrow">↗</span>
