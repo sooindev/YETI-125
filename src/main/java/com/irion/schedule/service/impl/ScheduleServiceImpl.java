@@ -1,8 +1,8 @@
 package com.irion.schedule.service.impl;
 
-import com.irion.schedule.mapper.ScheduleMapper;
+import com.irion.schedule.persistence.ScheduleMapper;
 import com.irion.schedule.service.ScheduleService;
-import com.irion.schedule.vo.ScheduleVO;
+import com.irion.schedule.domain.ScheduleVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

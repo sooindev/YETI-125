@@ -1,8 +1,8 @@
 package com.irion.guestbook.service;
 
-import com.irion.guestbook.mapper.GuestbookMapper;
+import com.irion.guestbook.persistence.GuestbookMapper;
 import com.irion.guestbook.service.impl.GuestbookServiceImpl;
-import com.irion.guestbook.vo.GuestbookVO;
+import com.irion.guestbook.domain.GuestbookVO;
 import org.junit.Test;
 
 import java.lang.reflect.Field;

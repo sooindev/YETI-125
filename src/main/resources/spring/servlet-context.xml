@@ -88,7 +88,7 @@
             <!-- 로그인 페이지가 자기 자신에게 막히면 무한 리다이렉트가 된다 -->
             <mvc:exclude-mapping path="/admin/admin-login"/>
             <mvc:exclude-mapping path="/admin/loginProc"/>
-            <bean class="com.irion.common.interceptor.AdminLoginInterceptor"/>
+            <bean class="com.irion.common.web.interceptor.AdminLoginInterceptor"/>
         </mvc:interceptor>
     </mvc:interceptors>
 

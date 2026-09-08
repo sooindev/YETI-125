@@ -707,13 +707,19 @@ YETI-125/
 │   ├── main/
 │   │   ├── java/com/irion/
 │   │   │   ├── common/
-│   │   │   │   ├── controller/  HTTP 처리 (요청 파라미터 · 응답 모양)
+│   │   │   │   ├── api/         공개 페이지 · 라이브 상태 컨트롤러
+│   │   │   │   ├── web/filter/  인증 · CSRF · 보안 헤더 · 캐시 재검증
+│   │   │   │   ├── web/interceptor/ 관리자 인증
 │   │   │   │   ├── service/     ChzzkClient(호출·파싱) · LiveFeedService(캐시)
-│   │   │   │   ├── filter/      인증 · CSRF · 보안 헤더 · 캐시 재검증
-│   │   │   │   ├── interceptor/ 관리자 인증
 │   │   │   │   └── util/        비밀번호 · CSRF 토큰 · 로그인 시도 제한 · 조회 기간
-│   │   │   ├── schedule/      방송 일정 — controller / service / mapper
-│   │   │   └── admin/         관리자 — 인증, 일정 관리
+│   │   │   ├── schedule/      방송 일정
+│   │   │   ├── guestbook/     3주년 방명록
+│   │   │   └── admin/         관리자 인증
+│   │   │       ├── api/         공개 주소를 받는 컨트롤러
+│   │   │       ├── admin/       /admin 아래 컨트롤러 — 인증 필터를 타는 쪽
+│   │   │       ├── domain/      VO
+│   │   │       ├── persistence/ MyBatis 매퍼 인터페이스
+│   │   │       └── service/     서비스 + impl
 │   │   ├── resources/
 │   │   │   ├── logback.xml    로그 설정 (클래스패스 최상단이어야 logback 이 찾는다)
 │   │   │   ├── spring/        Spring 설정
@@ -725,15 +731,22 @@ YETI-125/
 │   │       ├── META-INF/      톰캣 쿠키 처리기 (SameSite)
 │   │       ├── WEB-INF/
 │   │       │   ├── web.xml
-│   │       │   └── views/     페이지 JSP — 홈, 일정, 프로필, 관리자
-│   │       │       └── common/  상단바 · 바닥글 · 테마 토글 · head 공통 조각
-│   │       └── resources/     css · js · images
+│   │       │   └── views/
+│   │       │       ├── pages/   홈 · 일정 · 프로필 · 방명록
+│   │       │       ├── layout/  상단바 · 바닥글 · head 공통 조각 · 테마 토글
+│   │       │       ├── admin/   관리자 화면
+│   │       │       └── error/   404 · 500
+│   │       └── resources/
+│   │           ├── css/   base(공용) · pages(화면별) · features(연출)
+│   │           ├── js/    core(공용) · pages(화면별) · features(연출)
+│   │           └── images/ brand · cursors · profile · social
 │   └── test/
 │       ├── java/com/irion/
 │       │   ├── testsupport/   FakeHttp — 필터·인터셉터 테스트가 함께 쓰는 서블릿 대역
 │       │   └── (본 코드와 같은 패키지 구조)
 │       │                      비밀번호 · 로그인 검증 · 시도 제한 · 인증 두 겹
 │       │                      일정 저장·조회 · 치지직 파싱 · 페이지네이션
+│       │                      방명록 검증 · 익명 처리 · 목록 SQL
 │       │                      입력 검증 · 조회 기간 · JSON 날짜 형식
 │       │                      치지직 캐시 · 장애 폴백 · 백오프 · 커서 페이징
 │       │                      보안 헤더 · CSP 지시자 · web.xml 매핑
@@ -752,6 +765,11 @@ YETI-125/
 ├── deploy.env.example     배포 대상 서버 설정 예시 (실제 값은 deploy.env)
 └── pom.xml
 ```
+
+기능 폴더(`schedule` · `guestbook` · `admin`)는 모두 같은 다섯 갈래를 쓴다 —
+`api`(공개) · `admin`(관리자) · `domain` · `persistence` · `service`.
+`admin` 아래 컨트롤러를 따로 둔 것은 취향이 아니라 규칙이다: `web.xml` 의
+로그인·CSRF 필터가 `/admin/*` 에만 걸리므로, 주소가 그 아래여야 인증을 탄다.
 
 <br>
 

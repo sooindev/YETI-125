@@ -1,8 +1,8 @@
 package com.irion.admin.service;
 
-import com.irion.admin.mapper.AdminMapper;
+import com.irion.admin.persistence.AdminMapper;
 import com.irion.admin.service.impl.AdminServiceImpl;
-import com.irion.admin.vo.AdminVO;
+import com.irion.admin.domain.AdminVO;
 import com.irion.common.util.PasswordUtil;
 import org.junit.Test;
 

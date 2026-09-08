@@ -8,7 +8,7 @@
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
     <image:image>
-      <image:loc>https://yeti-125.com/resources/images/Irion-profile.jpg</image:loc>
+      <image:loc>https://yeti-125.com/resources/images/profile/Irion-profile.jpg</image:loc>
       <image:title>버추얼 스트리머 이리온(IRION)</image:title>
     </image:image>
   </url>
@@ -26,7 +26,7 @@
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://yeti-125.com/resources/images/Irion-profile.jpg</image:loc>
+      <image:loc>https://yeti-125.com/resources/images/profile/Irion-profile.jpg</image:loc>
       <image:title>이리온(IRION) 프로필</image:title>
     </image:image>
   </url>

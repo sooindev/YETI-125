@@ -6,10 +6,10 @@
   <meta name="robots" content="noindex, nofollow">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Schedule Admin — YETI-125</title>
-<jsp:include page="/WEB-INF/views/common/head-assets.jsp"/>
+<jsp:include page="/WEB-INF/views/layout/head-assets.jsp"/>
   <%-- FullCalendar 6 은 CSS 를 JS 번들 안에서 주입한다. 별도 스타일시트가 없다. --%>
-  <link rel="stylesheet" href="/resources/css/common.css">
-  <link rel="stylesheet" href="/resources/css/admin.css">
+  <link rel="stylesheet" href="/resources/css/base/common.css">
+  <link rel="stylesheet" href="/resources/css/pages/admin.css">
 </head>
 <body>
 
@@ -25,7 +25,7 @@
       <a href="/" target="_blank" class="nav-link">사이트 보기</a>
       <a href="#" id="logoutBtn" class="nav-link logout-btn">로그아웃</a>
     </nav>
-    <jsp:include page="/WEB-INF/views/common/theme-toggle.jsp"/>
+    <jsp:include page="/WEB-INF/views/layout/theme-toggle.jsp"/>
     <button class="mobile-menu-btn" aria-label="메뉴" aria-expanded="false">
       <span></span><span></span><span></span>
     </button>
@@ -128,11 +128,11 @@
 <%-- Toast --%>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-<jsp:include page="/WEB-INF/views/common/jquery.jsp"/>
+<jsp:include page="/WEB-INF/views/layout/jquery.jsp"/>
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"
         integrity="sha384-WfE/vOHqht3KDj6FvpwQUf3UxEPUHoGJ3w1yZ8rhpLWnVigt8HjXL2zXqtcfS7mf"
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="/resources/js/common.js"></script>
-<script src="/resources/js/admin-schedule.js"></script>
+<script src="/resources/js/core/common.js"></script>
+<script src="/resources/js/pages/admin-schedule.js"></script>
 </body>
 </html>

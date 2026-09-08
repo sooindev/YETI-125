@@ -1,8 +1,8 @@
 package com.irion.guestbook.service.impl;
 
-import com.irion.guestbook.mapper.GuestbookMapper;
+import com.irion.guestbook.persistence.GuestbookMapper;
 import com.irion.guestbook.service.GuestbookService;
-import com.irion.guestbook.vo.GuestbookVO;
+import com.irion.guestbook.domain.GuestbookVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

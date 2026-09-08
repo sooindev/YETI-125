@@ -6,9 +6,9 @@
   <meta name="robots" content="noindex, nofollow">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Admin Login — YETI-125</title>
-<jsp:include page="/WEB-INF/views/common/head-assets.jsp"/>
-  <link rel="stylesheet" href="/resources/css/common.css">
-  <link rel="stylesheet" href="/resources/css/admin.css">
+<jsp:include page="/WEB-INF/views/layout/head-assets.jsp"/>
+  <link rel="stylesheet" href="/resources/css/base/common.css">
+  <link rel="stylesheet" href="/resources/css/pages/admin.css">
 </head>
 <body class="login-page">
 
@@ -52,7 +52,7 @@
   </section>
 </main>
 
-<jsp:include page="/WEB-INF/views/common/jquery.jsp"/>
-<script src="/resources/js/admin-login.js"></script>
+<jsp:include page="/WEB-INF/views/layout/jquery.jsp"/>
+<script src="/resources/js/pages/admin-login.js"></script>
 </body>
 </html>

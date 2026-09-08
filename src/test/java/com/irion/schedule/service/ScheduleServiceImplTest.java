@@ -1,8 +1,8 @@
 package com.irion.schedule.service;
 
-import com.irion.schedule.mapper.ScheduleMapper;
+import com.irion.schedule.persistence.ScheduleMapper;
 import com.irion.schedule.service.impl.ScheduleServiceImpl;
-import com.irion.schedule.vo.ScheduleVO;
+import com.irion.schedule.domain.ScheduleVO;
 import org.junit.Test;
 
 import java.lang.reflect.Field;

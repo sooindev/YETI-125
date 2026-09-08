@@ -1,6 +1,6 @@
 package com.irion.admin.service;
 
-import com.irion.admin.vo.AdminVO;
+import com.irion.admin.domain.AdminVO;
 
 public interface AdminService {
 

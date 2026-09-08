@@ -1,6 +1,6 @@
 package com.irion.guestbook.service;
 
-import com.irion.guestbook.vo.GuestbookVO;
+import com.irion.guestbook.domain.GuestbookVO;
 
 import java.util.List;
 

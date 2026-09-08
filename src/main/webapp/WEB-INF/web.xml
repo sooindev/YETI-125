@@ -38,7 +38,7 @@
   <!-- Static Resource Encoding Filter (이모티콘 지원) -->
   <filter>
     <filter-name>staticResourceEncodingFilter</filter-name>
-    <filter-class>com.irion.common.filter.StaticResourceEncodingFilter</filter-class>
+    <filter-class>com.irion.common.web.filter.StaticResourceEncodingFilter</filter-class>
   </filter>
   <filter-mapping>
     <filter-name>staticResourceEncodingFilter</filter-name>
@@ -48,7 +48,7 @@
   <!-- Static Resource Cache Filter (배포 후 낡은 CSS/JS 방지) -->
   <filter>
     <filter-name>staticResourceCacheFilter</filter-name>
-    <filter-class>com.irion.common.filter.StaticResourceCacheFilter</filter-class>
+    <filter-class>com.irion.common.web.filter.StaticResourceCacheFilter</filter-class>
   </filter>
   <!--
     ERROR 를 함께 적는 이유 — 필터 기본값은 REQUEST 뿐이라, <error-page> 로 넘어가는
@@ -68,7 +68,7 @@
   <!-- 옛 .html → 정규 주소 301. 보안 헤더 뒤, 로그인 검사 앞에 둔다 -->
   <filter>
     <filter-name>legacyHtmlRedirectFilter</filter-name>
-    <filter-class>com.irion.common.filter.LegacyHtmlRedirectFilter</filter-class>
+    <filter-class>com.irion.common.web.filter.LegacyHtmlRedirectFilter</filter-class>
   </filter>
   <filter-mapping>
     <filter-name>legacyHtmlRedirectFilter</filter-name>
@@ -109,16 +109,16 @@
   <!-- Error Pages -->
   <error-page>
     <error-code>404</error-code>
-    <location>/WEB-INF/views/common/404.jsp</location>
+    <location>/WEB-INF/views/error/404.jsp</location>
   </error-page>
   <error-page>
     <error-code>500</error-code>
-    <location>/WEB-INF/views/common/500.jsp</location>
+    <location>/WEB-INF/views/error/500.jsp</location>
   </error-page>
 
   <filter>
     <filter-name>adminLoginFilter</filter-name>
-    <filter-class>com.irion.common.filter.AdminLoginFilter</filter-class>
+    <filter-class>com.irion.common.web.filter.AdminLoginFilter</filter-class>
   </filter>
   <filter-mapping>
     <filter-name>adminLoginFilter</filter-name>
@@ -128,7 +128,7 @@
   <!-- CSRF 검사. adminLoginFilter 다음에 매핑해 로그인 여부를 먼저 가린다 -->
   <filter>
     <filter-name>csrfFilter</filter-name>
-    <filter-class>com.irion.common.filter.CsrfFilter</filter-class>
+    <filter-class>com.irion.common.web.filter.CsrfFilter</filter-class>
   </filter>
   <filter-mapping>
     <filter-name>csrfFilter</filter-name>

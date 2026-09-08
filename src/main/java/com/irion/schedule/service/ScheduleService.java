@@ -1,6 +1,6 @@
 package com.irion.schedule.service;
 
-import com.irion.schedule.vo.ScheduleVO;
+import com.irion.schedule.domain.ScheduleVO;
 
 import java.util.Date;
 import java.util.List;
