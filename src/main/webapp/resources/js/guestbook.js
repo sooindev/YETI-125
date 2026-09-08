@@ -42,7 +42,6 @@ $(document).ready(function() {
         loadGuestbook(false);
     });
 
-    // 남은 글자 수
     $('#gbContent').on('input', function() {
         const len = $(this).val().length;
         $('#gbContentCount').text(len);
@@ -131,10 +130,7 @@ function showEmptyIfBlank() {
     $('#gbEmpty').toggle($('#gbList').children().length === 0);
 }
 
-/**
- * 카드를 그린다. append 면 뒤에 잇고, 아니면 갈아 끼운다.
- * startOrdinal 은 이 묶음 첫 카드의 번호 — 아래로 내려가며 1씩 줄어든다.
- */
+/** 카드를 그린다. startOrdinal 부터 아래로 내려가며 번호가 1씩 줄어든다 */
 function renderGuestbook(entries, append, startOrdinal) {
     let html = '';
 
@@ -155,12 +151,9 @@ function renderGuestbook(entries, append, startOrdinal) {
 }
 
 /**
- * 카드 한 장.
- * 값은 전부 사용자가 적은 글이다 — 화면에 찍기 직전 반드시 이스케이프한다.
- * 여기를 빠뜨리면 방명록에 <script> 를 적는 것만으로 보는 사람 브라우저에서 실행된다.
- *
- * ordinal 은 "몇 번째 축하인가" — 오래된 것이 1번이다.
- * 목록은 최신순이라 위에서 아래로 번호가 줄어든다.
+ * 카드 한 장. ordinal 은 몇 번째 축하인가 — 가장 오래된 글이 1번이다.
+ * 값은 전부 사용자가 적은 글이라 찍기 직전 반드시 이스케이프한다. 빠뜨리면
+ * 방명록에 <script> 를 적는 것만으로 보는 사람 브라우저에서 실행된다.
  */
 function guestbookCard(entry, ordinal) {
     const nickname = YetiUtil.escapeHtml(entry.nickname);
@@ -187,7 +180,6 @@ function guestbookCard(entry, ordinal) {
                 '</div>';
     }
 
-    // 편지처럼 글쓴이 이름이 맨 끝에 온다
     card += '<p class="gb-card-sign">' + nickname + '</p>';
 
     return card + '</article>';

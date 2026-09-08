@@ -10,11 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
- * 방명록 삭제 — 관리자 전용.
- *
- * 주소가 /admin 아래인 것이 핵심이다. web.xml 이 /admin/* 에 로그인 필터와 CSRF 필터를 걸고
- * servlet-context.xml 이 인터셉터를 한 겹 더 얹는다. 공개 컨트롤러에 삭제를 두면
- * 그 세 겹을 전부 비켜 가므로, 화면에서 버튼을 숨기는 것만으로는 아무 방어가 되지 않는다.
+ * 방명록 삭제. 주소가 /admin 아래인 것이 핵심이다 — web.xml 의 로그인·CSRF 필터와
+ * 인터셉터가 그 경로에만 걸린다. 공개 컨트롤러에 두면 세 겹을 전부 비켜 간다.
  */
 @Controller
 @RequestMapping("/admin/guestbook")

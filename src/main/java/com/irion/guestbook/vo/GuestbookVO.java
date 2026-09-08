@@ -15,11 +15,7 @@ public class GuestbookVO implements Serializable {
 
     private Long guestbookId;
 
-    /**
-     * 글쓴이 이름. 방명록은 전부 익명이라 사용자가 채우지 않는다 —
-     * 컨트롤러가 GuestbookController.ANONYMOUS 로 덮어쓴다.
-     * 길이 제약만 남겨 둔다(코드가 실수로 긴 값을 넣으면 DB 제약에 걸려 500 이 난다).
-     */
+    /** 방명록은 전부 익명이라 사용자가 채우지 않는다 — 컨트롤러가 덮어쓴다 */
     @Size(max = 30, message = "닉네임은 30자를 넘을 수 없습니다.")
     private String nickname;
 
@@ -27,7 +23,7 @@ public class GuestbookVO implements Serializable {
     @Size(max = 500, message = "메시지는 500자를 넘을 수 없습니다.")
     private String content;
 
-    /** 응원의 한마디 — 카드에 한 줄로 얹히는 짧은 문구라 선택 입력이다 */
+    /** 응원의 한마디 — 선택 입력 */
     @Size(max = 100, message = "응원의 한마디는 100자를 넘을 수 없습니다.")
     private String cheer;
 

@@ -3,11 +3,8 @@
 (function () {
     'use strict';
 
-    /* ---- 설정 -------------------------------------------------
-       연출을 켜 두는 기간. 이 창을 벗어나면 아무것도 하지 않으므로,
-       기념 주간이 끝나면 사이트는 저절로 평소 모습으로 돌아간다.
-       (아예 걷어내려면 각 JSP 의 anniversary.css / anniversary.js 두 줄을 지운다)
-       ----------------------------------------------------------- */
+    // 연출을 켜 두는 기간. 창을 벗어나면 아무것도 하지 않으므로 기념 주간이 끝나면
+    // 저절로 평소 모습으로 돌아간다. 아예 걷어내려면 각 JSP 의 두 줄을 지운다.
     const DEBUT_TEXT  = '2023.09.12';   // 이리온 데뷔일
     const ANNIV_TEXT  = '2026.09.12';   // 3주년 당일
     const ANNIV_DATE  = '2026-09-12';   // D-day 계산용
@@ -21,11 +18,8 @@
     const POPUP_DELAY_MS = 900;   // 폭죽이 먼저 터지고, 뒤이어 팝업이 뜬다
     const INTRO_DELAY_MS = 500;   // 문이 걷히기 시작한 뒤 기다리는 시간
 
-    /* ---- 날짜 -------------------------------------------------
-       door-intro.js 와 같은 이유로 로컬 기준 문자열을 쓴다 —
-       toISOString() 은 한국에서 오전 9시에 날짜가 바뀐다.
-       ----------------------------------------------------------- */
-
+    // door-intro.js 와 같은 이유로 로컬 기준으로 만든다 —
+    // toISOString() 은 한국에서 오전 9시에 날짜가 바뀐다
     function todayKey() {
         const now = new Date();
         const pad = function (n) { return String(n).padStart(2, '0'); };
@@ -75,11 +69,8 @@
     const reduceMotion = !!(window.matchMedia
             && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 
-    /* ---- 알갱이 캔버스 -----------------------------------------
-       폭죽과 반짝이가 캔버스 하나와 루프 하나를 같이 쓴다.
-       알갱이가 하나도 없으면 루프를 멈추므로 평소에는 아무것도 돌지 않는다.
-       ----------------------------------------------------------- */
-
+    // 폭죽과 반짝이가 캔버스 하나와 루프를 같이 쓴다.
+    // 알갱이가 하나도 없으면 루프를 멈추므로 평소에는 아무것도 돌지 않는다.
     const particles = [];
     let canvas = null;
     let ctx = null;
@@ -190,8 +181,7 @@
         ctx.restore();
     }
 
-    /* ---- 색 — 테마 토큰에서 그대로 가져온다 (다크에서도 뜬다) ---- */
-
+    /** 색은 테마 토큰에서 가져온다 — 다크 테마에서도 그대로 뜬다 */
     function readPalette() {
         const cs = getComputedStyle(document.documentElement);
         function token(name, fallback) {
@@ -219,8 +209,6 @@
     function pick(list) {
         return list[(Math.random() * list.length) | 0];
     }
-
-    /* ---- 폭죽 -------------------------------------------------- */
 
     /** 한 지점에서 부채꼴로 쏜다. angle/spread 는 라디안, 캔버스 좌표라 위쪽이 음수다 */
     function cannon(x, y, angle, spread, count, power) {
@@ -305,8 +293,6 @@
         }, CONFETTI_MS);
     }
 
-    /* ---- 반짝이 — 커서를 따라, 그리고 배경에 드문드문 ------------- */
-
     function sparkle(x, y, size, alpha) {
         particles.push({
             shape: 'star',
@@ -335,7 +321,7 @@
             x: x, y: y,
             vx: 0, vy: 0, gravity: 0, drag: 1,
             size: 5,
-            grow: 0.85,          // 프레임마다 커지는 반지름
+            grow: 0.85,
             line: 1.6,
             color: colors.spark[0],
             rot: 0, vrot: 0, flutter: 0,
@@ -425,8 +411,6 @@
         }, 1400);
     }
 
-    /* ---- 축하 팝업 ---------------------------------------------- */
-
     let pop = null;
 
     function dateLine() {
@@ -484,8 +468,6 @@
             closePopup();
         }
     });
-
-    /* ---- 시작 순서 ---------------------------------------------- */
 
     function ready(fn) {
         if (document.readyState === 'loading') {
@@ -545,17 +527,15 @@
     function celebrate() {
         const moving = startSparkles();
 
-        // 폭죽은 홈에서만, 그리고 움직임을 허용한 사용자에게만
         if (moving && confettiEnabled) fireConfetti();
 
-        // 폭죽이 먼저 터지고 뒤이어 팝업이 뜬다. 폭죽이 없으면 기다릴 이유가 없다
+        // 폭죽이 없으면 팝업을 늦출 이유가 없다
         if (!popupShownToday) {
             setTimeout(showPopup, (moving && confettiEnabled) ? POPUP_DELAY_MS : 300);
         }
     }
 
     ready(function () {
-        // 오늘 이미 본 사람에게는 팝업 자체를 만들지 않는다
         if (!popupShownToday) buildPopup();
 
         whenVisible(function () {

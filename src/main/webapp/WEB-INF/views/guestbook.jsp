@@ -32,11 +32,8 @@
   <%-- 데뷔 3주년 축하 연출 (기념 주간 한정) --%>
   <link rel="stylesheet" href="/resources/css/anniversary.css">
 </head>
-<%--
-  data-admin 은 화면 표시용일 뿐이다. 삭제 버튼을 보이느냐만 정하고,
-  실제 권한은 /admin/guestbook/* 의 필터·인터셉터가 서버에서 판단한다.
-  브라우저에서 이 값을 Y 로 고쳐도 삭제 요청은 401 로 막힌다.
---%>
+<%-- data-admin 은 삭제 버튼을 보이느냐만 정한다. 브라우저에서 Y 로 고쳐도
+     삭제 요청은 /admin/* 의 필터에 막힌다 --%>
 <body class="gb-page" data-admin="${not empty sessionScope.adminUser ? 'Y' : 'N'}">
 
 <jsp:include page="/WEB-INF/views/common/header.jsp">

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""
+r"""
 배포 산출물의 CSS/JS 주석을 걷어낸다 (소스는 건드리지 않는다).
 
     strip-comments.py <디렉터리>

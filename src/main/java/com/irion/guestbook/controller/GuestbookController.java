@@ -25,17 +25,12 @@ import java.util.Map;
 @RequestMapping("/guestbook")
 public class GuestbookController {
 
-    /** 한 번에 보여줄 개수 */
-    private static final int PAGE_SIZE = 12;
-
     /** 방명록은 전부 익명이다. 화면에 이 이름으로 서명된다 */
     public static final String ANONYMOUS = "익명";
 
     /**
-     * 같은 사람이 연달아 올릴 수 있는 간격.
-     * 자동 욕설 필터는 두지 않기로 했으므로, 최소한 손이 미끄러진 중복 등록과
-     * 새로고침 도배는 여기서 막는다. 세션 기준이라 쿠키를 지우면 풀린다 —
-     * 진짜 방어는 nginx 쪽 요청 제한이다 (README 의 "남은 과제" 참고).
+     * 연달아 올릴 수 있는 간격. 세션 기준이라 쿠키를 지우면 풀린다 —
+     * 새로고침 도배를 막는 정도고, 진짜 방어는 nginx 쪽 요청 제한이다.
      */
     private static final long WRITE_COOLDOWN_MILLIS = 30 * 1000L;
 
@@ -44,16 +39,12 @@ public class GuestbookController {
     @Autowired
     private GuestbookService guestbookService;
 
-    /** 방명록 페이지 */
     @GetMapping("")
     public String guestbook() {
         return "guestbook";
     }
 
-    /**
-     * 방명록 목록.
-     * 홈의 클립 목록과 같은 모양으로 돌려준다 — 화면 쪽 "더 보기" 처리를 하나로 맞춘다.
-     */
+    /** 홈의 클립 목록과 같은 모양으로 돌려준다 — 화면 쪽 "더 보기" 처리를 하나로 맞춘다 */
     @GetMapping("/list")
     @ResponseBody
     public JsonResult getGuestbookList(@RequestParam(defaultValue = "0") int offset,
@@ -85,7 +76,6 @@ public class GuestbookController {
         return JsonResult.success("조회되었습니다.", data);
     }
 
-    /** 방명록 등록 */
     @PostMapping("")
     @ResponseBody
     public JsonResult createGuestbook(@Valid @RequestBody GuestbookVO guestbookVO,
@@ -101,9 +91,8 @@ public class GuestbookController {
             return JsonResult.fail(remaining + "초 후에 다시 남겨 주세요.");
         }
 
-        // 글쓴이가 정하는 값이 아니다. 실려 와도 무시한다.
-        // 닉네임도 여기 포함된다 — 화면에서 입력칸을 없앤 것만으로는
-        // API 로 직접 이름을 실어 보내는 것을 막지 못한다.
+        // 글쓴이가 정하는 값이 아니다. 화면에서 입력칸을 없앤 것만으로는
+        // API 로 직접 실어 보내는 것을 막지 못한다.
         guestbookVO.setNickname(ANONYMOUS);
         guestbookVO.setGuestbookId(null);
         guestbookVO.setDelYn(null);

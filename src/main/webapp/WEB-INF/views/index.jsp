@@ -238,12 +238,7 @@
     </div>
   </section>
 
-  <%--
-    3주년 방명록 안내 띠.
-    히어로 바로 다음에 두되 얇게 유지한다 — 라이브 중일 때는 위쪽 라이브 히어로가
-    주인공이라, 이 띠가 두꺼우면 방송 정보를 아래로 밀어낸다.
-    기념이 끝나 내릴 때는 이 <section> 하나와 index.css 의 .gb-band 블록을 지운다.
-  --%>
+  <%-- 3주년 방명록 띠. 내릴 때는 이 section 과 index.css 의 .gb-band 블록을 함께 지운다 --%>
   <section class="gb-band-section">
     <div class="shell">
       <a href="/guestbook" class="gb-band">
