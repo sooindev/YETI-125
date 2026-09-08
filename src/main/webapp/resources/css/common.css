@@ -453,6 +453,35 @@ img { display: block; max-width: 100%; }
 .nav-link.active::after { transform: scaleX(1); }
 .nav-link.active { color: var(--frost); }
 
+/* ---- 기념 이벤트 탭 -----------------------------------------
+   다른 메뉴와 색을 달리하고 글자 뒤에 점을 하나 붙인다.
+   frost 원형 점은 "방송 중"(live-dot)이 쓰는 신호라 여기서는 rose 로 간다 —
+   두 신호가 같은 모양·같은 색이면 상단바에서 서로를 흐린다.
+   기념이 끝나면 header.jsp 에서 nav-link--event 클래스만 떼면 된다.
+   ----------------------------------------------------------- */
+.nav-link--event {
+    /* 가로 메뉴와 모바일 세로 메뉴 양쪽에서 점이 글자를 따라가도록 */
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55em;
+    font-weight: 600;
+    color: var(--rose);
+}
+.nav-link--event::before {
+    content: "";
+    /* 글자 뒤에 놓는다 — 앞에 두면 목록 기호처럼 읽힌다 */
+    order: 1;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--rose);
+    flex-shrink: 0;
+}
+.nav-link--event:hover { color: var(--rose-deep); }
+.nav-link--event.active { color: var(--rose); }
+/* 밑줄도 같은 색으로 — frost 밑줄이 남으면 두 색이 겹쳐 지저분해진다 */
+.nav-link--event::after { background: var(--rose); }
+
 /* ---- 테마 토글 — 아이콘 셋 모두 DOM 에 두고 하나만 보인다 (레이아웃 비용 없음) ---- */
 .theme-toggle {
     display: inline-flex;
