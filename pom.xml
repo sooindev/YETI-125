@@ -26,7 +26,7 @@
     -->
     <hibernate-validator.version>6.2.5.Final</hibernate-validator.version>
     <slf4j.version>1.7.36</slf4j.version>
-    <logback.version>1.2.13</logback.version>
+    <logback.version>1.6.3</logback.version>
 
     <!-- -Dnvd.api.key=... 또는 환경변수로 덮어쓴다. 저장소에는 비워 둔다 -->
     <nvd.api.key>${env.NVD_API_KEY}</nvd.api.key>
