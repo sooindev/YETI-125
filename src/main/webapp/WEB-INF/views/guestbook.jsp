@@ -52,7 +52,7 @@
         <div>
           <span class="kicker">Archive / Anniversary</span>
           <h1 class="gb-hero-title">
-            이리온의 세 번째 겨울,<br>
+            눈이 내린 지 세 번째 해,<br>
             <em>축하 한마디</em>를 남겨 주세요
           </h1>
           <p class="gb-hero-copy">

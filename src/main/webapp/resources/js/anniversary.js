@@ -450,7 +450,7 @@
             '<span class="anniv-pop-kicker">Anniversary / 3rd</span>' +
             '<p class="anniv-pop-date"></p>' +
             '<h2 class="anniv-pop-title" id="annivPopTitle">이리온 데뷔 3주년 <em>축하드립니다!</em> 🥳</h2>' +
-            '<p class="anniv-pop-desc">설녀 이리온의 세 번째 겨울입니다.<br>' +
+            '<p class="anniv-pop-desc">눈이 내린 지 세 번째 해입니다.<br>' +
             '함께 걸어온 예티들과 이리온에게 축하를 전합니다.</p>' +
             '<div class="anniv-pop-actions">' +
             '  <button type="button" class="btn btn-primary anniv-pop-ok">고마워요 <span class="btn-arrow">→</span></button>' +
