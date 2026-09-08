@@ -3,7 +3,7 @@
 # YETI-125
 
 치지직 스트리머 이리온(IRION)의 비공식 팬사이트.
-라이브 상태, 방송 일정, 클립 아카이브를 한곳에서.
+라이브 상태, 방송 일정, 클립 아카이브, 3주년 방명록을 한곳에서.
 
 <br>
 
@@ -26,32 +26,84 @@
 
 <br>
 
+## 목차
+
+| | |
+|---|---|
+| [소개](#소개) · [한눈에 보기](#한눈에-보기) · [기술 스택](#기술-스택) | 이 프로젝트가 무엇인가 |
+| [화면](#화면) | 사용자에게 보이는 것 |
+| [전체 그림](#전체-그림) · [요청 하나가 화면이 되기까지](#요청-하나가-화면이-되기까지) | 어떻게 도는가 |
+| [코드가 놓인 자리](#코드가-놓인-자리) · [새 기능을 붙이려면](#새-기능을-붙이려면) | 어디를 고치면 되는가 |
+| [요청 처리 파이프라인](#요청-처리-파이프라인) · [데이터 모델](#데이터-모델) · [치지직 연동과 캐시](#치지직-연동과-캐시) | 내부 구조 |
+| [디자인](#디자인) · [보안](#보안) | 설계 결정 |
+| [로컬에서 실행하기](#로컬에서-실행하기) · [배포](#배포) · [데이터베이스 백업](#데이터베이스-백업) | 돌리고 올리는 법 |
+| [트러블슈팅](#트러블슈팅) | 실제로 부딪힌 문제와 원인 |
+
+<br>
+
 ## 소개
 
 YETI-125는 치지직 스트리머 이리온의 활동을 한곳에 모아 보여주는 팬 아카이브입니다.
 
-chzzk API와 연동해 실시간 방송 상태를 보여주고,
+치지직 API와 연동해 실시간 방송 상태를 보여주고,
 인기 클립과 다시보기를 자동으로 수집하며,
 관리자가 직접 등록한 방송 일정을 캘린더로 제공합니다.
+데뷔 3주년을 맞아 방문자가 축하 메시지를 남기는 방명록도 함께 운영합니다.
+
+혼자 만들어 혼자 운영하는 프로젝트입니다.
+그래서 "여러 사람이 붙어도 안전한 구조"보다 **한 사람이 오래 고쳐 쓰기 좋은 구조**를
+우선했습니다. 이 문서도 같은 목적으로 씁니다 — 몇 달 뒤에 돌아온 자신과,
+처음 이 저장소를 여는 사람이 같은 그림을 보게 하려는 것입니다.
 
 > 순수한 팬 활동의 일환으로 제작된 비상업적 프로젝트입니다.
 > 원 저작자와 직접적인 관련이 없으며, 정보 제공 및 아카이빙 목적으로만 운영됩니다.
 
 <br>
 
-> **처음 오셨다면 → [YETI-125 설계도](https://claude.ai/code/artifact/c8bf3548-904d-44b6-91d1-e9de9e328aac)**
->
-> 폴더 구조와 요청 하나가 화면이 되기까지의 흐름을, 함수 단위까지 그림으로 풀어 쓴 해설서입니다.
-> 이 README 는 운영과 의사결정 기록에 집중하고, 구조 설명은 그쪽이 더 자세합니다.
+## 한눈에 보기
+
+| | |
+|---|---|
+| 서비스 주소 | <https://yeti-125.com> |
+| 형태 | 서버 렌더링(JSP) + 화면 안에서 AJAX 로 갱신 |
+| 페이지 수 | 공개 4개(홈 · 일정 · 프로필 · 방명록) + 관리자 2개 + 오류 2개 |
+| 자바 클래스 | 33개 |
+| 테스트 | JUnit 4 · 219개 (DB · 톰캣 없이 도는 순수 단위 테스트) |
+| 데이터 출처 | MariaDB(일정 · 방명록 · 관리자) + 치지직 API(라이브 · 클립 · 다시보기) |
+| 운영 서버 | Ubuntu 22.04 · 2GB · nginx → Tomcat 9 |
+| 배포 | `./scripts/deploy.sh` 한 줄 — 실패하면 자동 롤백 |
 
 <br>
 
-## 기능
+## 기술 스택
+
+| 영역 | |
+|------|---|
+| 백엔드 | Java (빌드 타깃 8 · 실행 11 이상) · Spring Framework 5.3 · MyBatis 3.5 |
+| 데이터베이스 | MariaDB · HikariCP |
+| 프론트엔드 | HTML5 · CSS3 · JavaScript · jQuery 3.7 |
+| 라이브러리 | FullCalendar 6.1 · Jackson · Hibernate Validator |
+| 테스트 | JUnit 4 (219개) |
+| 외부 API | [chzzk API](https://chzzk.naver.com/) · 클립 임베드 플레이어 |
+| 빌드 / 서버 | Maven · Apache Tomcat 9 |
+
+프레임워크를 최신으로 올리지 못하는 이유가 있습니다.
+Spring 6 계열은 `javax` 가 아닌 `jakarta` 네임스페이스를 요구하고,
+그러면 톰캣 10 이상과 자바 17 이상으로 함께 올라가야 합니다.
+2GB 서버에서 도는 팬사이트에는 지금 조합이 맞다고 보고 5.3 에 머물러 있습니다.
+`pom.xml` 의 주석에 어떤 의존성이 왜 묶여 있는지 적어두었습니다.
+
+<br>
+
+## 화면
 
 ### 홈
 
 실시간 방송 상태(LIVE / OFFLINE), 인기 클립과 다시보기,
 채널과 SNS 링크를 한 화면에 정리합니다.
+
+방송 중이면 라이브 히어로가, 아니면 오프라인 히어로가 그 자리에 들어갑니다.
+둘 다 마크업에 있고 `index.js` 가 치지직 응답을 보고 하나만 켭니다.
 
 클립은 카드를 누르면 치지직으로 나가지 않고 그 자리에서 재생됩니다.
 치지직 공식 임베드 플레이어를 모달에 띄우는 방식이라
@@ -61,8 +113,7 @@ chzzk API와 연동해 실시간 방송 상태를 보여주고,
 다시보기는 치지직이 임베드 경로를 제공하지 않아 링크 이동입니다.
 나가기 전에 어디로 가는지 알리는 확인 모달을 띄웁니다.
 매번 묻는 것이 번거로우면 "다시 묻지 않기"로 끌 수 있고,
-끈 뒤에는 섹션 머리말에 되돌리는 링크가 나타납니다.
-선택은 기기에 기억됩니다.
+끈 뒤에는 섹션 머리말에 되돌리는 링크가 나타납니다. 선택은 기기에 기억됩니다.
 
 목록에서 감출 다시보기는 `LiveFeedService` 의 `HIDDEN_VIDEO_NOS` 에
 `videoNo` 로 적어둡니다. 제목은 바뀔 수 있지만 번호는 그대로입니다.
@@ -75,6 +126,10 @@ chzzk API와 연동해 실시간 방송 상태를 보여주고,
 월간 캘린더 뷰로 방송 일정을 확인합니다.
 저스트 채팅, 종합게임, 노래방송, 합방 — 유형별로 색을 달리해 한눈에 구분됩니다.
 
+일정은 치지직에서 가져오는 값이 아니라 **관리자가 손으로 넣는 데이터**입니다.
+그래서 이 사이트에서 유일하게 "잃으면 되돌릴 수 없는" 자료이고,
+[데이터베이스 백업](#데이터베이스-백업)이 존재하는 이유이기도 합니다.
+
 <img src="docs/screenshots/schedule.webp" alt="방송 일정 캘린더 — 유형별 색상과 다가오는 일정 목록" width="900">
 
 ### 프로필
@@ -83,6 +138,23 @@ chzzk API와 연동해 실시간 방송 상태를 보여주고,
 채널과 SNS 링크를 정돈된 형태로 제공합니다.
 
 <img src="docs/screenshots/profile.webp" alt="프로필 명세 — 기본 정보, 상세 정보, 크레딧, 팬 정보" width="900">
+
+### 방명록
+
+데뷔 3주년을 맞아 방문자가 축하 메시지를 남기는 페이지입니다.
+
+**로그인도 닉네임도 없습니다.** 글쓴이 이름은 서버가 `익명` 으로 고정하고,
+IP 나 기기 정보는 저장하지 않습니다. 화면에서 입력칸을 없앤 것만으로는
+API 로 직접 이름을 실어 보내는 것을 막지 못하므로, 컨트롤러가 실려 온 값을
+버리고 다시 씁니다 (`GuestbookControllerTest` 가 이것을 못 박습니다).
+
+카드는 편지 모양입니다 — 위에 아카이브 번호와 날짜, 가운데 본문,
+아래에 응원 한마디와 서명이 옵니다. 번호는 "몇 번째 축하인가"를 뜻해서
+가장 오래된 글이 1번입니다.
+
+관리자로 로그인한 상태로 이 페이지에 들어오면 카드마다 삭제 버튼이 나타납니다.
+별도의 관리 화면을 두지 않은 이유는, 실제로 보이는 카드를 보면서 지우는 편이
+목록에서 제목만 보고 지우는 것보다 실수가 적기 때문입니다.
 
 ### 관리자
 
@@ -109,22 +181,17 @@ chzzk API와 연동해 실시간 방송 상태를 보여주고,
 커서를 따라다니는 반짝이와, 클릭한 자리에서 퍼지는 링도 함께 켜집니다.
 
 폭죽은 홈에서만 터집니다.
-`index.jsp` 의 `<script ... data-confetti="on">` 이 스위치라
+`pages/index.jsp` 의 `<script ... data-confetti="on">` 이 스위치라
 어느 페이지에서 터뜨릴지가 마크업에 드러납니다.
-주소로 홈을 가려내면 컨텍스트 패스나 경로가 바뀔 때 조용히 깨집니다.
+주소로 홈을 가려내면 컨텍스트 패스나 경로가 바뀔 때 같이 깨집니다.
 
-팝업은 하루에 한 번입니다.
-인트로와 같은 방식으로 본 날짜를 `localStorage` 에 두고 오늘과 비교합니다.
-닫을 때가 아니라 뜨는 순간 기록하므로, 닫지 않고 다른 페이지로 넘어가도
-그날은 다시 뜨지 않습니다.
-
-문 인트로가 있는 홈에서는 문이 걷히기 시작한 뒤에 터뜨립니다.
-문 뒤에서 터지면 아무도 보지 못합니다.
+팝업은 하루에 한 번입니다. 인트로와 같은 방식으로 본 날짜를 `localStorage` 에 두고
+오늘과 비교합니다. 닫을 때가 아니라 뜨는 순간 기록하므로, 닫지 않고 다른 페이지로
+넘어가도 그날은 다시 뜨지 않습니다.
 
 기간은 `anniversary.js` 상단의 `SHOW_FROM` / `SHOW_TO` 가 정합니다 (2026-09-05 ~ 09-19).
 이 창을 벗어나면 스크립트가 아무 일도 하지 않으므로,
 기념 주간이 끝나면 사이트는 저절로 평소 모습으로 돌아갑니다.
-아예 걷어내려면 각 JSP 의 `anniversary.css` · `anniversary.js` 두 줄을 지웁니다.
 
 움직임을 줄이도록 설정한 사용자(`prefers-reduced-motion`)에게는
 폭죽 · 반짝이 · 클릭 이펙트를 켜지 않고 축하 인사만 띄웁니다.
@@ -136,38 +203,24 @@ chzzk API와 연동해 실시간 방송 상태를 보여주고,
 
 <br>
 
-## 기술 스택
-
-| 영역 | |
-|------|---|
-| 백엔드 | Java (빌드 타깃 8 · 실행 11 이상) · Spring Framework 5.3 · MyBatis |
-| 데이터베이스 | MariaDB · HikariCP |
-| 프론트엔드 | HTML5 · CSS3 · JavaScript · jQuery 3.7 |
-| 라이브러리 | FullCalendar 6.1 · Jackson · Hibernate Validator |
-| 테스트 | JUnit 4 (186개) |
-| 외부 API | [chzzk API](https://chzzk.naver.com/) · 클립 임베드 플레이어 |
-| 빌드 / 서버 | Maven · Apache Tomcat 9 |
-
-<br>
-
-## 아키텍처
+## 전체 그림
 
 nginx가 HTTPS를 끊고 톰캣에 평문으로 넘깁니다.
-방송 일정은 MariaDB에서, 라이브 상태·클립·다시보기는 치지직 API에서 옵니다.
+방송 일정·방명록은 MariaDB에서, 라이브 상태·클립·다시보기는 치지직 API에서 옵니다.
 
 ```mermaid
 flowchart LR
     subgraph browser["브라우저"]
-        UI["HTML · CSS\njQuery · FullCalendar"]
+        UI["JSP 가 그린 HTML\njQuery · FullCalendar"]
     end
 
-    subgraph prod["운영 서버"]
-        NG["nginx\nHTTPS 종료"]
+    subgraph prod["운영 서버 (Ubuntu 2GB)"]
+        NG["nginx\nHTTPS 종료 · 정적 캐시"]
         subgraph tc["Tomcat 9"]
-            FC["필터 체인"]
+            FC["필터 체인 6개"]
             DS["DispatcherServlet"]
-            CT["Controller\nHome · Live · Schedule · Admin"]
-            SV["Service\nLiveFeed · Schedule · Admin"]
+            CT["Controller\nHome · Live · Schedule\nGuestbook · Admin"]
+            SV["Service\nLiveFeed · Schedule\nGuestbook · Admin"]
             MP["MyBatis Mapper"]
         end
     end
@@ -182,7 +235,204 @@ flowchart LR
     SV -->|ChzzkClient| CZ
 ```
 
-### 요청 처리 파이프라인
+읽어야 할 두 가지가 있습니다.
+
+**하나 — 데이터 출처가 둘입니다.** 우리 DB 에 있는 것(일정 · 방명록 · 관리자)과
+치지직에서 매번 물어야 하는 것(라이브 · 클립 · 다시보기)은 성격이 다릅니다.
+앞의 것은 우리가 책임지고 백업하며, 뒤의 것은 [캐시](#치지직-연동과-캐시)로 감쌉니다.
+
+**둘 — 화면은 두 번 그려집니다.** JSP 가 뼈대를 서버에서 그려 보내고,
+브라우저가 뜬 뒤에 JS 가 AJAX 로 나머지를 채웁니다.
+그래서 "페이지는 200 인데 내용이 비어 있는" 상태가 가능하고,
+[배포 검증](#배포)이 페이지와 API 를 따로 확인하는 이유가 됩니다.
+
+<br>
+
+## 요청 하나가 화면이 되기까지
+
+방명록에 글을 남기는 흐름을 처음부터 끝까지 따라가 봅니다.
+이 프로젝트의 거의 모든 요소가 한 번씩 등장합니다.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant B as 브라우저
+    participant F as 필터 체인
+    participant D as DispatcherServlet
+    participant C as GuestbookController
+    participant V as Hibernate Validator
+    participant S as GuestbookServiceImpl
+    participant M as GuestbookMapper
+    participant DB as MariaDB
+
+    Note over B: 사용자가 "축하 남기기" 클릭
+    B->>F: POST /guestbook (JSON)
+    F->>F: UTF-8 강제 · 보안 헤더 부착
+    Note right of F: /admin/* 이 아니라<br/>인증·CSRF 필터는 건너뜀
+    F->>D: 통과
+    D->>C: @PostMapping("") 매칭 + JSON → GuestbookVO
+    C->>V: @Valid 검증
+    V-->>C: 길이·빈값 위반 시 메시지
+    Note right of C: 위반이면 여기서 끝<br/>JsonResult.fail
+    C->>C: nickname="익명" · id/delYn 버림
+    C->>C: 세션의 마지막 작성 시각 확인 (30초 간격)
+    C->>S: createGuestbook(vo)
+    S->>S: 앞뒤 공백 제거 · 빈 cheer → null
+    S->>M: insertGuestbook(vo)
+    M->>DB: INSERT (MyBatis #{} 바인딩)
+    DB-->>M: 생성된 id
+    M-->>S: 1
+    S-->>C: id
+    C-->>B: {"success":true, "message":"..."}
+    B->>B: 목록을 처음부터 다시 읽어 새 글을 맨 위에
+```
+
+각 단계가 어느 파일인지는 이렇습니다.
+
+| 단계 | 파일 |
+|---|---|
+| 필터 체인 | `webapp/WEB-INF/web.xml` + `common/web/filter/*` |
+| 주소 → 메서드 | `guestbook/api/GuestbookController.java` |
+| 입력 규칙 | `guestbook/domain/GuestbookVO.java` (`@NotBlank` · `@Size`) |
+| 업무 규칙 | `guestbook/service/impl/GuestbookServiceImpl.java` |
+| SQL | `resources/sql/guestbook/Guestbook_SQL.xml` |
+| 화면 · AJAX | `webapp/resources/js/pages/guestbook.js` |
+
+<br>
+
+## 코드가 놓인 자리
+
+```
+YETI-125/
+├── src/
+│   ├── main/
+│   │   ├── java/com/irion/
+│   │   │   ├── common/
+│   │   │   │   ├── api/             공개 페이지 · 라이브 상태 컨트롤러
+│   │   │   │   ├── web/filter/      인증 · CSRF · 보안 헤더 · 캐시 재검증
+│   │   │   │   ├── web/interceptor/ 관리자 인증 재확인
+│   │   │   │   ├── service/         ChzzkClient(호출·파싱) · LiveFeedService(캐시)
+│   │   │   │   └── util/            비밀번호 · CSRF 토큰 · 로그인 시도 제한 · 조회 기간
+│   │   │   ├── schedule/          방송 일정
+│   │   │   ├── guestbook/         3주년 방명록
+│   │   │   └── admin/             관리자 인증
+│   │   │       ├── api/             공개 주소를 받는 컨트롤러
+│   │   │       ├── admin/           /admin 아래 컨트롤러 — 인증 필터를 타는 쪽
+│   │   │       ├── domain/          VO
+│   │   │       ├── persistence/     MyBatis 매퍼 인터페이스
+│   │   │       └── service/         서비스 + impl
+│   │   ├── resources/
+│   │   │   ├── logback.xml        로그 설정 (클래스패스 최상단이어야 logback 이 찾는다)
+│   │   │   ├── spring/            Spring 설정 (root-context · servlet-context)
+│   │   │   ├── mybatis/           MyBatis 설정 (별칭 · camelCase 매핑)
+│   │   │   ├── properties/        DB 접속 정보 (로컬)
+│   │   │   └── sql/               매퍼 SQL — MyBatis 가 읽는 *_SQL.xml 만 둔다
+│   │   ├── resources-prod/        DB 접속 정보 (운영) — mvn -Pprod 전용
+│   │   └── webapp/
+│   │       ├── META-INF/          톰캣 쿠키 처리기 (SameSite)
+│   │       ├── manifest.json      홈 화면에 추가했을 때의 아이콘·이름
+│   │       ├── WEB-INF/
+│   │       │   ├── web.xml        필터 · 서블릿 · 세션 · 오류 페이지
+│   │       │   └── views/
+│   │       │       ├── pages/     홈 · 일정 · 프로필 · 방명록
+│   │       │       ├── layout/    상단바 · 바닥글 · head 공통 조각 · 테마 토글
+│   │       │       ├── admin/     관리자 화면
+│   │       │       └── error/     404 · 500
+│   │       └── resources/
+│   │           ├── css/    base(공용) · pages(화면별) · features(연출)
+│   │           ├── js/     core(공용) · pages(화면별) · features(연출)
+│   │           └── images/ brand · cursors · profile · social
+│   └── test/
+│       ├── java/com/irion/
+│       │   ├── testsupport/       FakeHttp — 필터·인터셉터 테스트가 쓰는 서블릿 대역
+│       │   └── (본 코드와 같은 패키지 구조)
+│       └── resources/             logback-test.xml — 테스트는 파일 로그를 남기지 않는다
+├── .github/
+│   ├── workflows/test.yml   푸시·PR 마다 mvn test
+│   └── dependabot.yml       주간 의존성 감시
+├── scripts/
+│   ├── run-local.sh         로컬 빌드 · 배포 · 기동 확인 (맥)
+│   ├── deploy.sh            테스트 · 빌드 · 전송 · 배포 · 롤백 (맥 → 서버)
+│   ├── strip-comments.py    배포본 css · js 주석 제거 (mvn -Pprod 가 부른다)
+│   └── db-backup.sh         DB 백업 (서버에서 cron 으로)
+├── docs/
+│   ├── db/schema.sql        최초 1회 실행하는 DDL — 실행 자원이 아니라 war 에 넣지 않는다
+│   └── screenshots/         README 용 화면 캡처
+├── deploy.env.example       배포 대상 서버 설정 예시 (실제 값은 deploy.env)
+└── pom.xml
+```
+
+### 기능 폴더는 모두 같은 모양입니다
+
+`schedule` · `guestbook` · `admin` 은 다섯 갈래를 똑같이 씁니다.
+
+```mermaid
+flowchart TD
+    A["api/\n공개 주소를 받는 컨트롤러"] --> S
+    B["admin/\n/admin 아래 컨트롤러"] --> S
+    S["service/\n업무 규칙 · 트랜잭션"] --> P
+    P["persistence/\n매퍼 인터페이스"] --> X["resources/sql/**_SQL.xml\n실제 SQL"]
+    D["domain/\nVO · 입력 제약"]
+    A -.->|주고받는 값| D
+    S -.-> D
+    P -.-> D
+```
+
+`api` 와 `admin` 을 가른 것은 취향이 아니라 **규칙**입니다.
+`web.xml` 의 로그인 필터와 CSRF 필터가 `/admin/*` 에만 걸리므로,
+관리자만 할 수 있어야 하는 일은 주소가 그 아래여야 합니다.
+방명록 삭제를 `AdminGuestbookController` 에 따로 둔 것이 그 예입니다 —
+공개 컨트롤러에 두면 화면에서 버튼을 숨기는 것 말고는 아무 방어가 없습니다.
+
+`common` 은 성격이 달라 이 틀을 따르지 않습니다.
+어느 기능에도 속하지 않는 것(필터 · 인터셉터 · 유틸 · 치지직 클라이언트)만 모읍니다.
+
+### 어디를 고치면 되나
+
+| 하고 싶은 일 | 볼 파일 |
+|---|---|
+| 화면의 글자·색을 바꾼다 | `webapp/resources/css/pages/*.css` |
+| 상단바·바닥글을 바꾼다 | `webapp/WEB-INF/views/layout/*.jsp` |
+| 새 주소(URL)를 연다 | 해당 기능의 `api/` 또는 `admin/` 컨트롤러 |
+| SQL 을 고친다 | `resources/sql/<기능>/*_SQL.xml` |
+| 입력 길이 제한을 바꾼다 | `<기능>/domain/*VO.java` 의 `@Size` (+ DB 컬럼) |
+| 치지직 호출 주기를 바꾼다 | `common/service/LiveFeedService.java` 의 TTL 상수 |
+| 필터 순서를 바꾼다 | `webapp/WEB-INF/web.xml` 의 `filter-mapping` 선언 순 |
+| 보안 헤더를 바꾼다 | `common/web/filter/StaticResourceCacheFilter.java` |
+| 3주년 연출을 끈다 | `js/features/anniversary.js` 의 `SHOW_FROM` / `SHOW_TO` |
+
+<br>
+
+## 새 기능을 붙이려면
+
+방명록을 예로 들면, 만든 파일은 이 순서였습니다.
+
+1. **테이블** — `docs/db/schema.sql` 에 `tb_guestbook` 추가
+2. **VO** — `guestbook/domain/GuestbookVO.java` · 컬럼 제약을 `@Size` 로 옮겨 적음
+3. **매퍼 인터페이스** — `guestbook/persistence/GuestbookMapper.java`
+4. **SQL** — `resources/sql/guestbook/Guestbook_SQL.xml`
+5. **서비스** — `guestbook/service/` + `impl/`
+6. **컨트롤러** — 공개는 `api/`, 삭제는 `admin/`
+7. **화면** — `views/pages/guestbook.jsp` + `css/pages/` + `js/pages/`
+8. **테스트** — 본 코드와 같은 패키지에 4종
+
+**설정 파일에서 고칠 곳은 한 줄뿐이었습니다.**
+`mybatis-config.xml` 의 `typeAliases` 에 `com.irion.guestbook.domain` 을 더한 것.
+나머지는 자동으로 잡힙니다.
+
+```xml
+<!-- root-context.xml — 새 기능도 이 규칙에 저절로 걸린다 -->
+<context:component-scan base-package="com.irion"/>
+<property name="mapperLocations" value="classpath:sql/**/*_SQL.xml"/>
+<property name="basePackage" value="com.irion.*.persistence"/>
+```
+
+컨트롤러가 화면을 돌려줄 때는 `views/` 아래 경로를 씁니다 (`return "pages/guestbook";`).
+`InternalResourceViewResolver` 가 앞에 `/WEB-INF/views/`, 뒤에 `.jsp` 를 붙입니다.
+
+<br>
+
+## 요청 처리 파이프라인
 
 필터 여섯 개가 순서대로 지나갑니다. 순서는 `web.xml` 의 `filter-mapping` 선언 순입니다.
 
@@ -213,13 +463,45 @@ flowchart TD
 (트러블슈팅의 "404·500 페이지에만 보안 헤더가 붙지 않던 문제" 참고).
 `<dispatcher>` 를 하나라도 쓰면 기본값이 사라지므로 `REQUEST` 를 함께 적어야 합니다.
 
-### 데이터 모델
+인증 실패를 돌려주는 방식은 요청 종류에 따라 다릅니다.
+AJAX에는 401 JSON을, 브라우저 요청에는 로그인 페이지 리다이렉트를 보냅니다.
 
-테이블은 둘뿐이고 **서로 외래키로 엮이지 않습니다.**
+```mermaid
+sequenceDiagram
+    participant B as 브라우저
+    participant F as adminLoginFilter
+    participant I as Interceptor
+    participant C as Controller
+
+    Note over B,F: 세션이 만료된 상태
+
+    B->>F: GET /admin/schedule/list<br/>(X-Requested-With: XMLHttpRequest)
+    F->>F: 세션 없음 + AJAX 판정
+    F-->>B: 401 + JSON
+    Note right of B: 로그인 화면으로 이동
+
+    B->>F: GET /admin/schedule<br/>(Accept: text/html)
+    F->>F: 세션 없음 + 일반 요청
+    F-->>B: 302 → /admin/admin-login
+
+    Note over B,C: 로그인된 경우
+    B->>F: 요청
+    F->>I: 통과
+    I->>C: 통과
+```
+
+<br>
+
+## 데이터 모델
+
+테이블은 셋이고 **서로 외래키로 엮이지 않습니다.**
+
 일정에 작성자를 남기지 않기 때문입니다. 관리자가 한 명이라 지금은 필요가 없고,
 여러 명이 되면 `tb_schedule` 에 `admin_id` 를 더하면 됩니다.
+방명록은 익명이라 애초에 이어 붙일 사람이 없습니다.
 
-삭제는 `del_yn` 으로 표시만 하고 행은 남깁니다.
+삭제는 세 테이블 모두 `del_yn` 으로 표시만 하고 행은 남깁니다.
+잘못 지웠을 때 `UPDATE ... SET del_yn='N'` 한 줄로 되살릴 수 있습니다.
 
 ```mermaid
 erDiagram
@@ -237,23 +519,49 @@ erDiagram
         bigint schedule_id PK
         varchar title
         text description
-        varchar schedule_type
+        varchar schedule_type "STREAM · GAME · KARAOKE · COLLAB ..."
         datetime start_date
-        datetime end_date
+        datetime end_date "NULL 이면 단발 일정"
         char all_day_yn
-        char display_yn
+        char display_yn "N 이면 공개 목록에서 숨김"
         varchar color
         datetime reg_date
         datetime mod_date
         char del_yn
     }
+    tb_guestbook {
+        bigint guestbook_id PK
+        varchar nickname "항상 '익명'"
+        varchar content "축하 메시지 (최대 500자)"
+        varchar cheer "응원 한마디 (선택)"
+        datetime reg_date
+        char del_yn
+    }
 ```
 
-### 치지직 연동과 캐시
+`tb_guestbook` 만 `mod_date` 가 없습니다 — 방명록은 쓰고 나면 고치지 않습니다.
+인덱스는 `(del_yn, guestbook_id)` 한 벌인데, 목록 질의가
+"안 지워진 것을 최신순으로"뿐이라 걸러내기와 정렬이 그 하나에서 끝납니다.
+
+<br>
+
+## 치지직 연동과 캐시
 
 방송 상태·클립·다시보기는 우리 데이터가 아니라 매번 치지직에 물어야 하는 값입니다.
 호출 하나가 최대 5초(`READ_TIMEOUT`)를 쓰기 때문에 그대로 두면
 방문자 수만큼 그 시간이 곱해집니다. `LiveFeedService` 가 앞에서 이것을 흡수합니다.
+
+```mermaid
+stateDiagram-v2
+    [*] --> 신선함
+    신선함 --> 만료됨 : TTL 경과<br/>(상태 1분 · 클립 10분)
+    만료됨 --> 갱신중 : 첫 요청만 진입<br/>(락 + 이중 확인)
+    갱신중 --> 신선함 : 성공
+    갱신중 --> 백오프 : 실패
+    백오프 --> 만료됨 : 30초 뒤
+    만료됨 --> 만료됨 : 나머지 요청은<br/>기다리지 않고 옛 값 사용
+    백오프 --> 백오프 : 치지직을 두드리지 않음
+```
 
 | 상태 | 하는 일 | 기준 |
 |---|---|---|
@@ -281,12 +589,23 @@ erDiagram
 각 페이지 CSS를 건드리지 않고도 전환됩니다.
 어두운 배경에서는 액센트를 한 단계 밝혀 탁해 보이지 않게 했습니다.
 
+```
+:root                      라이트 값
+:root[data-theme="dark"]   다크 값 (토글로 지정)
+@media (prefers-color-scheme: dark)
+                           JS 가 꺼졌을 때의 폴백
+```
+
 헤더의 테마 버튼은 시스템 → 라이트 → 다크 순으로 돕니다.
 시스템 상태에서는 OS 설정을 따라가며, 페이지를 켜 둔 채로
 OS 모드를 바꿔도 새로고침 없이 그 자리에서 바뀝니다.
+첫 페인트 전에 `theme-init.js` 가 `<head>` 에서 동기로 돌아 테마를 확정합니다 —
+그러지 않으면 새로고침할 때마다 밝은 화면이 한 번 번쩍입니다.
 
 타이포그래피는 디스플레이의 Anton과 본문의 JetBrains Mono를 대비시켜
-정보의 위계를 만들었습니다.
+정보의 위계를 만들었습니다. Anton 에는 한글 글리프가 없어 한글은 Noto Sans KR 로
+폴백되므로, 한글이 들어가는 자리에는 처음부터 `--f-kr` 을 씁니다.
+
 화면 전체에 옅은 그레인 텍스처를 더해 무게감을 주고,
 미디어 카드는 균일한 3열로 정렬해 가독성에 집중했습니다.
 
@@ -317,36 +636,31 @@ OS 모드를 바꿔도 새로고침 없이 그 자리에서 바뀝니다.
 | CSRF | 상태 변경 요청에 토큰 검증, 로그아웃은 POST |
 | 무차별 대입 | 계정 기준 실패 횟수 제한 · 자동 해제 · 추적 항목 수 상한 |
 | 계정 열거 | 아이디 존재 여부와 무관하게 같은 시간을 들여 응답 |
-| 자원 남용 | 일정 조회 기간 상한 · 로그인 아이디 길이 상한 |
+| 자원 남용 | 일정 조회 기간 상한 · 로그인 아이디 길이 상한 · 방명록 조회 개수 상한 |
 | 경로 우회 | 인증 판정 전 경로 정규화 — `..` · 퍼센트 인코딩 · 역슬래시 · 중복 슬래시 · 경로 파라미터 |
 | 응답 헤더 | CSP · HSTS · `X-Frame-Options` · `X-Content-Type-Options` · `Referrer-Policy` (오류 페이지 포함) |
 | 외부 스크립트 | jQuery · FullCalendar 에 SRI 해시 |
+| XSS | 화면에 찍는 사용자 입력은 전부 `YetiUtil.escapeHtml` 통과 |
+| SQL 인젝션 | MyBatis `#{}` 바인딩만 사용 — `${}` 문자열 치환 없음 |
 
-비밀번호 저장 포맷은 알고리즘 이름을 앞에 둡니다.
+### 비밀번호 저장 형식
 
 ```
 pbkdf2$210000$<salt>$<hash>
 ```
 
-이 포맷으로 옮기기 전에는 SHA-256 을 한 번만 돌린 값을 저장했습니다.
-두 형식을 한동안 같이 받아주면서, 로그인에 성공하는 순간 — 원문을 아는
-시점이 거기뿐입니다 — 새 형식으로 다시 저장하는 방식으로 계정을 하나씩
-옮겼습니다. DB를 한 번에 갈아엎지 않아도 되는 대신, 옛 형식을 검증하는
-경로가 남아 있어야 했습니다.
+알고리즘 이름을 앞에 둡니다. 반복 횟수를 올릴 때 기존 해시를 다시 만드는 경로가
+그대로 있어서, `ITERATIONS` 를 높이면 다음 로그인부터 차례로 새 값으로 바뀝니다.
 
-계정이 모두 옮겨간 것을 확인한 뒤 그 경로는 지웠습니다.
-옛 형식은 검증이 1ms도 걸리지 않아서, **그런 계정만 응답이 눈에 띄게
-빨리 돌아왔기 때문입니다.** 지금은 알 수 없는 형식의 해시를 만나면
-같은 시간을 들여 거절하고, 원인을 `ERROR` 로그로 남깁니다 —
-그러지 않으면 화면에는 "비밀번호가 틀렸다"로만 보여 진짜 이유를
+알 수 없는 형식의 해시를 만나면 같은 시간을 들여 거절하고, 원인을 `ERROR` 로그로
+남깁니다 — 그러지 않으면 화면에는 "비밀번호가 틀렸다"로만 보여 진짜 이유를
 알아낼 방법이 없습니다.
 
-반복 횟수를 올릴 때 기존 해시를 다시 만드는 경로는 그대로 있습니다.
-`ITERATIONS` 를 높이면 다음 로그인부터 차례로 새 값으로 바뀝니다.
+### 계정 열거 방어
 
 비밀번호를 몰라도 **응답 시간만 재면 아이디의 존재 여부를 알 수 있습니다.**
 관리자 계정이 하나뿐이라 아이디가 드러나는 순간 표적이 확정되고,
-위의 실패 횟수 제한과 엮이면 관리자를 계속 잠가두기도 쉬워집니다.
+실패 횟수 제한과 엮이면 관리자를 계속 잠가두기도 쉬워집니다.
 그래서 없는 아이디에도 검증에 드는 만큼의 계산을 그대로 씁니다.
 
 | 로그인 실패 경로 | 응답 시간 |
@@ -355,7 +669,9 @@ pbkdf2$210000$<salt>$<hash>
 | 없는 아이디 | 199.2 ms |
 | 알 수 없는 형식의 해시 | 196.6 ms |
 
-CSP 의 `script-src` 에는 `'unsafe-inline'` 이 없습니다.
+### CSP
+
+`script-src` 에 `'unsafe-inline'` 이 없습니다.
 페이지에서 인라인 `onclick` 을 전부 걷어냈기 때문입니다.
 닫기 버튼 하나를 인라인으로 되돌리는 순간 이 방어가 통째로 무의미해지므로,
 새 핸들러는 `data-*` 속성과 이벤트 위임으로 붙입니다.
@@ -363,59 +679,32 @@ CSP 의 `script-src` 에는 `'unsafe-inline'` 이 없습니다.
 이 규칙은 `StaticResourceCacheFilter` 가 **실제로 내보낸 응답 헤더**를 읽어 검사합니다
 (`StaticResourceCacheFilterTest`). `script-src` 에 `'unsafe-inline'` 이나 `'unsafe-eval'` 이
 들어오면 빌드가 깨집니다. 상수를 직접 읽지 않는 이유는, 그러면 필터가 헤더를 안 붙여도
-테스트가 통과하기 때문입니다. 같은 테스트가 `object-src 'none'` · `frame-ancestors 'none'` ·
-`base-uri 'self'` · `form-action 'self'` 처럼 빠져도 티가 안 나는 지시자들도 함께 못 박습니다.
-
-보안 헤더는 404·500 오류 페이지에도 붙습니다. 필터 기본 디스패치가 `REQUEST` 뿐이라
-예전에는 그 두 페이지만 빠져나갔습니다 (트러블슈팅 참고).
+테스트가 통과하기 때문입니다.
 
 `SameSite` 는 Servlet 4.0 의 `<cookie-config>` 에 항목이 없어
 `webapp/META-INF/context.xml` 의 톰캣 쿠키 처리기로 지정합니다.
-
-인증 실패를 돌려주는 방식은 요청 종류에 따라 다릅니다.
-AJAX에는 401 JSON을, 브라우저 요청에는 로그인 페이지 리다이렉트를 보냅니다.
-
-```mermaid
-sequenceDiagram
-    participant B as 브라우저
-    participant F as adminLoginFilter
-    participant I as Interceptor
-    participant C as Controller
-
-    Note over B,F: 세션이 만료된 상태
-
-    B->>F: GET /admin/schedule/list<br/>(X-Requested-With: XMLHttpRequest)
-    F->>F: 세션 없음 + AJAX 판정
-    F-->>B: 401 + JSON
-    Note right of B: 로그인 화면으로 이동
-
-    B->>F: GET /admin/schedule<br/>(Accept: text/html)
-    F->>F: 세션 없음 + 일반 요청
-    F-->>B: 302 → /admin/admin-login
-
-    Note over B,C: 로그인된 경우
-    B->>F: 요청
-    F->>I: 통과
-    I->>C: 통과
-```
 
 > `Secure` 때문에 로컬 `http://localhost:8080` 에서는 관리자 로그인이
 > 사파리에서 유지되지 않습니다. 크롬과 파이어폭스는 localhost 를
 > 신뢰할 수 있는 출처로 보아 그대로 동작합니다.
 
-### 의존성 취약점 감시
+### 방명록이 수집하는 것
 
-애플리케이션 코드가 아무리 멀쩡해도 가져다 쓰는 라이브러리에 구멍이 나면
-같이 뚫립니다. 두 가지를 겁니다.
+방명록은 **식별 정보를 저장하지 않습니다.** 닉네임은 서버가 `익명` 으로 고정하고,
+IP · User-Agent · 쿠키를 기록하는 코드가 없습니다. 남는 것은 글 내용과 작성 시각뿐입니다.
+
+다만 웹서버 접속 로그(nginx · 톰캣)에는 다른 사이트와 마찬가지로 방문자 IP 가 남습니다.
+"아무것도 수집하지 않는다"가 아니라 **"애플리케이션이 저장하지 않는다"** 가 정확한 표현입니다.
+
+도배는 세션 기준 30초 간격으로 막습니다. 쿠키를 지우면 풀리는 임시 방편이고,
+진짜 방어는 아래 nginx 요청 제한입니다.
+
+### 의존성 취약점 감시
 
 **자동 (키 없이 동작)** — [.github/dependabot.yml](.github/dependabot.yml)
 
 깃허브가 매주 월요일 `pom.xml` 을 훑어 새 버전이 나오면 PR 을 열어줍니다.
-패치 단위 업데이트는 한 PR 로 묶고, 지금 올릴 수 없는 것(Spring 6 계열 —
-`jakarta` 네임스페이스가 필요합니다)은 소음이 되므로 제외했습니다.
-
-보안 경고(Dependabot alerts)는 이 파일과 별개입니다. 저장소
-`Settings › Code security` 에서 켜며, 공개 저장소는 기본으로 켜져 있습니다.
+패치 단위 업데이트는 한 PR 로 묶고, 지금 올릴 수 없는 것(Spring 6 계열)은 제외했습니다.
 
 **수동 (NVD API 키 필요)** — `security` 프로파일
 
@@ -425,44 +714,30 @@ mvn -Psecurity verify -Dnvd.api.key=발급받은키
 
 CVSS 7.0 이상이 나오면 빌드를 실패시키고, 보고서는
 `target/dependency-check-report.html` 에 남습니다.
-
-키는 <https://nvd.nist.gov/developers/request-an-api-key> 에서 무료로
-받습니다. 2024년부터 익명 접근이 막혀 **키 없이는 아예 돌지 않습니다**.
-저장소에 적지 말고 명령줄이나 `NVD_API_KEY` 환경변수로 넘깁니다.
-
-오탐은 [dependency-check-suppress.xml](dependency-check-suppress.xml) 에
-**왜 해당되지 않는지 근거를 적어** 예외 처리합니다. 근거 없는 예외는 스캔을
-통과시키려고 눈을 가리는 것과 같습니다.
-
+키는 <https://nvd.nist.gov/developers/request-an-api-key> 에서 무료로 받습니다.
+2024년부터 익명 접근이 막혀 **키 없이는 아예 돌지 않습니다.**
 기본 빌드에는 들어가지 않습니다 — NVD 데이터를 받느라 몇 분씩 걸립니다.
 
-<br>
+오탐은 [dependency-check-suppress.xml](dependency-check-suppress.xml) 에
+**왜 해당되지 않는지 근거를 적어** 예외 처리합니다.
 
 ### 남은 과제 — 로그인 요청 비용 제한
 
 **`/admin/loginProc` 은 아직 요청 빈도 제한이 없습니다.** 실제 위험이라 적어둡니다.
 
 비밀번호 해시는 일부러 느리게 만듭니다(PBKDF2 210,000회). 그 느림이 공격자에게도
-그대로 넘어갑니다 — 로그인 요청 **한 건이 서버에서 약 280ms 의 계산**이 됩니다
-(M 시리즈 맥 실측값. 2GB 운영 서버는 더 느립니다).
+그대로 넘어갑니다 — 로그인 요청 **한 건이 서버에서 약 280ms 의 계산**이 됩니다.
 
 `LoginAttemptGuard` 는 **아이디 기준**이라 이걸 못 막습니다. 매번 다른 아이디를
-보내면 5회 한도에 영원히 닿지 않아 잠기지 않습니다. 게다가 없는 아이디에도
-계정 열거를 막으려고 `matchesDummy()` 가 같은 계산을 그대로 태웁니다 —
-공격자는 **일부러 없는 아이디만 골라 보내** 그 비용을 무한정 끌어냅니다.
-계정 열거 방어와 자원 보호가 서로를 무너뜨리는 자리입니다.
-
-톰캣 기본 스레드가 200개라, 코어가 둘뿐인 서버에서는 초당 몇 건만으로도
-CPU 가 다 차고 일반 방문자의 요청이 밀립니다. DB 조회도 매번 따라붙어
-커넥션 풀(최대 10)까지 함께 밀립니다.
+보내면 5회 한도에 영원히 닿지 않습니다. 게다가 없는 아이디에도 계정 열거를 막으려고
+같은 계산을 그대로 태웁니다 — 공격자는 **일부러 없는 아이디만 골라 보내** 그 비용을
+무한정 끌어냅니다. 계정 열거 방어와 자원 보호가 서로를 무너뜨리는 자리입니다.
 
 `/admin/loginProc` 은 세션 이전이라 **CSRF 검사가 면제**입니다. 올바른 설계지만,
-그래서 아무 웹페이지에서나 이 주소로 POST 를 보낼 수 있습니다. 자동 제출 폼을
-심어두면 그 페이지를 여는 **방문자들의 브라우저가 대신 때립니다** —
-`SameSite=Lax` 는 쿠키만 빼고 요청 자체는 서버에 도착합니다.
+그래서 아무 웹페이지에서나 이 주소로 POST 를 보낼 수 있습니다.
 
 **막는 방법은 앞단 nginx 입니다.** `limit_req` 는 기본 내장이라 모듈이 필요 없고,
-요청이 톰캣에 닿기 전에 잘라냅니다. 애플리케이션 코드는 건드리지 않습니다.
+요청이 톰캣에 닿기 전에 잘라냅니다.
 
 ```nginx
 # http 블록
@@ -478,18 +753,16 @@ location = /admin/loginProc {
 }
 ```
 
-코드로 막으려면 아이디와 무관한 전역 카운터를 두는 방법이 있지만,
-공격 중에는 관리자도 함께 막힙니다. IP 단위인 nginx 쪽이 정교합니다.
-
 <br>
 
-## 시작하기
+## 로컬에서 실행하기
 
 **JDK 11 이상**, Maven 3.6 이상, MariaDB 10 이상, Apache Tomcat 9 이상이 필요합니다.
 
 바이트코드는 자바 8 타깃으로 컴파일되지만, 실행 환경은 자바 11 이상이어야 합니다.
 톰캣이 JSP 를 실행 중에 컴파일할 때 쓰는 ECJ 가 11 이상을 요구하기 때문입니다
-(자바 8 서버에 올리면 모든 페이지가 500 이 됩니다 — [트러블슈팅](#자바-8-서버에서-모든-페이지가-500-이-되는-문제) 참고).
+(자바 8 서버에 올리면 모든 페이지가 500 이 됩니다 —
+[트러블슈팅](#자바-8-서버에서-모든-페이지가-500-이-되는-문제) 참고).
 `scripts/deploy.sh` 는 배포 전에 서버 자바 버전을 확인하고 11 미만이면 중단합니다.
 
 #### 1. 저장소 클론
@@ -502,10 +775,34 @@ cd YETI-125
 #### 2. 데이터베이스 준비
 
 `docs/db/schema.sql` 을 실행해 `for_125` 데이터베이스와
-`tb_admin`, `tb_schedule` 테이블을 생성합니다.
+`tb_admin` · `tb_schedule` · `tb_guestbook` 테이블을 생성합니다.
 
 ```bash
 mysql -u root -p < docs/db/schema.sql
+```
+
+앱이 쓸 계정은 따로 만듭니다. 스키마 파일은 테이블만 만들고 계정은 만들지 않습니다.
+
+```sql
+CREATE USER 'yeti'@'localhost' IDENTIFIED BY '비밀번호';
+GRANT SELECT, INSERT, UPDATE, DELETE ON for_125.* TO 'yeti'@'localhost';
+```
+
+관리자 계정도 `tb_admin` 에 직접 넣어야 합니다.
+`tb_admin` 은 비어 있는 채로 만들어지고, 계정을 심는 스크립트는 없습니다.
+비밀번호 해시는 `PasswordUtil` 이 만들어 줍니다.
+
+```bash
+mvn -q clean compile
+mvn -q dependency:build-classpath -Dmdep.outputFile=/tmp/yeti-cp.txt
+java -cp "target/classes:$(cat /tmp/yeti-cp.txt)" com.irion.common.util.PasswordUtil "비밀번호"
+```
+
+출력된 값을 그대로 넣습니다.
+
+```sql
+INSERT INTO tb_admin (admin_login_id, admin_password, admin_name)
+VALUES ('아이디', 'pbkdf2$210000$...$...', '관리자');
 ```
 
 #### 3. 접속 정보 설정
@@ -536,6 +833,9 @@ macOS에서는 위 과정을 스크립트 하나로 대신할 수 있습니다.
 
 ```bash
 ./scripts/run-local.sh
+./scripts/run-local.sh --skip-build   # 빌드 없이 재배포
+./scripts/run-local.sh --stop         # 정지
+./scripts/run-local.sh --logs         # catalina.out 실시간 보기
 ```
 
 DB 비밀번호는 스크립트에 두지 않습니다.
@@ -551,31 +851,39 @@ password="비밀번호"
 값은 큰따옴표로 감싸세요. `user=` 는 넣지 않습니다 —
 `[client]` 는 모든 mariadb 클라이언트에 적용되어 소켓 인증까지 끌려갑니다.
 
-테스트는 빌드에 포함되어 있고 따로 돌릴 수도 있습니다.
-DB 는 필요 없습니다 — 스프링 컨텍스트를 띄우지 않습니다.
+> `mvn -Pprod` 로 빌드하면 `target/classes` 의 DB 설정이 **운영 값으로 덮여 남습니다.**
+> 그 뒤 IDE 로 로컬 실행하면 운영 비밀번호로 로컬 DB 에 붙으려다 `Access denied` 가 납니다.
+> `mvn clean package`(prod 아님)를 한 번 돌리면 되돌아옵니다.
+> `run-local.sh` 는 prod 없이 빌드하므로 스스로 복구됩니다.
+
+#### 5. 테스트
 
 ```bash
 mvn test
 ```
 
+DB 도 톰캣도 필요 없습니다 — 스프링 컨텍스트를 띄우지 않고,
+매퍼·서비스·서블릿을 가짜 객체로 갈아 끼워 순수 자바로만 돕니다.
 `main` 에 올리거나 PR 을 열면 깃허브 액션이 같은 테스트를 자동으로 돌립니다
-(`.github/workflows/test.yml`). 실패하면 어느 테스트가 깨졌는지 보고서가 남습니다.
+(`.github/workflows/test.yml`).
 
-#### 5. 접속
+#### 6. 접속
 
 | | |
 |---|---|
 | 메인 사이트 | `http://localhost:8080` |
+| 방명록 | `http://localhost:8080/guestbook` |
 | 관리자 | `http://localhost:8080/admin/admin-login` |
 
 <br>
 
 ## 배포
 
+### 왜 프로파일을 나눴나
+
 `database.properties` 는 classpath 리소스라 **war 안에 그대로 패키징됩니다.**
 로컬 설정이 담긴 war를 운영에 올리면 DB 연결에 실패해 사이트가 내려갑니다.
 
-이를 막기 위해 빌드 프로파일을 분리했습니다.
 운영 설정은 `src/main/resources-prod/properties/database.properties` 에 두고,
 `prod` 프로파일로 빌드할 때만 덮어씁니다. 이 파일 역시 `.gitignore` 대상입니다.
 
@@ -586,35 +894,22 @@ mvn clean package -Pprod   # 운영 배포용
 
 운영 설정이 채워지지 않았거나 주소가 로컬을 가리키면 **빌드 단계에서 중단됩니다.**
 
-배포 대상 서버 주소는 저장소에 두지 않습니다 — 공개 저장소이기 때문입니다.
-`deploy.env` 에 적거나 환경변수로 넘깁니다. 이 파일은 `.gitignore` 대상입니다.
+배포 대상 서버 주소도 저장소에 두지 않습니다 — 공개 저장소이기 때문입니다.
 
 ```bash
 cp deploy.env.example deploy.env
 # YETI_DEPLOY_SERVER=사용자@서버주소
 ```
 
-배포는 스크립트 한 줄로 끝납니다.
-테스트 → 빌드 → 서버 자바 확인 → 전송 → 교체 → 검증 순으로 진행하고,
-검증에 실패하면 직전 백업으로 자동 롤백합니다.
-
-검증은 정상 페이지 다섯 곳과 DB 연동 API 두 곳이 200 인지 보고,
-**없는 주소가 404 를 주는지와 그 응답에 보안 헤더가 붙어 있는지**도 함께 봅니다.
-상태 코드만 보면 안 됩니다 — 톰캣만 뜨고 앱이 아직 안 붙은 순간에도 404 는 나오기 때문에,
-헤더까지 확인해야 "우리 오류 화면이 우리 필터를 타고 나왔다"가 증명됩니다.
-
-방명록은 페이지(`/guestbook`)와 목록 API(`/guestbook/list`)를 둘 다 봅니다.
-페이지는 화면만 그리고 글은 브라우저가 API 로 따로 받아 가기 때문에,
-테이블이 없거나 앱 계정에 권한이 없어도 페이지 자체는 200 입니다 — 페이지만 보면 그냥 통과합니다.
+### 배포 한 줄
 
 ```bash
 ./scripts/deploy.sh
 ./scripts/deploy.sh --skip-tests   # 급할 때만
 ```
 
-테스트는 배포 경로에 포함되어 있습니다.
-예전에는 `-DskipTests` 로 빌드해서 손으로 `mvn test` 를 칠 때만 확인이 됐고,
-깨진 코드가 그대로 운영에 올라갈 수 있었습니다.
+테스트 → 빌드 → 서버 자바 확인 → 전송 → 교체 → 검증 순으로 진행하고,
+검증에 실패하면 직전 백업으로 자동 롤백합니다.
 
 ```mermaid
 flowchart TD
@@ -630,11 +925,23 @@ flowchart TD
     J -->|통과| E["scp → 서버"]
     E --> F["기존 ROOT.war 백업"]
     F --> G["교체 후 톰캣 재기동"]
-    G --> H{"헬스체크\nAPI + 페이지 4곳 + 오류 화면"}
+    G --> H{"헬스체크\nAPI 2곳 + 페이지 5곳 + 오류 화면"}
     H -->|전부 통과| I(["외부 접근 확인\nhttps://yeti-125.com"])
     H -->|실패| R["백업으로 자동 롤백"]
     R --> Y(["이전 버전으로 복구"])
 ```
+
+### 헬스체크가 보는 것
+
+검증은 정상 페이지 다섯 곳과 DB 연동 API 두 곳이 200 인지 보고,
+**없는 주소가 404 를 주는지와 그 응답에 보안 헤더가 붙어 있는지**도 함께 봅니다.
+
+상태 코드만 보면 안 됩니다 — 톰캣만 뜨고 앱이 아직 안 붙은 순간에도 404 는 나오기 때문에,
+헤더까지 확인해야 "우리 오류 화면이 우리 필터를 타고 나왔다"가 증명됩니다.
+
+방명록은 페이지(`/guestbook`)와 목록 API(`/guestbook/list`)를 둘 다 봅니다.
+페이지는 화면만 그리고 글은 브라우저가 API 로 따로 받아 가기 때문에,
+테이블이 없거나 앱 계정에 권한이 없어도 페이지 자체는 200 입니다 — 페이지만 보면 그냥 통과합니다.
 
 ### 배포본에서 주석 걷어내기
 
@@ -646,24 +953,24 @@ war 플러그인의 `webResources` 겹치기 순서에 기대지 않으려고
 사본을 `warSourceDirectory` 로 통째로 지정했습니다.
 
 걷어내는 일은 `scripts/strip-comments.py` 가 맡습니다.
-정규식으로 자르지 않습니다 — `'https://...'` 같은 문자열이나
-`/^\d+$/` 같은 정규식 리터럴 안의 슬래시까지 주석으로 보고 잘라 코드를 깨뜨립니다.
-문자열 · 템플릿 · 정규식 상태를 따라가는 스캐너로 훑습니다.
+정규식으로 자르지 않습니다 — 문자열이나 정규식 리터럴 안의 슬래시까지 주석으로 보고
+잘라 코드를 깨뜨립니다. 문자열 · 템플릿 · 정규식 상태를 따라가는 스캐너로 훑습니다.
 
 JSP 의 `<!-- -->` 는 브라우저로 그대로 나갑니다.
 페이지 주석은 전부 `<%-- --%>` 로 적습니다 — 서버에서 걷혀 응답에 실리지 않습니다.
 
 빌드 장비에 `python3` 가 필요합니다.
-없으면 주석이 남은 채 배포되지 않도록 빌드를 세웁니다.
-(CI 는 `mvn test` 만 돌아 해당 없습니다)
+없으면 주석이 남은 채 배포되지 않도록 빌드를 세웁니다. (CI 는 `mvn test` 만 돌아 해당 없습니다)
 
 코드 자체를 감추는 것은 아닙니다.
 브라우저가 받아 실행하는 파일이라 로직은 그대로 보입니다. 걷어내는 것은 설명뿐입니다.
 
-### 데이터베이스 백업
+<br>
+
+## 데이터베이스 백업
 
 운영 서버에서 `scripts/db-backup.sh` 가 cron 으로 돕니다.
-일정은 전부 관리자가 손으로 넣은 것이라 잃으면 되돌릴 방법이 없습니다.
+일정과 방명록은 되돌릴 방법이 없는 자료입니다.
 
 | | |
 |---|---|
@@ -693,83 +1000,6 @@ sudo crontab -e
 ```bash
 gunzip -c /var/backups/yeti-125/for_125-20260826-040001.sql.gz | mysql for_125
 ```
-
-> 옛 SHA-256 해시가 담긴 백업을 되살리면 그 관리자 계정은 로그인할 수 없습니다.
-> `PasswordUtil.main` 으로 해시를 새로 넣어야 합니다.
-
-<br>
-
-## 프로젝트 구조
-
-```
-YETI-125/
-├── src/
-│   ├── main/
-│   │   ├── java/com/irion/
-│   │   │   ├── common/
-│   │   │   │   ├── api/         공개 페이지 · 라이브 상태 컨트롤러
-│   │   │   │   ├── web/filter/  인증 · CSRF · 보안 헤더 · 캐시 재검증
-│   │   │   │   ├── web/interceptor/ 관리자 인증
-│   │   │   │   ├── service/     ChzzkClient(호출·파싱) · LiveFeedService(캐시)
-│   │   │   │   └── util/        비밀번호 · CSRF 토큰 · 로그인 시도 제한 · 조회 기간
-│   │   │   ├── schedule/      방송 일정
-│   │   │   ├── guestbook/     3주년 방명록
-│   │   │   └── admin/         관리자 인증
-│   │   │       ├── api/         공개 주소를 받는 컨트롤러
-│   │   │       ├── admin/       /admin 아래 컨트롤러 — 인증 필터를 타는 쪽
-│   │   │       ├── domain/      VO
-│   │   │       ├── persistence/ MyBatis 매퍼 인터페이스
-│   │   │       └── service/     서비스 + impl
-│   │   ├── resources/
-│   │   │   ├── logback.xml    로그 설정 (클래스패스 최상단이어야 logback 이 찾는다)
-│   │   │   ├── spring/        Spring 설정
-│   │   │   ├── mybatis/       MyBatis 설정
-│   │   │   ├── properties/    DB 접속 정보 (로컬)
-│   │   │   └── sql/           매퍼 SQL — MyBatis 가 읽는 *_SQL.xml 만 둔다
-│   │   ├── resources-prod/    DB 접속 정보 (운영) — mvn -Pprod 전용
-│   │   └── webapp/
-│   │       ├── META-INF/      톰캣 쿠키 처리기 (SameSite)
-│   │       ├── WEB-INF/
-│   │       │   ├── web.xml
-│   │       │   └── views/
-│   │       │       ├── pages/   홈 · 일정 · 프로필 · 방명록
-│   │       │       ├── layout/  상단바 · 바닥글 · head 공통 조각 · 테마 토글
-│   │       │       ├── admin/   관리자 화면
-│   │       │       └── error/   404 · 500
-│   │       └── resources/
-│   │           ├── css/   base(공용) · pages(화면별) · features(연출)
-│   │           ├── js/    core(공용) · pages(화면별) · features(연출)
-│   │           └── images/ brand · cursors · profile · social
-│   └── test/
-│       ├── java/com/irion/
-│       │   ├── testsupport/   FakeHttp — 필터·인터셉터 테스트가 함께 쓰는 서블릿 대역
-│       │   └── (본 코드와 같은 패키지 구조)
-│       │                      비밀번호 · 로그인 검증 · 시도 제한 · 인증 두 겹
-│       │                      일정 저장·조회 · 치지직 파싱 · 페이지네이션
-│       │                      방명록 검증 · 익명 처리 · 목록 SQL
-│       │                      입력 검증 · 조회 기간 · JSON 날짜 형식
-│       │                      치지직 캐시 · 장애 폴백 · 백오프 · 커서 페이징
-│       │                      보안 헤더 · CSP 지시자 · web.xml 매핑
-│       └── resources/         logback-test.xml — 테스트는 파일 로그를 남기지 않는다
-├── .github/
-│   ├── workflows/test.yml 푸시·PR 마다 mvn test
-│   └── dependabot.yml     주간 의존성 감시
-├── scripts/
-│   ├── run-local.sh       로컬 빌드 · 배포 · 기동 확인 (맥)
-│   ├── deploy.sh          테스트 · 빌드 · 전송 · 배포 · 롤백 (맥 → 서버)
-│   ├── strip-comments.py  배포본 css · js 주석 제거 (mvn -Pprod 가 부른다)
-│   └── db-backup.sh       DB 백업 (서버에서 cron 으로)
-├── docs/
-│   ├── db/schema.sql      최초 1회 실행하는 DDL — 실행 자원이 아니라 war 에 넣지 않는다
-│   └── screenshots/       README 용 화면 캡처
-├── deploy.env.example     배포 대상 서버 설정 예시 (실제 값은 deploy.env)
-└── pom.xml
-```
-
-기능 폴더(`schedule` · `guestbook` · `admin`)는 모두 같은 다섯 갈래를 쓴다 —
-`api`(공개) · `admin`(관리자) · `domain` · `persistence` · `service`.
-`admin` 아래 컨트롤러를 따로 둔 것은 취향이 아니라 규칙이다: `web.xml` 의
-로그인·CSRF 필터가 `/admin/*` 에만 걸리므로, 주소가 그 아래여야 인증을 탄다.
 
 <br>
 
@@ -1152,6 +1382,8 @@ JSON 파싱에 실패해 `error` 콜백으로 오지만, 그때 `xhr.status` 는
 
 필터에도 같은 판정을 넣어 AJAX 요청에는 401 JSON 을 돌려주도록 했습니다.
 판정 로직은 `RequestUtil` 한 곳에 모아 두 곳이 어긋나지 않게 했습니다.
+
+<br>
 
 <br>
 
