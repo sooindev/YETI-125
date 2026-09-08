@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.irion.guestbook.mapper.GuestbookMapper">
+
+    <!--
+      목록은 항상 "안 지워진 것을 최신순으로" 읽는다.
+      정렬 기준을 reg_date 가 아니라 guestbook_id 로 잡은 이유 —
+      reg_date 는 초 단위라 같은 초에 들어온 글끼리 순서가 흔들린다.
+      그러면 페이지 경계에서 같은 글이 두 번 나오거나 한 건이 통째로 빠진다.
+      id 는 겹치지 않으므로 페이지를 넘겨도 순서가 고정된다.
+    -->
+    <select id="selectGuestbookList" resultType="GuestbookVO">
+        SELECT guestbook_id
+               ,nickname
+               ,content
+               ,cheer
+               ,reg_date
+               ,del_yn
+        FROM tb_guestbook
+        WHERE del_yn = 'N'
+        ORDER BY guestbook_id DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- 전체 개수 — "총 N개의 축하" 와 더 볼 글이 남았는지 판단에 쓴다 -->
+    <select id="selectGuestbookCount" resultType="int">
+        SELECT COUNT(*)
+        FROM tb_guestbook
+        WHERE del_yn = 'N'
+    </select>
+
+    <!-- 방명록 등록 -->
+    <insert id="insertGuestbook" parameterType="GuestbookVO" useGeneratedKeys="true" keyProperty="guestbookId">
+        INSERT INTO tb_guestbook (
+            nickname
+            ,content
+            ,cheer
+        ) VALUES (
+            #{nickname}
+            ,#{content}
+            ,#{cheer}
+        )
+    </insert>
+
+    <!-- 방명록 삭제 (소프트 삭제) -->
+    <update id="deleteGuestbook" parameterType="Long">
+        UPDATE tb_guestbook
+        SET del_yn = 'Y'
+        WHERE guestbook_id = #{guestbookId}
+          AND del_yn = 'N'
+    </update>
+
+</mapper>

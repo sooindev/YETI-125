@@ -123,11 +123,17 @@ WEBAPPS=/var/lib/tomcat9/webapps
 
 # API 하나만 보면 JSP 가 전부 깨져도 통과한다 (2026-08-24 장애).
 # DB 연동 · 페이지 렌더 · 관리자 입구 · 오류 화면을 함께 본다.
+#
+# 방명록은 페이지와 목록 API 를 둘 다 본다. /guestbook 은 화면만 그리고
+# 글은 브라우저가 /guestbook/list 로 따로 받아 간다 — 테이블이 없거나
+# 앱 계정에 권한이 없어도 페이지 자체는 200 이라, 페이지만 보면 그냥 통과한다.
 CHECKS="
 http://localhost:8080/schedule/list?start=2020-01-01&end=2030-12-31
+http://localhost:8080/guestbook/list
 http://localhost:8080/
 http://localhost:8080/schedule
 http://localhost:8080/info
+http://localhost:8080/guestbook
 http://localhost:8080/admin/admin-login
 "
 

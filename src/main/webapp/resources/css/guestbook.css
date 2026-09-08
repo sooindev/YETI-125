@@ -1,0 +1,457 @@
+/* 3주년 기념 방명록 — 히어로, 작성 패널, 축하 카드 */
+
+/*
+  이 페이지는 사이트의 기존 문법을 그대로 쓴다 — 각진 판, 1px 헤어라인,
+  mono 대문자 라벨, 번호 인덱스, 호버에 frost 로 물드는 테두리.
+  둥근 모서리·그라데이션 테두리·색 아바타 같은 장치는 쓰지 않는다.
+  클립 카드(.clip-card)와 링크 행(.link-row)이 이 페이지의 기준점이다.
+*/
+
+.gb-page {
+    /* 카드 안쪽 여백만 토큰으로 둔다. 곡률 토큰은 없다 — 전부 각진다 */
+    --gb-pad: clamp(20px, 2.2vw, 26px);
+    --gb-shadow-rest:  0 4px 14px -8px rgba(var(--shadow-rgb), 0.18);
+    --gb-shadow-hover: 0 18px 36px -14px var(--frost-glow);
+}
+
+/* ---- 히어로 --------------------------------------------------- */
+
+.gb-hero {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    padding: calc(var(--head-total) + clamp(52px, 9vw, 96px)) 0 clamp(48px, 7vw, 80px);
+    border-bottom: 1px solid var(--ink-line);
+}
+
+/* 배경 물듦. body::before 와 같은 방식이라 페이지에 이어 붙은 것처럼 보인다 */
+.gb-hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+        radial-gradient(64% 88% at 8% 0%, var(--frost-soft) 0%, transparent 58%),
+        radial-gradient(56% 82% at 96% 8%, var(--rose-soft) 0%, transparent 60%);
+    opacity: 0.75;
+}
+
+.gb-hero-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
+    gap: clamp(24px, 4vw, 56px);
+    align-items: end;
+}
+
+.gb-hero-title {
+    font-family: var(--f-kr);
+    font-size: clamp(1.85rem, 1.15rem + 3.1vw, 3rem);
+    font-weight: 700;
+    line-height: 1.28;
+    /* 큰 글자일수록 자간을 좁혀야 덩어리로 읽힌다 */
+    letter-spacing: -0.035em;
+    color: var(--bone);
+    margin-top: 20px;
+    word-break: keep-all;
+}
+.gb-hero-title em {
+    font-style: normal;
+    color: var(--frost);
+}
+
+.gb-hero-copy {
+    margin-top: 18px;
+    max-width: 34rem;
+    font-size: 0.95rem;
+    line-height: 1.85;
+    letter-spacing: -0.01em;
+    color: var(--bone-dim);
+    word-break: keep-all;
+}
+
+/* 오른쪽 아래 계기판. 사이트의 .hero-baseline 과 같은 자리·같은 말투 */
+.gb-hero-meta {
+    border-top: 1px solid var(--ink-line-2);
+    padding-top: 14px;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+}
+.gb-hero-meta-label {
+    font-family: var(--f-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--bone-faint);
+}
+.gb-hero-meta-value {
+    font-family: var(--f-display);
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    line-height: 0.9;
+    color: var(--bone);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ---- 작성 패널 ------------------------------------------------ */
+
+.gb-compose { padding: clamp(48px, 7vw, 80px) 0 clamp(40px, 6vw, 64px); }
+
+.gb-form {
+    max-width: 620px;
+    margin: 0 auto;
+    padding: clamp(24px, 4vw, 38px);
+    background: var(--ink-raise);
+    border: 1px solid var(--ink-line-2);
+    box-shadow: var(--gb-shadow-rest);
+}
+
+.gb-form-head {
+    padding-bottom: 20px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--ink-line);
+}
+.gb-form-title {
+    font-family: var(--f-kr);
+    font-size: 1.12rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    color: var(--bone);
+}
+.gb-form-sub {
+    margin-top: 7px;
+    font-size: 0.84rem;
+    line-height: 1.7;
+    color: var(--bone-faint);
+    word-break: keep-all;
+}
+
+.gb-field { margin-bottom: 18px; }
+
+.gb-field-label {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 9px;
+}
+.gb-field label {
+    font-family: var(--f-mono);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--bone-dim);
+}
+.gb-required { color: var(--rose); margin-left: 3px; }
+.gb-optional {
+    font-family: var(--f-kr);
+    font-size: 0.72rem;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--bone-faint);
+}
+
+.gb-field input[type="text"],
+.gb-field textarea {
+    width: 100%;
+    padding: 13px 15px;
+    border: 1px solid var(--ink-line-2);
+    background: var(--ink);
+    color: var(--bone);
+    font-family: var(--f-kr);
+    /* 16px 미만이면 iOS 사파리가 입력할 때 화면을 확대한다 */
+    font-size: 16px;
+    line-height: 1.65;
+    letter-spacing: -0.01em;
+    transition: border-color var(--t-fast), box-shadow var(--t-fast);
+}
+.gb-field textarea { resize: vertical; min-height: 128px; }
+.gb-field input::placeholder,
+.gb-field textarea::placeholder { color: var(--bone-faint); }
+
+.gb-field input[type="text"]:focus,
+.gb-field textarea:focus {
+    outline: none;
+    border-color: var(--frost);
+    box-shadow: 0 0 0 3px var(--frost-glow);
+}
+
+.gb-counter {
+    font-family: var(--f-mono);
+    font-size: 0.68rem;
+    color: var(--bone-faint);
+    font-variant-numeric: tabular-nums;
+    transition: color var(--t-fast);
+}
+.gb-counter.is-full { color: var(--rose-deep); }
+
+/* 제출 버튼은 공용 .btn .btn-primary 를 그대로 쓴다 (호버에 색이 차오르는 그 버튼).
+   여기서는 폭과 정렬만 손본다 — 사이트에 없던 버튼을 새로 만들지 않는다 */
+.gb-form .btn {
+    width: 100%;
+    justify-content: center;
+    margin-top: 24px;
+    cursor: pointer;
+}
+.gb-form .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ---- 목록 ----------------------------------------------------- */
+
+.gb-list-section { padding-top: 0; }
+
+.gb-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: clamp(14px, 1.5vw, 20px);
+    align-items: start;
+}
+
+/*
+  카드. 클립 카드와 같은 재질 — 들린 표면, 1px 헤어라인, 각진 모서리.
+  호버도 같은 동작이라 두 목록이 한 사이트의 것으로 읽힌다.
+*/
+.gb-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: var(--gb-pad);
+    background: var(--ink-raise);
+    border: 1px solid var(--ink-line);
+    box-shadow: var(--gb-shadow-rest);
+    transition: transform var(--t-fast),
+                box-shadow var(--t-fast),
+                border-color var(--t-fast);
+}
+.gb-card:hover {
+    transform: translateY(-6px);
+    border-color: var(--frost);
+    box-shadow: var(--gb-shadow-hover);
+}
+
+/* 머리줄 — 왼쪽에 아카이브 번호, 오른쪽에 날짜. 둘 다 mono 라 자릿수가 흔들리지 않는다 */
+.gb-card-top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding-bottom: 14px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--ink-line);
+}
+.gb-card-idx {
+    font-family: var(--f-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    color: var(--bone-faint);
+    font-variant-numeric: tabular-nums;
+    transition: color var(--t-fast);
+}
+.gb-card:hover .gb-card-idx { color: var(--frost); }
+.gb-card-date {
+    font-family: var(--f-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.04em;
+    color: var(--bone-faint);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.gb-card-content {
+    font-size: 0.9rem;
+    line-height: 1.85;
+    letter-spacing: -0.005em;
+    color: var(--bone-dim);
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+    /* 줄바꿈을 그대로 살린다. 이스케이프는 자바스크립트가 미리 한다 */
+    white-space: pre-wrap;
+}
+
+/*
+  응원 한마디. 알약이나 이모지 대신 라벨 붙은 각주로 둔다 —
+  본문과 위계가 갈리면서 카드가 조용해진다.
+*/
+.gb-card-cheer {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 12px;
+    align-items: baseline;
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid var(--ink-line);
+}
+
+.gb-card-cheer-label {
+    font-family: var(--f-mono);
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--rose);
+    white-space: nowrap;
+}
+.gb-card-cheer-text {
+    font-size: 0.82rem;
+    line-height: 1.7;
+    letter-spacing: -0.005em;
+    color: var(--bone-dim);
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+}
+
+/*
+  글쓴이 서명. 편지처럼 카드 맨 끝에 온다.
+  margin-top: auto 라 본문이 짧은 카드에서도 바닥에 앉아,
+  격자에서 카드 높이가 달라도 서명 줄이 가지런히 맞는다.
+*/
+.gb-card-sign {
+    margin-top: auto;
+    padding-top: 20px;
+    text-align: right;
+    font-family: var(--f-kr);
+    font-size: 0.96rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--bone);
+    /* 긴 닉네임이 카드를 밀어내지 않게 */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+/* 줄표는 장식이라 마크업이 아니라 여기서 붙인다 — 닉네임 글자에 섞이지 않는다 */
+.gb-card-sign::before {
+    content: "—";
+    margin-right: 0.5em;
+    color: var(--bone-faint);
+    font-weight: 400;
+}
+
+/* 관리자로 접속했을 때만 body[data-admin="Y"] 아래에서 보인다 */
+.gb-card-delete {
+    position: absolute;
+    top: 0; right: 0;
+    width: 34px; height: 34px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    line-height: 1;
+    color: var(--bone-faint);
+    background: var(--ink-raise);
+    border: 0;
+    border-left: 1px solid var(--ink-line);
+    border-bottom: 1px solid var(--ink-line);
+    cursor: pointer;
+    /* 마우스를 올리기 전에는 존재감을 낮춘다 */
+    opacity: 0;
+    transition: opacity var(--t-fast), background-color var(--t-fast), color var(--t-fast);
+}
+body[data-admin="Y"] .gb-card-delete { display: flex; }
+body[data-admin="Y"] .gb-card:hover .gb-card-delete,
+body[data-admin="Y"] .gb-card-delete:focus-visible { opacity: 1; }
+.gb-card-delete:hover { background: var(--t-collab); color: #fff; }
+/* 삭제 버튼이 날짜를 덮지 않게 자리를 비운다 */
+body[data-admin="Y"] .gb-card-top { padding-right: 30px; }
+
+/* 손가락에는 hover 가 없다 — 터치 기기에서는 늘 보여야 누를 수 있다 */
+@media (hover: none) {
+    body[data-admin="Y"] .gb-card-delete { opacity: 1; }
+}
+
+/* ---- 스켈레톤 (첫 로딩) --------------------------------------- */
+
+.gb-skeleton {
+    padding: var(--gb-pad);
+    background: var(--ink-raise);
+    border: 1px solid var(--ink-line);
+}
+.gb-skeleton-line {
+    height: 10px;
+    background: linear-gradient(90deg,
+        var(--ink-line) 25%, var(--ink-line-2) 37%, var(--ink-line) 63%);
+    background-size: 400% 100%;
+    animation: gb-shimmer 1.4s ease-in-out infinite;
+}
+.gb-skeleton-line + .gb-skeleton-line { margin-top: 12px; }
+.gb-skeleton-line.is-short { width: 34%; }
+.gb-skeleton-line.is-mid { width: 72%; }
+.gb-skeleton-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding-bottom: 14px;
+    margin-bottom: 18px;
+    border-bottom: 1px solid var(--ink-line);
+}
+.gb-skeleton-top .gb-skeleton-line { margin-top: 0; width: 46px; }
+
+@keyframes gb-shimmer {
+    0%   { background-position: 100% 50%; }
+    100% { background-position: 0 50%; }
+}
+
+/* ---- 상태 · 더 보기 ------------------------------------------- */
+
+.gb-state {
+    text-align: center;
+    padding: 64px 20px;
+    font-family: var(--f-mono);
+    font-size: 0.82rem;
+    line-height: 2;
+    letter-spacing: 0.02em;
+    color: var(--bone-faint);
+}
+.gb-state-mark {
+    display: block;
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+    color: var(--ink-line-2);
+}
+
+.gb-more {
+    display: flex;
+    justify-content: center;
+    margin-top: clamp(28px, 4vw, 44px);
+}
+.gb-more .btn { cursor: pointer; }
+.gb-more .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ---- 등장 순서 — scroll-animations.js 가 .is-visible 을 붙인다 --- */
+
+.gb-grid > .scroll-animate:nth-child(3n+1).is-visible { transition-delay: 0s; }
+.gb-grid > .scroll-animate:nth-child(3n+2).is-visible { transition-delay: 0.06s; }
+.gb-grid > .scroll-animate:nth-child(3n+3).is-visible { transition-delay: 0.12s; }
+
+/* ---- 키보드 초점 ---------------------------------------------- */
+
+.gb-card-delete:focus-visible {
+    outline: 2px solid var(--frost);
+    outline-offset: -2px;
+}
+
+/* ---- 반응형 --------------------------------------------------- */
+
+@media (max-width: 900px) {
+    .gb-hero-inner { grid-template-columns: 1fr; align-items: start; }
+    .gb-hero-meta { margin-top: 26px; }
+    .gb-grid { grid-template-columns: repeat(auto-fill, minmax(258px, 1fr)); }
+}
+
+@media (max-width: 640px) {
+    .gb-hero { padding-top: calc(var(--head-total) + 40px); }
+    .gb-grid { grid-template-columns: 1fr; }
+    .gb-hero-meta-value { font-size: 2.4rem; }
+}
+
+@media (max-width: 380px) {
+    .gb-form { padding: 22px 18px; }
+}
+
+/* ---- 움직임 줄이기 -------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+    .gb-card:hover { transform: none; }
+    .gb-skeleton-line { animation: none; }
+}

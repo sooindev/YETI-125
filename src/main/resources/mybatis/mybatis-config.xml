@@ -16,6 +16,7 @@
     <typeAliases>
         <package name="com.irion.admin.vo"/>
         <package name="com.irion.schedule.vo"/>
+        <package name="com.irion.guestbook.vo"/>
     </typeAliases>
 
 </configuration>
