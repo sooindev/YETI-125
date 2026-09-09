@@ -1,0 +1,95 @@
+/* 홈 — 3주년 방명록 띠 */
+
+/* ---- 3주년 방명록 띠 -----------------------------------------
+   라이브 중일 때 방송 정보를 아래로 밀지 않도록 한 줄 높이로 묶는다.
+   ----------------------------------------------------------- */
+
+.gb-band-section {
+    padding: clamp(28px, 4vw, 44px) 0 0;
+}
+
+.gb-band {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: clamp(16px, 2.5vw, 28px);
+    padding: clamp(18px, 2.4vw, 26px) clamp(20px, 2.6vw, 30px);
+    background: var(--ink-raise);
+    border: 1px solid var(--ink-line-2);
+    /* 왼쪽에 분홍 굵은 선 한 줄 — 기념 구역이라는 표시. 커뮤니티 슬랩과 구분된다 */
+    border-left: 3px solid var(--rose);
+    transition: border-color var(--t-fast), transform var(--t-fast), box-shadow var(--t-fast);
+}
+.gb-band:hover {
+    border-color: var(--frost);
+    border-left-color: var(--rose);
+    transform: translateY(-3px);
+    box-shadow: 0 16px 32px -18px rgba(var(--shadow-rgb), 0.3);
+}
+
+.gb-band-mark {
+    font-family: var(--f-display);
+    font-size: clamp(1.6rem, 3.4vw, 2.6rem);
+    line-height: 0.9;
+    text-transform: uppercase;
+    color: transparent;
+    /* 푸터의 em 과 같은 처리 — 속을 비운 글자 */
+    -webkit-text-stroke: 1.5px var(--rose);
+}
+
+.gb-band-text {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+.gb-band-kicker {
+    font-family: var(--f-mono);
+    font-size: 0.66rem;
+    font-weight: 600;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: var(--frost);
+}
+.gb-band-title {
+    font-family: var(--f-kr);
+    font-size: clamp(0.98rem, 0.9rem + 0.4vw, 1.22rem);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    color: var(--bone);
+    word-break: keep-all;
+}
+
+.gb-band-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-shrink: 0;
+    font-family: var(--f-mono);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--bone-dim);
+    transition: color var(--t-fast);
+}
+.gb-band:hover .gb-band-cta { color: var(--frost); }
+.gb-band:hover .btn-arrow { transform: translateX(4px); }
+
+@media (max-width: 560px) {
+    /* 좁은 화면에서는 "방명록" 글씨를 빼고 화살표만 남긴다 — 제목이 두 줄 되는 걸 막는다 */
+    .gb-band { gap: 14px; padding: 16px 18px; }
+    .gb-band-cta-label { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .gb-band:hover { transform: none; }
+}
+
+/* 눕힌 폰 — 세로가 390px 남짓이라 제목 세 줄이면 썸네일이 접힌 화면 밖으로 나간다 */
+@media (max-height: 520px) and (orientation: landscape) {
+    .live-title {
+        -webkit-line-clamp: 2;
+        margin: 12px 0 18px;
+    }
+}

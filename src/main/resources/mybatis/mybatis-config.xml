@@ -14,9 +14,9 @@
 
     <!-- Type Aliases (VO 클래스 별칭) -->
     <typeAliases>
-        <package name="com.irion.admin.domain"/>
-        <package name="com.irion.schedule.domain"/>
-        <package name="com.irion.guestbook.domain"/>
+        <package name="com.irion.feature.admin.domain"/>
+        <package name="com.irion.feature.schedule.domain"/>
+        <package name="com.irion.feature.guestbook.domain"/>
     </typeAliases>
 
 </configuration>

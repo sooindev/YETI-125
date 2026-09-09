@@ -307,20 +307,26 @@ YETI-125/
 ├── src/
 │   ├── main/
 │   │   ├── java/com/irion/
-│   │   │   ├── common/
-│   │   │   │   ├── api/             공개 페이지 · 라이브 상태 컨트롤러
-│   │   │   │   ├── web/filter/      인증 · CSRF · 빈도 제한 · 보안 헤더 · 캐시 재검증
-│   │   │   │   ├── web/interceptor/ 관리자 인증 재확인
-│   │   │   │   ├── service/         ChzzkClient(호출·파싱) · LiveFeedService(캐시)
-│   │   │   │   └── util/            비밀번호 · CSRF 토큰 · 로그인 시도 제한 · 조회 기간
-│   │   │   ├── schedule/          방송 일정
-│   │   │   ├── guestbook/         3주년 방명록
-│   │   │   └── admin/             관리자 인증
-│   │   │       ├── api/             공개 주소를 받는 컨트롤러
-│   │   │       ├── admin/           /admin 아래 컨트롤러 — 인증 필터를 타는 쪽
-│   │   │       ├── domain/          VO
-│   │   │       ├── persistence/     MyBatis 매퍼 인터페이스
-│   │   │       └── service/         서비스 + impl
+│   │   │   ├── common/            어느 기능에도 속하지 않는 것
+│   │   │   │   ├── api/             JsonResult — 응답 봉투
+│   │   │   │   ├── security/        비밀번호 · CSRF 토큰 · 로그인 시도·빈도 제한
+│   │   │   │   ├── time/            조회 기간(DateRange)
+│   │   │   │   └── web/             요청 판별(RequestUtil)
+│   │   │   │       ├── filter/        인증 · CSRF · 빈도 제한 · 보안 헤더 · 캐시 재검증
+│   │   │   │       └── interceptor/   관리자 인증 재확인
+│   │   │   ├── integration/       바깥 서비스와 말하는 곳
+│   │   │   │   └── chzzk/           ChzzkClient(호출·파싱) · LiveFeedService(캐시)
+│   │   │   └── feature/           화면 기능 — 폴더 모양이 모두 같다
+│   │   │       ├── home/api/        홈 화면
+│   │   │       ├── live/api/        방송 상태 · 클립 · 다시보기 API
+│   │   │       ├── schedule/        방송 일정
+│   │   │       ├── guestbook/       3주년 방명록
+│   │   │       └── admin/           관리자 인증
+│   │   │           ├── api/           공개 주소를 받는 컨트롤러
+│   │   │           ├── admin/         /admin 아래 컨트롤러 — 인증 필터를 타는 쪽
+│   │   │           ├── domain/        VO
+│   │   │           ├── persistence/   MyBatis 매퍼 인터페이스
+│   │   │           └── service/       서비스 + impl
 │   │   ├── resources/
 │   │   │   ├── logback.xml        로그 설정 (클래스패스 최상단이어야 logback 이 찾는다)
 │   │   │   ├── spring/            Spring 설정 (root-context · servlet-context)
@@ -340,7 +346,9 @@ YETI-125/
 │   │       │       └── error/     404 · 500
 │   │       └── resources/
 │   │           ├── css/    base(공용) · pages(화면별) · features(연출)
+│   │           │        └ 홈처럼 큰 화면은 pages/index/ 처럼 폴더로 나눈다
 │   │           ├── js/     core(공용) · pages(화면별) · features(연출)
+│   │           │        └ 나눈 파일은 JSP 에 적힌 순서대로 실린다 — 순서가 곧 규칙이다
 │   │           └── images/ brand · cursors · profile · social
 │   └── test/
 │       ├── java/com/irion/
@@ -364,7 +372,7 @@ YETI-125/
 
 ### 기능 폴더는 모두 같은 모양입니다
 
-`schedule` · `guestbook` · `admin` 은 다섯 갈래를 똑같이 씁니다.
+`feature/` 아래의 `schedule` · `guestbook` · `admin` 은 다섯 갈래를 똑같이 씁니다.
 
 ```mermaid
 flowchart TD
@@ -384,19 +392,28 @@ flowchart TD
 방명록 삭제를 `AdminGuestbookController` 에 따로 둔 것이 그 예입니다 —
 공개 컨트롤러에 두면 화면에서 버튼을 숨기는 것 말고는 아무 방어가 없습니다.
 
-`common` 은 성격이 달라 이 틀을 따르지 않습니다.
-어느 기능에도 속하지 않는 것(필터 · 인터셉터 · 유틸 · 치지직 클라이언트)만 모읍니다.
+`common` 과 `integration` 은 성격이 달라 이 틀을 따르지 않습니다.
+`common` 은 어느 기능에도 속하지 않는 것을 성격별로 나눠 담습니다 —
+`security`(비밀번호 · 토큰 · 제한) · `web`(요청 판별 · 필터 · 인터셉터) ·
+`api`(응답 봉투) · `time`(조회 기간).
+`integration/chzzk` 는 바깥 서비스와 말하는 코드만 모읍니다.
+`ChzzkClient` 와 `LiveFeedService` 를 한 패키지에 둔 것은 취향이 아닙니다 —
+`ClipPage` 의 생성자가 package-private 이라, 나누려면 캡슐화를 풀어야 합니다.
+
+`home` 과 `live` 는 컨트롤러 하나뿐이라 `api/` 만 있습니다.
+`live` 가 `integration/chzzk` 와 갈린 이유는, 한쪽은 **치지직에게 묻는 코드**이고
+다른 쪽은 **우리 화면에 주는 코드**이기 때문입니다.
 
 ### 어디를 고치면 되나
 
 | 하고 싶은 일 | 볼 파일 |
 |---|---|
-| 화면의 글자·색을 바꾼다 | `webapp/resources/css/pages/*.css` |
+| 화면의 글자·색을 바꾼다 | `webapp/resources/css/pages/` — 홈은 `pages/index/` 아래 |
 | 상단바·바닥글을 바꾼다 | `webapp/WEB-INF/views/layout/*.jsp` |
-| 새 주소(URL)를 연다 | 해당 기능의 `api/` 또는 `admin/` 컨트롤러 |
+| 새 주소(URL)를 연다 | `feature/<기능>/` 의 `api/` 또는 `admin/` 컨트롤러 |
 | SQL 을 고친다 | `resources/sql/<기능>/*_SQL.xml` |
-| 입력 길이 제한을 바꾼다 | `<기능>/domain/*VO.java` 의 `@Size` (+ DB 컬럼) |
-| 치지직 호출 주기를 바꾼다 | `common/service/LiveFeedService.java` 의 TTL 상수 |
+| 입력 길이 제한을 바꾼다 | `feature/<기능>/domain/*VO.java` 의 `@Size` (+ DB 컬럼) |
+| 치지직 호출 주기를 바꾼다 | `integration/chzzk/LiveFeedService.java` 의 TTL 상수 |
 | 필터 순서를 바꾼다 | `webapp/WEB-INF/web.xml` 의 `filter-mapping` 선언 순 |
 | 보안 헤더를 바꾼다 | `common/web/filter/StaticResourceCacheFilter.java` |
 | 3주년 연출을 끈다 | `js/features/anniversary.js` 의 `SHOW_FROM` / `SHOW_TO` |
@@ -408,23 +425,24 @@ flowchart TD
 방명록을 예로 들면, 만든 파일은 이 순서였습니다.
 
 1. **테이블** — `docs/db/schema.sql` 에 `tb_guestbook` 추가
-2. **VO** — `guestbook/domain/GuestbookVO.java` · 컬럼 제약을 `@Size` 로 옮겨 적음
-3. **매퍼 인터페이스** — `guestbook/persistence/GuestbookMapper.java`
+2. **VO** — `feature/guestbook/domain/GuestbookVO.java` · 컬럼 제약을 `@Size` 로 옮겨 적음
+3. **매퍼 인터페이스** — `feature/guestbook/persistence/GuestbookMapper.java`
 4. **SQL** — `resources/sql/guestbook/Guestbook_SQL.xml`
-5. **서비스** — `guestbook/service/` + `impl/`
+5. **서비스** — `feature/guestbook/service/` + `impl/`
 6. **컨트롤러** — 공개는 `api/`, 삭제는 `admin/`
 7. **화면** — `views/pages/guestbook.jsp` + `css/pages/` + `js/pages/`
 8. **테스트** — 본 코드와 같은 패키지에 4종
 
 **설정 파일에서 고칠 곳은 한 줄뿐이었습니다.**
-`mybatis-config.xml` 의 `typeAliases` 에 `com.irion.guestbook.domain` 을 더한 것.
+`mybatis-config.xml` 의 `typeAliases` 에 `com.irion.feature.guestbook.domain` 을 더한 것.
 나머지는 자동으로 잡힙니다.
 
 ```xml
-<!-- root-context.xml — 새 기능도 이 규칙에 저절로 걸린다 -->
+<!-- root-context.xml — 새 기능도 이 규칙에 저절로 걸린다.
+     단, 매퍼는 feature 바로 아래 한 단계까지만 훑는다 — 와일드카드가 한 칸이다 -->
 <context:component-scan base-package="com.irion"/>
 <property name="mapperLocations" value="classpath:sql/**/*_SQL.xml"/>
-<property name="basePackage" value="com.irion.*.persistence"/>
+<property name="basePackage" value="com.irion.feature.*.persistence"/>
 ```
 
 컨트롤러가 화면을 돌려줄 때는 `views/` 아래 경로를 씁니다 (`return "pages/guestbook";`).
@@ -846,7 +864,7 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON for_125.* TO 'yeti'@'localhost';
 ```bash
 mvn -q clean compile
 mvn -q dependency:build-classpath -Dmdep.outputFile=/tmp/yeti-cp.txt
-java -cp "target/classes:$(cat /tmp/yeti-cp.txt)" com.irion.common.util.PasswordUtil "비밀번호"
+java -cp "target/classes:$(cat /tmp/yeti-cp.txt)" com.irion.common.security.PasswordUtil "비밀번호"
 ```
 
 출력된 값을 그대로 넣습니다.

@@ -1,7 +1,7 @@
 package com.irion.common.web.interceptor;
 
-import com.irion.admin.domain.AdminVO;
-import com.irion.common.util.RequestUtil;
+import com.irion.feature.admin.domain.AdminVO;
+import com.irion.common.web.RequestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.HandlerInterceptor;

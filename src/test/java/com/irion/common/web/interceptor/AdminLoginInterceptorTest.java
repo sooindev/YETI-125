@@ -1,6 +1,6 @@
 package com.irion.common.web.interceptor;
 
-import com.irion.admin.domain.AdminVO;
+import com.irion.feature.admin.domain.AdminVO;
 import com.irion.testsupport.FakeHttp;
 import org.junit.Test;
 

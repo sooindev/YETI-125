@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.irion.guestbook.persistence.GuestbookMapper">
+<mapper namespace="com.irion.feature.guestbook.persistence.GuestbookMapper">
 
     <!--
       목록은 항상 "안 지워진 것을 최신순으로" 읽는다.

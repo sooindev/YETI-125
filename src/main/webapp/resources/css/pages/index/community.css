@@ -1,0 +1,131 @@
+/* 홈 — 커뮤니티 슬랩 · 링크 목록, 그리고 이 페이지의 반응형 규칙 */
+
+/* Community slab */
+.community-slab {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    border: 1px solid var(--ink-line-2);
+    background: var(--ink-raise);
+    transition: border-color var(--t-fast);
+}
+.community-slab:hover { border-color: var(--frost); }
+
+.community-slab-left {
+    padding: clamp(32px, 5vw, 64px);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 32px;
+    border-right: 1px solid var(--ink-line);
+}
+.community-slab-title {
+    font-size: clamp(2.4rem, 5vw, 4.6rem);
+    color: var(--bone);
+}
+.community-slab-right {
+    padding: clamp(32px, 5vw, 64px);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    justify-content: center;
+}
+.community-slab-icon {
+    width: 48px; height: 48px;
+    object-fit: contain;
+}
+.community-slab-copy {
+    font-family: var(--f-mono);
+    font-size: 0.9rem;
+    color: var(--bone-dim);
+    line-height: 1.8;
+}
+.community-slab-cta {
+    font-family: var(--f-mono);
+    font-size: 0.8rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--frost);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.community-slab:hover .btn-arrow { transform: translateX(4px); }
+
+/* Link list — channels & links */
+.link-list { list-style: none; }
+.link-list li { border-top: 1px solid var(--ink-line); }
+.link-list li:last-child { border-bottom: 1px solid var(--ink-line); }
+
+.link-row {
+    display: grid;
+    grid-template-columns: 64px minmax(0, 4fr) minmax(0, 6fr) 48px;
+    align-items: center;
+    gap: 20px;
+    padding: clamp(20px, 3vw, 34px) 8px;
+    transition: padding var(--t-fast), background var(--t-fast);
+}
+.link-row:hover {
+    background: var(--ink-raise);
+    padding-left: 24px;
+}
+.link-row-idx {
+    font-family: var(--f-mono);
+    font-size: 0.74rem;
+    color: var(--bone-faint);
+}
+.link-row-name {
+    font-family: var(--f-display);
+    font-size: clamp(1.4rem, 3vw, 2.4rem);
+    text-transform: uppercase;
+    color: var(--bone);
+    transition: color var(--t-fast);
+}
+.link-row:hover .link-row-name { color: var(--frost); }
+.link-row-desc {
+    font-family: var(--f-mono);
+    font-size: 0.82rem;
+    color: var(--bone-dim);
+}
+.link-row-arrow {
+    font-size: 1.2rem;
+    color: var(--bone-faint);
+    text-align: right;
+    transition: color var(--t-fast), transform var(--t-fast);
+}
+.link-row:hover .link-row-arrow {
+    color: var(--frost);
+    transform: translate(3px, -3px);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .hero-grid { grid-template-columns: 1fr; gap: 36px; }
+    .hero-side {
+        border-left: none;
+        border-top: 1px solid var(--ink-line);
+        padding-left: 0;
+        padding-top: 32px;
+    }
+    .hero-line--stroke { padding-left: 0; }
+
+    .live-hero-grid { grid-template-columns: 1fr; }
+    .sec-head--flip { direction: ltr; }
+
+    .card-grid { grid-template-columns: repeat(2, 1fr); }
+
+    .community-slab { grid-template-columns: 1fr; }
+    .community-slab-left {
+        border-right: none;
+        border-bottom: 1px solid var(--ink-line);
+    }
+
+    .link-row {
+        grid-template-columns: 40px 1fr 32px;
+        gap: 14px;
+    }
+    .link-row-desc { display: none; }
+}
+
+@media (max-width: 560px) {
+    .card-grid { grid-template-columns: 1fr; }
+}

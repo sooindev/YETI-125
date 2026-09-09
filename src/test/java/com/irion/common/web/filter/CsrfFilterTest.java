@@ -2,7 +2,7 @@ package com.irion.common.web.filter;
 
 import com.irion.testsupport.FakeHttp;
 
-import com.irion.common.util.CsrfTokens;
+import com.irion.common.security.CsrfTokens;
 import org.junit.Test;
 
 import javax.servlet.http.HttpSession;

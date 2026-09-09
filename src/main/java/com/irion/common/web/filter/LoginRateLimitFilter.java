@@ -1,7 +1,7 @@
 package com.irion.common.web.filter;
 
-import com.irion.common.util.LoginRateLimiter;
-import com.irion.common.util.RequestUtil;
+import com.irion.common.security.LoginRateLimiter;
+import com.irion.common.web.RequestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

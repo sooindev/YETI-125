@@ -43,7 +43,7 @@
 
     <!-- MyBatis Mapper Scan -->
     <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
-        <property name="basePackage" value="com.irion.*.persistence"/>
+        <property name="basePackage" value="com.irion.feature.*.persistence"/>
         <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
     </bean>
 

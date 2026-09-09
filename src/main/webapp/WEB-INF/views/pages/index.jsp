@@ -102,7 +102,12 @@
   }
   </script>
   <link rel="stylesheet" href="/resources/css/base/common.css">
-  <link rel="stylesheet" href="/resources/css/pages/index.css">
+  <%-- 홈 스타일 — 순서가 곧 겹침 우선순위다. 바꾸지 말 것 --%>
+  <link rel="stylesheet" href="/resources/css/pages/index/hero.css">
+  <link rel="stylesheet" href="/resources/css/pages/index/media.css">
+  <link rel="stylesheet" href="/resources/css/pages/index/community.css">
+  <link rel="stylesheet" href="/resources/css/pages/index/guestbook-band.css">
+  <link rel="stylesheet" href="/resources/css/pages/index/modal.css">
   <link rel="stylesheet" href="/resources/css/features/door-intro.css">
   <link rel="stylesheet" href="/resources/css/base/scroll-animations.css">
   <%-- 데뷔 3주년 축하 연출 (기념 주간 한정) --%>
@@ -446,7 +451,13 @@
 <script src="/resources/js/features/door-intro.js"></script>
 <script src="/resources/js/core/common.js"></script>
 <script src="/resources/js/core/scroll-animations.js"></script>
-<script src="/resources/js/pages/index.js"></script>
+<%-- 홈 스크립트 — media.js 가 clips.js·videos.js 보다 먼저 실려야 한다 --%>
+<script src="/resources/js/pages/index/bootstrap.js"></script>
+<script src="/resources/js/pages/index/live.js"></script>
+<script src="/resources/js/pages/index/next-schedule.js"></script>
+<script src="/resources/js/pages/index/media.js"></script>
+<script src="/resources/js/pages/index/clips.js"></script>
+<script src="/resources/js/pages/index/videos.js"></script>
 <%-- data-confetti 가 붙은 페이지에서만 폭죽이 터진다 (팝업·반짝이는 모든 페이지) --%>
 <script src="/resources/js/features/anniversary.js" data-confetti="on"></script>
 </body>

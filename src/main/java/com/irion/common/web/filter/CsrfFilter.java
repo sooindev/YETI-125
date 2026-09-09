@@ -1,7 +1,7 @@
 package com.irion.common.web.filter;
 
-import com.irion.common.util.CsrfTokens;
-import com.irion.common.util.RequestUtil;
+import com.irion.common.security.CsrfTokens;
+import com.irion.common.web.RequestUtil;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
