@@ -309,7 +309,7 @@ YETI-125/
 │   │   ├── java/com/irion/
 │   │   │   ├── common/
 │   │   │   │   ├── api/             공개 페이지 · 라이브 상태 컨트롤러
-│   │   │   │   ├── web/filter/      인증 · CSRF · 보안 헤더 · 캐시 재검증
+│   │   │   │   ├── web/filter/      인증 · CSRF · 빈도 제한 · 보안 헤더 · 캐시 재검증
 │   │   │   │   ├── web/interceptor/ 관리자 인증 재확인
 │   │   │   │   ├── service/         ChzzkClient(호출·파싱) · LiveFeedService(캐시)
 │   │   │   │   └── util/            비밀번호 · CSRF 토큰 · 로그인 시도 제한 · 조회 기간
@@ -434,7 +434,7 @@ flowchart TD
 
 ## 요청 처리 파이프라인
 
-필터 여섯 개가 순서대로 지나갑니다. 순서는 `web.xml` 의 `filter-mapping` 선언 순입니다.
+필터 일곱 개가 순서대로 지나갑니다. 순서는 `web.xml` 의 `filter-mapping` 선언 순입니다.
 
 `adminLoginFilter` 가 `DispatcherServlet` **앞에서** 도는 것이 중요합니다.
 정적 HTML까지 막아주는 대신, 인증 실패 응답을 이 필터가 직접 만들어야 합니다
@@ -450,7 +450,8 @@ flowchart TD
     SC --> LR["legacyHtmlRedirectFilter\n/* · 옛 .html → 정규 주소 301"]
     LR --> Q2{"/admin/* ?"}
     Q2 -->|아니오| DS
-    Q2 -->|예| AL["adminLoginFilter\n세션 확인"]
+    Q2 -->|예| RL["loginRateLimitFilter\nPOST /admin/loginProc 빈도 제한"]
+    RL --> AL["adminLoginFilter\n세션 확인"]
     AL --> CF["csrfFilter\nPOST·PUT·DELETE 토큰 검증"]
     CF --> DS["DispatcherServlet"]
     DS --> IC["AdminLoginInterceptor\n/admin/** 재확인"]
@@ -635,6 +636,7 @@ OS 모드를 바꿔도 새로고침 없이 그 자리에서 바뀝니다.
 | 쿠키 | `HttpOnly` · `Secure` · `SameSite=Lax` |
 | CSRF | 상태 변경 요청에 토큰 검증, 로그아웃은 POST |
 | 무차별 대입 | 계정 기준 실패 횟수 제한 · 자동 해제 · 추적 항목 수 상한 |
+| 요청 빈도 | 로그인은 주소 기준으로도 제한 — nginx `limit_req`(1차) + 필터(2차) |
 | 계정 열거 | 아이디 존재 여부와 무관하게 같은 시간을 들여 응답 |
 | 자원 남용 | 일정 조회 기간 상한 · 로그인 아이디 길이 상한 · 방명록 조회 개수 상한 |
 | 경로 우회 | 인증 판정 전 경로 정규화 — `..` · 퍼센트 인코딩 · 역슬래시 · 중복 슬래시 · 경로 파라미터 |
@@ -721,36 +723,85 @@ CVSS 7.0 이상이 나오면 빌드를 실패시키고, 보고서는
 오탐은 [dependency-check-suppress.xml](dependency-check-suppress.xml) 에
 **왜 해당되지 않는지 근거를 적어** 예외 처리합니다.
 
-### 남은 과제 — 로그인 요청 비용 제한
+### 로그인 요청 비용 제한
 
-**`/admin/loginProc` 은 아직 요청 빈도 제한이 없습니다.** 실제 위험이라 적어둡니다.
+`/admin/loginProc` 은 **두 겹**으로 막습니다. 그럴 이유가 있습니다.
 
-비밀번호 해시는 일부러 느리게 만듭니다(PBKDF2 210,000회). 그 느림이 공격자에게도
-그대로 넘어갑니다 — 로그인 요청 **한 건이 서버에서 약 280ms 의 계산**이 됩니다.
-
-`LoginAttemptGuard` 는 **아이디 기준**이라 이걸 못 막습니다. 매번 다른 아이디를
-보내면 5회 한도에 영원히 닿지 않습니다. 게다가 없는 아이디에도 계정 열거를 막으려고
-같은 계산을 그대로 태웁니다 — 공격자는 **일부러 없는 아이디만 골라 보내** 그 비용을
-무한정 끌어냅니다. 계정 열거 방어와 자원 보호가 서로를 무너뜨리는 자리입니다.
-
-`/admin/loginProc` 은 세션 이전이라 **CSRF 검사가 면제**입니다. 올바른 설계지만,
+비밀번호 해시는 일부러 느립니다(PBKDF2 210,000회). 그 느림이 공격자에게도 그대로
+넘어가 **요청 한 건이 서버에서 약 280ms 의 계산**이 됩니다. `LoginAttemptGuard` 는
+**아이디 기준**이라 이걸 못 막습니다 — 매번 다른 아이디를 보내면 5회 한도에 영원히
+닿지 않고, 없는 아이디에도 계정 열거를 막으려고 같은 계산을 그대로 태웁니다.
+공격자는 **일부러 없는 아이디만 골라 보내** 그 비용을 무한정 끌어냅니다.
+게다가 이 주소는 세션 이전이라 **CSRF 검사가 면제**입니다. 올바른 설계지만,
 그래서 아무 웹페이지에서나 이 주소로 POST 를 보낼 수 있습니다.
 
-**막는 방법은 앞단 nginx 입니다.** `limit_req` 는 기본 내장이라 모듈이 필요 없고,
-요청이 톰캣에 닿기 전에 잘라냅니다.
+그래서 세는 기준을 아이디가 아니라 **주소**로 하나 더 둡니다.
 
-```nginx
-# http 블록
-limit_req_zone $binary_remote_addr zone=login:10m rate=10r/m;
+| | 어디서 | 한도 | 막는 시점 |
+|---|---|---|---|
+| 1차 | nginx `limit_req` | 분당 10회 + 버스트 5 | 톰캣 스레드를 잡기 전 |
+| 2차 | `LoginRateLimitFilter` | 분당 20회 | 해시 계산 앞 |
 
-# server 블록
-location = /admin/loginProc {
-    limit_req zone=login burst=5 nodelay;
-    limit_req_status 429;
-    proxy_pass http://127.0.0.1:8080;
-    # 기존 location 의 proxy_set_header 들을 그대로 옮겨 적을 것 —
-    # 정확 일치 location 이라 기존 블록의 설정을 물려받지 않는다
-}
+1차가 더 쌉니다. 요청이 톰캣에 닿기도 전에 잘라내기 때문입니다.
+2차는 **nginx 설정이 빠졌거나 서버를 새로 세웠을 때를 위한 그물**입니다 —
+서버 설정은 저장소 밖에 있어 언제든 사라질 수 있고, 사라져도 아무도 모릅니다.
+한도를 일부러 nginx 보다 느슨하게 둔 이유는, 평소에 2차가 먼저 걸리면
+원인을 엉뚱한 곳에서 찾게 되기 때문입니다.
+
+#### 1차 — nginx
+
+설정은 `config/nginx` 에 있습니다. `limit_req_zone` 은 `http` 블록에만,
+`location` 은 `server` 블록에만 놓을 수 있어 파일이 둘입니다.
+
+```bash
+# 저장 영역 — conf.d 는 http 블록에서 자동으로 include 된다
+sudo install -m 644 config/nginx/yeti-125-login-zone.conf /etc/nginx/conf.d/
+
+# 적용 지점 — 사이트의 server 블록 안에서 include 한다
+sudo install -m 644 config/nginx/yeti-125-login.conf /etc/nginx/snippets/
+#   server { ... 안에 한 줄:
+#       include snippets/yeti-125-login.conf;
+
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+정확 일치(`=`) location 이라 **기존 location 의 설정을 하나도 물려받지 않습니다.**
+`proxy_set_header` 를 그 블록에 다시 적어야 합니다. 특히 `X-Forwarded-For` 를
+빠뜨리면 톰캣이 요청자 주소를 알 수 없게 되고, 2차가 **모든 요청을 한 통에 담아**
+정작 관리자가 못 들어옵니다.
+
+#### 2차 — LoginRateLimitFilter
+
+`common/web/filter/LoginRateLimitFilter.java` 가 `POST /admin/loginProc` 만 셉니다.
+한도를 넘으면 `429` 와 `Retry-After` 를 주고 **거기서 끊습니다** — 컨트롤러까지
+들어가면 이미 해시를 계산한 뒤라 늦습니다. 컨트롤러가 아니라 필터인 이유입니다.
+
+주소는 `RequestUtil.clientIp()` 가 정합니다. 헤더는 보낸 쪽이 마음대로 적을 수 있어
+그냥 믿으면 제한이 무의미해지므로, 두 가지만 믿습니다.
+
+1. **루프백에서 온 요청** — 앞단 nginx 가 넘긴 것입니다. 이때만 `X-Forwarded-For` 를 봅니다.
+2. **그 헤더의 마지막 값** — nginx 의 `$proxy_add_x_forwarded_for` 는 자기가 본 주소를
+   뒤에 덧붙입니다. 앞쪽은 지어낸 값일 수 있어도 마지막은 아닙니다.
+
+톰캣에 직접 닿은 요청은 헤더를 아예 보지 않습니다.
+
+경로는 `RequestUtil.normalizedPath()` 로 판정합니다.
+원본 주소로 보면 `/admin/schedule/../loginProc` 이 이 검사를 비켜 갑니다.
+
+기록은 주소당 항목 하나이고 상한이 10,000개입니다. 창이 끝난 항목부터 치우고,
+그래도 자리가 없으면 통과시키지 않습니다 — 상한이 곧 우회로가 되면 안 됩니다.
+
+막힌 요청은 로그에 남지만 **1분에 한 줄까지만** 남깁니다.
+막히기 시작하면 계속 막히므로, 한 줄씩 남기면 공격이 곧 로그 폭탄이 됩니다.
+주소는 마지막 자리를 가려 적습니다(`1.2.3.x`) — 계정 이름을 가리는 것과 같은 이유입니다.
+
+확인은 이렇게 합니다. 21번째부터 `429` 가 나와야 합니다.
+
+```bash
+for i in $(seq 1 21); do
+  printf '%s ' "$(curl -s -o /dev/null -w '%{http_code}' \
+      -X POST -d 'adminLoginId=x&password=y' https://yeti-125.com/admin/loginProc)"
+done
 ```
 
 <br>

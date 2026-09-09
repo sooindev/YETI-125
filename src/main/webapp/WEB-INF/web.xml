@@ -116,6 +116,20 @@
     <location>/WEB-INF/views/error/500.jsp</location>
   </error-page>
 
+  <!--
+    로그인 요청 빈도 제한. adminLoginFilter 앞에 둔다 — /admin/loginProc 은 어차피
+    그 필터의 공개 경로라, 뒤에 두면 순서만 헷갈리고 얻는 것이 없다.
+    앞단 nginx 의 limit_req 가 1차이고 이것은 그물이다 (config/nginx 참고).
+  -->
+  <filter>
+    <filter-name>loginRateLimitFilter</filter-name>
+    <filter-class>com.irion.common.web.filter.LoginRateLimitFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>loginRateLimitFilter</filter-name>
+    <url-pattern>/admin/*</url-pattern>
+  </filter-mapping>
+
   <filter>
     <filter-name>adminLoginFilter</filter-name>
     <filter-class>com.irion.common.web.filter.AdminLoginFilter</filter-class>

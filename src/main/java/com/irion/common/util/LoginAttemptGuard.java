@@ -9,8 +9,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * 로그인 시도 제한. IP 는 프록시 뒤라 못 믿으므로 계정 기준으로 세고, 시간이 지나면 풀린다.
+ * 로그인 시도 제한 — 계정 기준. 한도를 넘으면 잠그고, 시간이 지나면 풀린다.
  * 아이디는 공격자가 지어내는 값이라 항목 수와 키 길이에 상한을 둔다.
+ *
+ * 매번 다른 아이디를 보내면 이 카운터에는 영원히 걸리지 않는다.
+ * 그쪽은 {@link LoginRateLimiter} 가 주소 기준으로 막는다 — 둘은 세는 대상이 다르다.
+ *
  * 톰캣 하나 기준 — 서버를 늘리면 공유 저장소로 옮겨야 한다.
  */
 public class LoginAttemptGuard {

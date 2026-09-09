@@ -30,6 +30,57 @@ public final class RequestUtil {
     }
 
     /**
+     * 요청을 보낸 쪽의 주소. 빈도 제한이 이 값으로 사람을 가른다.
+     *
+     * 헤더는 보낸 쪽이 마음대로 적을 수 있으므로 그냥 믿으면 안 된다 — X-Forwarded-For 를
+     * 통째로 믿으면 한 줄만 바꿔 보내며 제한을 무한히 우회한다. 반대로 남의 주소를 적어
+     * 그 사람을 막아버릴 수도 있다.
+     *
+     * 그래서 두 가지만 믿는다.
+     *   1. 루프백에서 온 요청 — 앞단 nginx 가 넘긴 것이다. 이때만 X-Forwarded-For 를 본다.
+     *   2. 그 헤더의 <b>마지막</b> 값 — nginx 의 $proxy_add_x_forwarded_for 는 자기가 본
+     *      주소를 뒤에 덧붙인다. 앞쪽은 보낸 쪽이 지어낸 값일 수 있어도 마지막은 아니다.
+     *
+     * 루프백이 아니면 톰캣에 직접 닿은 요청이라 헤더를 아예 보지 않는다.
+     * nginx 가 X-Forwarded-For 를 붙이지 않으면 모든 요청이 루프백 하나로 묶인다 —
+     * config/nginx 의 proxy_set_header 가 필요한 이유다.
+     */
+    public static String clientIp(HttpServletRequest request) {
+        String remoteAddr = request.getRemoteAddr();
+        if (remoteAddr == null || remoteAddr.trim().isEmpty()) {
+            return "";
+        }
+        remoteAddr = remoteAddr.trim();
+
+        if (!isLoopback(remoteAddr)) {
+            return remoteAddr;
+        }
+
+        String forwarded = request.getHeader("X-Forwarded-For");
+        if (forwarded == null) {
+            return remoteAddr;
+        }
+
+        // 마지막 값부터 거꾸로 — 빈 칸(", ,") 이 끼어 있어도 실제 값을 집는다
+        String[] hops = forwarded.split(",");
+        for (int i = hops.length - 1; i >= 0; i--) {
+            String hop = hops[i].trim();
+            if (!hop.isEmpty()) {
+                return hop;
+            }
+        }
+        return remoteAddr;
+    }
+
+    /** nginx 와 톰캣이 같은 장비에 있다. 프록시를 거친 요청은 여기서 온다. */
+    private static boolean isLoopback(String address) {
+        return "127.0.0.1".equals(address)
+                || "::1".equals(address)
+                || "0:0:0:0:0:0:0:1".equals(address)
+                || address.startsWith("127.");
+    }
+
+    /**
      * 컨텍스트 경로를 뗀 정규화 경로. 항상 "/" 로 시작한다.
      * getRequestURI() 원본으로 인증 예외를 판정하면 /admin/x/../admin-schedule 같은 요청에 뚫린다.
      *

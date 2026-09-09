@@ -28,6 +28,7 @@ public final class FakeHttp {
         private HttpSession session;
         private String contentType;
         private String queryString;
+        private String remoteAddr = "127.0.0.1";   // 평소에는 nginx 를 거쳐 들어온다
         private final Map<String, String> headers = new HashMap<String, String>();
         private final Map<String, String> params = new HashMap<String, String>();
 
@@ -69,6 +70,12 @@ public final class FakeHttp {
             return this;
         }
 
+        /** 톰캣이 보는 상대 주소. 프록시를 거치면 nginx 의 주소가 들어온다 */
+        public Request remoteAddr(String value) {
+            this.remoteAddr = value;
+            return this;
+        }
+
         public Request param(String name, String value) {
             this.params.put(name, value);
             return this;
@@ -100,6 +107,8 @@ public final class FakeHttp {
                                 return contentType;
                             case "getQueryString":
                                 return queryString;
+                            case "getRemoteAddr":
+                                return remoteAddr;
                             case "getHeader":
                                 return headers.get((String) args[0]);
                             case "getParameter":
