@@ -11,8 +11,11 @@
     const SHOW_FROM   = '2026-09-05';
     const SHOW_TO     = '2026-09-19';   // 이 날까지 (당일 포함)
 
-    // 축하 인사는 하루에 한 번. door-intro.js 와 같은 방식으로 '본 날짜' 를 남긴다
-    const SEEN_KEY = 'anniv_3rd_popup_date';
+    // 축하 인사는 12시간에 한 번. door-intro.js 와 같은 방식으로 localStorage 에
+    // 남기되, 날짜가 아니라 마지막으로 띄운 시각(epoch ms)을 적는다
+    const SHOWN_AT_KEY = 'anniv_3rd_popup_at';
+    const OLD_SEEN_KEY = 'anniv_3rd_popup_date';   // 하루 한 번이던 시절의 키
+    const POPUP_GAP_MS = 12 * 60 * 60 * 1000;
 
     const CONFETTI_MS    = 3500;  // 폭죽을 쏘는 시간. 남은 알갱이는 그 뒤 알아서 떨어진다
     const POPUP_DELAY_MS = 900;   // 폭죽이 먼저 터지고, 뒤이어 팝업이 뜬다
@@ -31,18 +34,28 @@
         return t >= SHOW_FROM && t <= SHOW_TO;
     }
 
-    // 사파리 프라이빗 모드에서는 접근 자체가 예외라 감싸지 않으면 연출이 통째로 멈춘다
-    function popupSeenToday() {
+    /**
+     * 마지막으로 띄운 뒤로 12시간이 지났는지.
+     * 사파리 프라이빗 모드에서는 접근 자체가 예외라 감싸지 않으면 연출이 통째로 멈춘다.
+     */
+    function popupDue() {
         try {
-            return localStorage.getItem(SEEN_KEY) === todayKey();
+            // 기록이 없거나 옛 형식('YYYY-MM-DD')이 남아 있으면 NaN 이라 한 번 띄운다
+            const last = parseInt(localStorage.getItem(SHOWN_AT_KEY), 10);
+            if (!last) return true;
+
+            // 기기 시계를 되돌리면 last 가 미래로 남아 영영 안 뜬다 — 그때도 띄운다
+            const now = Date.now();
+            return now < last || now - last >= POPUP_GAP_MS;
         } catch (e) {
-            return false;
+            return true;
         }
     }
 
     function rememberPopupShown() {
         try {
-            localStorage.setItem(SEEN_KEY, todayKey());
+            localStorage.setItem(SHOWN_AT_KEY, String(Date.now()));
+            localStorage.removeItem(OLD_SEEN_KEY);   // 날짜만 적던 옛 값은 이제 쓰지 않는다
         } catch (e) {}
     }
 
@@ -57,8 +70,8 @@
 
     if (!inShowWindow()) return;
 
-    // 오늘 이미 본 사람에게는 팝업만 빠진다 — 폭죽과 반짝이는 그대로다
-    const popupShownToday = popupSeenToday();
+    // 12시간이 안 지난 사람에게는 팝업만 빠진다 — 폭죽과 반짝이는 그대로다
+    const popupDueNow = popupDue();
 
     /* 폭죽은 홈에서만 터진다. index.jsp 의 <script ... data-confetti="on"> 이 스위치다 —
        주소로 홈을 알아내면 컨텍스트 패스나 경로가 바뀔 때 같이 깨진다.
@@ -454,7 +467,7 @@
 
     function showPopup() {
         pop.classList.add('show');
-        // 닫을 때가 아니라 뜨는 순간 기록한다 — 안 닫고 페이지를 옮겨도 그날은 다시 뜨지 않는다
+        // 닫을 때가 아니라 뜨는 순간 적는다 — 안 닫고 페이지를 옮겨도 12시간은 다시 뜨지 않는다
         rememberPopupShown();
     }
 
@@ -530,13 +543,13 @@
         if (moving && confettiEnabled) fireConfetti();
 
         // 폭죽이 없으면 팝업을 늦출 이유가 없다
-        if (!popupShownToday) {
+        if (popupDueNow) {
             setTimeout(showPopup, (moving && confettiEnabled) ? POPUP_DELAY_MS : 300);
         }
     }
 
     ready(function () {
-        if (!popupShownToday) buildPopup();
+        if (popupDueNow) buildPopup();
 
         whenVisible(function () {
             whenIntroGone(celebrate);
