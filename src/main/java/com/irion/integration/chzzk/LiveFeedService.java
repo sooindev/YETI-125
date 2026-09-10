@@ -1,5 +1,7 @@
 package com.irion.integration.chzzk;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +19,8 @@ import java.util.function.Supplier;
 /** 치지직 목록 캐시. 만료되면 한 스레드만 갱신한다. */
 @Service
 public class LiveFeedService {
+
+    private static final Logger logger = LoggerFactory.getLogger(LiveFeedService.class);
 
     private static final long CACHE_DURATION = 10 * 60 * 1000; // 10분 (클립/비디오)
     private static final long LIVE_CACHE_DURATION = 1 * 60 * 1000; // 1분 (방송 상태)
@@ -86,18 +90,18 @@ public class LiveFeedService {
 
     /** 방송 상태. 못 가져오면 null. */
     public Map<String, Object> getLiveStatus() {
-        return cached(liveStatusCache, liveStatusLock, LIVE_CACHE_DURATION, chzzk::fetchLiveStatus);
+        return cached("방송 상태", liveStatusCache, liveStatusLock, LIVE_CACHE_DURATION, chzzk::fetchLiveStatus);
     }
 
     /** 클립을 need 개까지 채워서 돌려준다. 못 가져오면 null. */
     public ClipFeed getClips(int need) {
-        ClipFeed feed = cached(clipsCache, clipsLock, CACHE_DURATION, this::loadClips);
+        ClipFeed feed = cached("클립", clipsCache, clipsLock, CACHE_DURATION, this::loadClips);
         return (feed == null) ? null : extendClips(feed, need);
     }
 
     /** 다시보기 목록. 못 가져오면 null. */
     public List<Map<String, Object>> getVideos() {
-        return cached(videosCache, videosLock, CACHE_DURATION, this::loadVideos);
+        return cached("다시보기", videosCache, videosLock, CACHE_DURATION, this::loadVideos);
     }
 
     /** 인기 클립 첫 묶음 로드 */
@@ -264,7 +268,7 @@ public class LiveFeedService {
      * 락 안에서도 백오프를 보는 이유는, 이미 락 앞에 줄 서 있던 스레드들이
      * 첫 스레드의 실패를 보고 그 자리에서 물러나야 하기 때문이다.
      */
-    private <T> T cached(AtomicReference<Snapshot<T>> ref, Object lock,
+    private <T> T cached(String name, AtomicReference<Snapshot<T>> ref, Object lock,
                          long ttl, Supplier<T> loader) {
 
         Snapshot<T> snapshot = ref.get();
@@ -279,23 +283,53 @@ public class LiveFeedService {
                 return snapshot.value;
             }
 
+            // 실패한 상태였는가. 상태가 바뀌는 순간에만 로그를 남기려고 미리 본다
+            boolean wasFailing = snapshot != null && snapshot.failedAt != 0;
+            String thrown = null;
+
             try {
                 T loaded = loader.get();
                 if (loaded != null) {
+                    if (wasFailing) {
+                        logger.info("치지직 {} 갱신이 다시 됩니다", name);
+                    }
                     // 성공했으니 실패 기록도 지운다 — 치지직이 돌아왔다
                     ref.set(new Snapshot<>(loaded, System.currentTimeMillis(), 0L));
                     return loaded;
                 }
-            } catch (Exception ignored) {
-                // 아래에서 실패를 적어두고 만료된 값으로 물러난다
+            } catch (Exception e) {
+                // 아래에서 실패를 적어두고 만료된 값으로 물러난다.
+                // 여기까지 왔다면 호출이 아니라 우리 파싱이 깨진 것이다 — 원인을 들고 간다
+                thrown = e.getClass().getSimpleName()
+                        + (e.getMessage() != null ? ": " + e.getMessage() : "");
             }
 
             // 값과 적재 시각은 그대로 두고 실패 시각만 새로 찍는다.
             // 값을 버리면 백오프 동안 화면이 빈다.
             T stale = (snapshot != null) ? snapshot.value : null;
             long staleAt = (snapshot != null) ? snapshot.loadedAt : 0L;
+
+            // 실패가 "시작되는" 순간에만 남긴다. 백오프가 30초라 매번 남기면
+            // 장애 하루에 수천 줄이 쌓이고, 정작 언제 시작됐는지가 묻힌다.
+            if (!wasFailing) {
+                logFailureStarted(name, stale, staleAt, thrown);
+            }
+
             ref.set(new Snapshot<>(stale, staleAt, System.currentTimeMillis()));
             return stale;
         }
+    }
+
+    /** 무엇이, 언제부터, 왜 안 되는지 한 줄로 남긴다. 원인은 ChzzkClient 가 따로 남긴다 */
+    private void logFailureStarted(String name, Object stale, long staleAt, String thrown) {
+        String cause = (thrown != null) ? thrown : "치지직이 값을 주지 않았습니다";
+
+        if (stale == null) {
+            logger.warn("치지직 {} 를 아직 한 번도 받지 못했습니다 — {}", name, cause);
+            return;
+        }
+
+        long minutes = (System.currentTimeMillis() - staleAt) / 60000;
+        logger.warn("치지직 {} 갱신 실패 — {}분 전 값으로 버팁니다 ({})", name, minutes, cause);
     }
 }

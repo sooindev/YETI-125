@@ -2,6 +2,8 @@ package com.irion.integration.chzzk;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
@@ -14,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
 /**
@@ -22,6 +25,16 @@ import java.util.function.Function;
  */
 @Component
 public class ChzzkClient {
+
+    private static final Logger logger = LoggerFactory.getLogger(ChzzkClient.class);
+
+    /**
+     * 실패를 남기는 간격. 치지직이 죽으면 호출마다 한 줄씩 남아 로그가 곧 쓰레기가 된다 —
+     * 클립은 한 요청이 최대 10번까지 부른다.
+     */
+    private static final long LOG_INTERVAL_MILLIS = 60 * 1000L;
+
+    private final AtomicLong lastLoggedAt = new AtomicLong();
 
     public static final String CHANNEL_ID = "63368ec9081dc85e61d0e4310b7e1602";
 
@@ -220,8 +233,11 @@ public class ChzzkClient {
             conn.setConnectTimeout(CONNECT_TIMEOUT_MS);
             conn.setReadTimeout(READ_TIMEOUT_MS);
 
-            if (conn.getResponseCode() != 200) {
+            int status = conn.getResponseCode();
+            if (status != 200) {
                 drain(conn.getErrorStream());
+                // 403·429 는 우리가 막힌 것이고 5xx 는 저쪽 사정이다 — 상태 코드가 곧 원인이다
+                logFailure(apiUrl, "HTTP " + status);
                 return null;
             }
 
@@ -231,8 +247,32 @@ public class ChzzkClient {
             if (conn != null) {
                 conn.disconnect();
             }
+            // 타임아웃인지, 응답이 JSON 이 아니게 바뀐 것인지가 여기서 갈린다
+            logFailure(apiUrl, e.getClass().getSimpleName()
+                    + (e.getMessage() != null ? ": " + e.getMessage() : ""));
             return null;
         }
+    }
+
+    /**
+     * 왜 실패했는지 남긴다. 이 줄이 없으면 치지직이 응답 모양을 바꾸거나 서버를 막아도
+     * 화면은 낡은 캐시로 멀쩡해 보이고, 알아챌 방법이 없다.
+     *
+     * 한 번 막히면 계속 막히므로 간격을 두고 남긴다.
+     */
+    private void logFailure(String apiUrl, String reason) {
+        long now = System.currentTimeMillis();
+        long last = lastLoggedAt.get();
+
+        if (now - last < LOG_INTERVAL_MILLIS || !lastLoggedAt.compareAndSet(last, now)) {
+            return;
+        }
+
+        int query = apiUrl.indexOf('?');
+        String endpoint = (query < 0) ? apiUrl : apiUrl.substring(0, query);
+
+        logger.warn("치지직 호출 실패: {} — {} (같은 로그는 {}초간 생략합니다)",
+                endpoint, reason, LOG_INTERVAL_MILLIS / 1000);
     }
 
     /** 다 읽고 닫아야 연결이 풀로 돌아간다 */

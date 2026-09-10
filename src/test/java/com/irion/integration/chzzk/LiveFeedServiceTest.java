@@ -1,6 +1,10 @@
 package com.irion.integration.chzzk;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import org.junit.Test;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -433,6 +437,130 @@ public class LiveFeedServiceTest {
 
 
     // ── 대역 ──────────────────────────────────────────────────
+
+    // ── 로그 ─────────────────────────────────────────────────
+    //
+    // 장애를 알아채는 유일한 통로다. 너무 적게 남기면 모르고 지나가고,
+    // 너무 많이 남기면 정작 "언제 시작됐나" 가 수천 줄에 묻힌다.
+
+    @Test
+    public void 실패가_시작될_때_한_번만_경고를_남긴다() throws Exception {
+        FakeChzzk chzzk = new FakeChzzk();
+        chzzk.liveStatus = liveStatus(true);
+        LiveFeedService service = serviceWith(chzzk);
+        service.getLiveStatus();                       // 한 번은 성공시켜 둔다
+
+        ListAppender<ILoggingEvent> log = captureLog();
+        try {
+            chzzk.liveStatus = null;                   // 여기서부터 치지직이 죽는다
+
+            expire(service, "liveStatusCache");   // 낡았지만 아직 실패한 적은 없다
+            service.getLiveStatus();              // 첫 실패 — 이 한 줄이 남아야 한다
+
+            // 장애가 이어지는 동안의 모습: 값은 낡았고(TTL 만료), 실패 기록은 남아 있고,
+            // 백오프만 지났다. 여기서 또 남기면 하루에 수천 줄이 쌓인다.
+            //
+            // expire() 는 실패 기록까지 지워 매번 "처음 실패" 로 보이고,
+            // expireBackoff() 는 적재 시각을 그대로 둬 캐시가 신선하다며 아예 부르지 않는다.
+            for (int i = 0; i < 9; i++) {
+                long longAgo = System.currentTimeMillis() - LONG_AGO_MILLIS;
+                rewriteSnapshot(service, "liveStatusCache", longAgo, longAgo);
+                service.getLiveStatus();
+            }
+
+            assertEquals("실패가 이어지는 동안에는 한 줄만 남아야 한다",
+                    1, warnings(log).size());
+            assertTrue("무엇이 안 되는지 적혀 있어야 한다: " + warnings(log),
+                    warnings(log).get(0).contains("방송 상태"));
+        } finally {
+            releaseLog(log);
+        }
+    }
+
+    @Test
+    public void 한_번도_못_받은_것과_낡은_값으로_버티는_것을_가른다() throws Exception {
+        FakeChzzk chzzk = new FakeChzzk();
+        LiveFeedService service = serviceWith(chzzk);   // 처음부터 실패한다
+
+        ListAppender<ILoggingEvent> log = captureLog();
+        try {
+            service.getLiveStatus();
+            assertTrue("첫 수신 실패는 따로 알려야 한다: " + warnings(log),
+                    warnings(log).get(0).contains("한 번도 받지 못했습니다"));
+        } finally {
+            releaseLog(log);
+        }
+    }
+
+    @Test
+    public void 복구되면_알린다() throws Exception {
+        FakeChzzk chzzk = new FakeChzzk();
+        LiveFeedService service = serviceWith(chzzk);
+        service.getLiveStatus();                       // 실패 상태로 만든다
+
+        ListAppender<ILoggingEvent> log = captureLog();
+        try {
+            chzzk.liveStatus = liveStatus(true);
+            expireBackoff(service, "liveStatusCache");
+            service.getLiveStatus();
+
+            boolean recovered = false;
+            for (ILoggingEvent event : log.list) {
+                if (event.getFormattedMessage().contains("다시 됩니다")) {
+                    recovered = true;
+                }
+            }
+            assertTrue("복구를 알리지 않으면 아직 죽은 줄 안다", recovered);
+        } finally {
+            releaseLog(log);
+        }
+    }
+
+    /** 파싱이 깨져 예외가 난 것과 치지직이 값을 안 준 것은 원인이 다르다 */
+    @Test
+    public void 예외로_실패하면_원인을_남긴다() throws Exception {
+        FakeChzzk chzzk = new FakeChzzk();
+        chzzk.liveFailure = new IllegalStateException("응답 모양이 바뀌었다");
+        LiveFeedService service = serviceWith(chzzk);
+
+        ListAppender<ILoggingEvent> log = captureLog();
+        try {
+            service.getLiveStatus();
+            assertTrue("예외 내용이 로그에 없다: " + warnings(log),
+                    warnings(log).get(0).contains("응답 모양이 바뀌었다"));
+        } finally {
+            releaseLog(log);
+        }
+    }
+
+    private static ListAppender<ILoggingEvent> captureLog() {
+        ListAppender<ILoggingEvent> appender = new ListAppender<ILoggingEvent>();
+        appender.start();
+
+        ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger)
+                LoggerFactory.getLogger(LiveFeedService.class);
+        logger.setLevel(Level.INFO);   // logback-test.xml 이 WARN 이라 복구(INFO)가 안 잡힌다
+        logger.addAppender(appender);
+        return appender;
+    }
+
+    private static void releaseLog(ListAppender<ILoggingEvent> appender) {
+        ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger)
+                LoggerFactory.getLogger(LiveFeedService.class);
+        logger.detachAppender(appender);
+        logger.setLevel(null);
+    }
+
+    private static List<String> warnings(ListAppender<ILoggingEvent> appender) {
+        List<String> messages = new ArrayList<String>();
+        for (ILoggingEvent event : appender.list) {
+            if (event.getLevel() == Level.WARN) {
+                messages.add(event.getFormattedMessage());
+            }
+        }
+        return messages;
+    }
+
 
     /** ChzzkClient 를 상속해 호출만 가로챈다. 어떤 커서로 불렸는지도 남긴다 */
     private static final class FakeChzzk extends ChzzkClient {
