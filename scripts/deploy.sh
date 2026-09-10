@@ -192,13 +192,41 @@ check_error_page() {
   fi
 }
 
+# 홈이 실제로 부르는 css · js 가 전부 200 인가.
+#
+# 주소를 여기 박아두면 JSP 가 다른 경로를 부르도록 바뀐 순간 검증이 헛돈다 —
+# 페이지에서 뽑아내야 "이 배포본이 실제로 부르는 파일" 을 본다.
+#
+# 페이지만 보면 놓친다 (2026-09-10 디렉터리 세분화): css · js 경로가 통째로
+# 바뀌었는데, 자산이 하나도 안 내려와 스타일이 다 빠진 화면도 200 이라 그냥 통과한다.
+check_assets() {
+  local page assets url code
+  page=$(curl -s --max-time 3 "http://localhost:8080/" || true)
+  assets=$(printf '%s' "$page" | grep -oE '/resources/[A-Za-z0-9._/-]+\.(css|js)' | sort -u)
+
+  # 홈이 200 인데 자산 주소가 하나도 없으면 JSP 가 제대로 그려지지 않은 것이다
+  if [ -z "$assets" ]; then
+    echo "홈에서 css · js 주소를 하나도 찾지 못했습니다 — 페이지가 제대로 렌더되지 않았을 수 있습니다"
+    return 0
+  fi
+
+  for url in $assets; do
+    code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 3 "http://localhost:8080$url" || true)
+    if [ "$code" != "200" ]; then
+      echo "http://localhost:8080$url → ${code:-무응답} (기대 200)"
+      return 0
+    fi
+  done
+}
+
 # 전부 통과해야 배포를 확정한다. 하나라도 아니면 그 주소를 알려준다
 wait_ok() {
   local failed=""
   for _ in $(seq 1 30); do
     failed="$(check_pages)"
     [ -n "$failed" ] || failed="$(check_error_page)"
-    [ -z "$failed" ] && { echo "정상 페이지 + 오류 화면 모두 통과"; return 0; }
+    [ -n "$failed" ] || failed="$(check_assets)"
+    [ -z "$failed" ] && { echo "정상 페이지 + 오류 화면 + 자산 모두 통과"; return 0; }
     sleep 2
   done
   echo "$failed"
@@ -208,7 +236,7 @@ wait_ok() {
 echo "   새 war 배포 중..."
 deploy_war /tmp/yeti-125.war
 
-echo "   DB 연동 · 페이지 · 오류 화면까지 검증 중 (최대 60초)..."
+echo "   DB 연동 · 페이지 · 오류 화면 · css/js 까지 검증 중 (최대 60초)..."
 if CODE=$(wait_ok); then
   echo "   검증 통과 ($CODE)"
   exit 0
