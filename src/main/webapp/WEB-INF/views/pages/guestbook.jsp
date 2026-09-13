@@ -29,8 +29,6 @@
   <link rel="stylesheet" href="/resources/css/pages/guestbook.css">
   <%-- 카드가 순서대로 떠오르는 등장 효과. guestbook.js 가 observeNewElements() 로 다시 태운다 --%>
   <link rel="stylesheet" href="/resources/css/base/scroll-animations.css">
-  <%-- 데뷔 3주년 축하 연출 (기념 주간 한정) --%>
-  <link rel="stylesheet" href="/resources/css/features/anniversary.css">
 </head>
 <%-- data-admin 은 삭제 버튼을 보이느냐만 정한다. 브라우저에서 Y 로 고쳐도
      삭제 요청은 /admin/* 의 필터에 막힌다 --%>
@@ -135,6 +133,5 @@
 <script src="/resources/js/core/common.js"></script>
 <script src="/resources/js/core/scroll-animations.js"></script>
 <script src="/resources/js/pages/guestbook.js"></script>
-<script src="/resources/js/features/anniversary.js"></script>
 </body>
 </html>

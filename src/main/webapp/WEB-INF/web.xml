@@ -75,6 +75,16 @@
     <url-pattern>/*</url-pattern>
   </filter-mapping>
 
+  <!-- 내려둔 화면(3주년 방명록)을 막는다. 되살릴 때는 이 두 덩이를 지우면 된다 -->
+  <filter>
+    <filter-name>closedPageFilter</filter-name>
+    <filter-class>com.irion.common.web.filter.ClosedPageFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>closedPageFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+
   <!-- Spring MVC DispatcherServlet -->
   <servlet>
     <servlet-name>dispatcher</servlet-name>

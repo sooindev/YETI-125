@@ -96,8 +96,6 @@
   <%-- scroll-animations.js 와 짝이다. 이게 없으면 .scroll-animate 가 정의되지 않아
        요소가 처음부터 보이고 등장 효과가 나지 않는다 (index.jsp 와 같은 순서로 둔다) --%>
   <link rel="stylesheet" href="/resources/css/base/scroll-animations.css">
-  <%-- 데뷔 3주년 축하 연출 (기념 주간 한정) --%>
-  <link rel="stylesheet" href="/resources/css/features/anniversary.css">
 </head>
 <body>
 
@@ -313,6 +311,5 @@
 <script src="/resources/js/core/common.js"></script>
 <script src="/resources/js/core/scroll-animations.js"></script>
 <script src="/resources/js/pages/info.js"></script>
-<script src="/resources/js/features/anniversary.js"></script>
 </body>
 </html>

@@ -193,6 +193,10 @@ public final class FakeHttp {
                                 redirect = (String) args[0];
                                 status = 302;
                                 return null;
+                            case "sendError":
+                                // sendError(int) 와 sendError(int, String) 둘 다 첫 값이 상태 코드다
+                                status = (Integer) args[0];
+                                return null;
                             case "setHeader":
                                 headers.put((String) args[0], (String) args[1]);
                                 return null;

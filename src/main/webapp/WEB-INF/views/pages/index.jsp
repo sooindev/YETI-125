@@ -106,12 +106,9 @@
   <link rel="stylesheet" href="/resources/css/pages/index/hero.css">
   <link rel="stylesheet" href="/resources/css/pages/index/media.css">
   <link rel="stylesheet" href="/resources/css/pages/index/community.css">
-  <link rel="stylesheet" href="/resources/css/pages/index/guestbook-band.css">
   <link rel="stylesheet" href="/resources/css/pages/index/modal.css">
   <link rel="stylesheet" href="/resources/css/features/door-intro.css">
   <link rel="stylesheet" href="/resources/css/base/scroll-animations.css">
-  <%-- 데뷔 3주년 축하 연출 (기념 주간 한정) --%>
-  <link rel="stylesheet" href="/resources/css/features/anniversary.css">
 </head>
 <body>
 
@@ -243,23 +240,6 @@
     </div>
   </section>
 
-  <%-- 3주년 방명록 띠. 내릴 때는 이 section 과 index.css 의 .gb-band 블록을 함께 지운다 --%>
-  <section class="gb-band-section">
-    <div class="shell">
-      <a href="/guestbook" class="gb-band">
-        <span class="gb-band-mark" aria-hidden="true">3rd</span>
-        <span class="gb-band-text">
-          <span class="gb-band-kicker">Anniversary Guestbook</span>
-          <span class="gb-band-title">이리온에게 축하 한마디 남기기</span>
-        </span>
-        <span class="gb-band-cta">
-          <span class="gb-band-cta-label">방명록</span>
-          <span class="btn-arrow">→</span>
-        </span>
-      </a>
-    </div>
-  </section>
-
   <%-- ===== Clips ===== --%>
   <section class="section media-section">
     <div class="shell">
@@ -381,16 +361,8 @@
           </a>
         </li>
         <li>
-          <a href="/guestbook" class="link-row">
-            <span class="link-row-idx">06</span>
-            <span class="link-row-name">방명록</span>
-            <span class="link-row-desc">3주년 축하 한마디를 남겨 주세요</span>
-            <span class="link-row-arrow">→</span>
-          </a>
-        </li>
-        <li>
           <a href="https://cafe.naver.com/dlfldhs0809" target="_blank" class="link-row">
-            <span class="link-row-idx">07</span>
+            <span class="link-row-idx">06</span>
             <span class="link-row-name">예티24</span>
             <span class="link-row-desc">네이버 팬카페</span>
             <span class="link-row-arrow">↗</span>
@@ -458,7 +430,5 @@
 <script src="/resources/js/pages/index/media.js"></script>
 <script src="/resources/js/pages/index/clips.js"></script>
 <script src="/resources/js/pages/index/videos.js"></script>
-<%-- data-confetti 가 붙은 페이지에서만 폭죽이 터진다 (팝업·반짝이는 모든 페이지) --%>
-<script src="/resources/js/features/anniversary.js" data-confetti="on"></script>
 </body>
 </html>
