@@ -257,15 +257,18 @@ check_page_assets() {
   done
 }
 
-# 전부 통과해야 배포를 확정한다. 하나라도 아니면 그 주소를 알려준다
+# 톰캣이 뜰 때까지 되풀이해 본다. 전부 통과해야 배포를 확정한다.
+#
+# 사이트맵은 여기 넣지 않는다 — 한 번에 최대 20초라, 30번 도는 이 루프에 넣으면
+# "최대 60초" 이던 검증이 몇 분으로 늘어난다. 기동을 기다리는 검사와
+# 한 번만 보면 되는 검사는 성격이 다르다.
 wait_ok() {
   local failed=""
   for _ in $(seq 1 30); do
     failed="$(check_pages)"
     [ -n "$failed" ] || failed="$(check_error_page)"
     [ -n "$failed" ] || failed="$(check_assets)"
-    [ -n "$failed" ] || failed="$(check_sitemap)"
-    [ -z "$failed" ] && { echo "정상 페이지 + 오류 화면 + 자산 + 사이트맵 모두 통과"; return 0; }
+    [ -z "$failed" ] && { echo "정상 페이지 + 오류 화면 + 자산 모두 통과"; return 0; }
     sleep 2
   done
   echo "$failed"
@@ -275,10 +278,15 @@ wait_ok() {
 echo "   새 war 배포 중..."
 deploy_war /tmp/yeti-125.war
 
-echo "   DB 연동 · 페이지 · 오류 화면 · css/js · 사이트맵까지 검증 중..."
+echo "   DB 연동 · 페이지 · 오류 화면 · css/js · 사이트맵까지 검증 중 (최대 60초)..."
 if CODE=$(wait_ok); then
-  echo "   검증 통과 ($CODE)"
-  exit 0
+  # 앱이 확실히 선 뒤에 한 번만 본다. 첫 호출이 클립 전량을 받아 오느라 몇 초 걸린다
+  SITEMAP="$(check_sitemap)"
+  if [ -z "$SITEMAP" ]; then
+    echo "   검증 통과 ($CODE + 사이트맵)"
+    exit 0
+  fi
+  CODE="$SITEMAP"
 fi
 
 echo "   검증 실패: ${CODE:-무응답}"

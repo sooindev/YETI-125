@@ -125,6 +125,15 @@
     <error-code>500</error-code>
     <location>/WEB-INF/views/error/500.jsp</location>
   </error-page>
+  <!--
+    503 도 같은 화면을 쓴다. 500.jsp 는 "일시적인 오류" 라 부르고 원래 주소로 가는
+    "다시 시도" 링크를 주는데, 클립 상세가 내는 503(목록을 아직 덜 받았다)에 꼭 맞는다.
+    빼두면 톰캣 기본 화면이 나가 보안 헤더도 우리 디자인도 없다.
+  -->
+  <error-page>
+    <error-code>503</error-code>
+    <location>/WEB-INF/views/error/500.jsp</location>
+  </error-page>
 
   <!--
     로그인 요청 빈도 제한. adminLoginFilter 앞에 둔다 — /admin/loginProc 은 어차피

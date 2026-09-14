@@ -14,7 +14,6 @@
     gap: clamp(16px, 1.6vw, 24px);
 }
 
-
 .clip-card,
 .video-card {
     display: flex;
@@ -54,7 +53,7 @@
 
 /* 썸네일 대체 자리 — 19금 방송·다시보기는 치지직이 이미지 주소를 주지 않는다.
    빈 src 로 깨진 아이콘을 띄우는 대신 이 자리를 채운다. 클립·다시보기 카드와
-
+   라이브 히어로가 모두 position: relative 라 inset 으로 그대로 덮인다. */
 .thumb-fallback {
     position: absolute;
     inset: 0;

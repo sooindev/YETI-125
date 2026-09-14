@@ -547,10 +547,10 @@ public class LiveFeedServiceTest {
         chzzk.clipPage = finiteClipPages(6);   // 300개
         LiveFeedService service = serviceWith(chzzk);
 
-        Map<String, Object> found = service.findClip("clip-250");
+        LiveFeedService.ClipLookup found = service.findClip("clip-250");
 
-        assertNotNull("첫 두 페이지 밖에 있어도 찾아야 한다", found);
-        assertEquals("클립 250", found.get("clipTitle"));
+        assertNotNull("첫 두 페이지 밖에 있어도 찾아야 한다", found.getClip());
+        assertEquals("클립 250", found.getClip().get("clipTitle"));
     }
 
     @Test
@@ -559,7 +559,10 @@ public class LiveFeedServiceTest {
         chzzk.clipPage = finiteClipPages(2);
         LiveFeedService service = serviceWith(chzzk);
 
-        assertNull("남의 채널 클립이 우리 주소로 열리면 안 된다", service.findClip("남의클립"));
+        LiveFeedService.ClipLookup missing = service.findClip("남의클립");
+
+        assertNull("남의 채널 클립이 우리 주소로 열리면 안 된다", missing.getClip());
+        assertTrue("목록을 끝까지 받았으니 없다고 단정해도 된다 (404)", missing.isComplete());
     }
 
     @Test
@@ -568,17 +571,41 @@ public class LiveFeedServiceTest {
         chzzk.clipPage = finiteClipPages(2);
         LiveFeedService service = serviceWith(chzzk);
 
-        assertNull(service.findClip(null));
-        assertNull(service.findClip(""));
+        assertNull(service.findClip(null).getClip());
+        assertNull(service.findClip("").getClip());
+        assertTrue("모양부터 아니니 더 받아도 소용없다", service.findClip("").isComplete());
         assertEquals(0, chzzk.clipCalls.get());
     }
 
+    /**
+     * 치지직이 죽었을 때 "없다" 고 답하면 안 된다.
+     *
+     * 이 클립이 없는 것이 아니라 우리가 모르는 것이다 — 화면은 404 가 아니라 503 을 내야 하고,
+     * 그 판단의 근거가 isComplete 다.
+     */
     @Test
-    public void 치지직이_죽어_있으면_못_찾는다() throws Exception {
+    public void 치지직이_죽어_있으면_없다고_단정하지_않는다() throws Exception {
         FakeChzzk chzzk = new FakeChzzk();   // 모든 페이지가 실패한다
         LiveFeedService service = serviceWith(chzzk);
 
-        assertNull(service.findClip("clip-0"));
+        LiveFeedService.ClipLookup unknown = service.findClip("clip-0");
+
+        assertNull(unknown.getClip());
+        assertFalse("목록이 아예 없다 — 없다고 단정할 수 없다", unknown.isComplete());
+    }
+
+    /** 커서가 남아 있는데 못 찾은 것도 "아직 모른다" 다 */
+    @Test
+    public void 목록을_덜_받았으면_없다고_단정하지_않는다() throws Exception {
+        FakeChzzk chzzk = new FakeChzzk();
+        chzzk.clipPage = endlessClipPages();   // 커서가 마르지 않는다
+        LiveFeedService service = serviceWith(chzzk);
+
+        // 상한(CLIP_MAX)까지 받아도 커서가 남지만, 상한에 닿았으면 더 받지 않는다
+        LiveFeedService.ClipLookup capped = service.findClip("clip-99999");
+
+        assertNull(capped.getClip());
+        assertTrue("상한에 닿았으면 우리로서는 끝까지 받은 것이다", capped.isComplete());
     }
 
     /** 한 번 채워 두면 다음 상세 화면은 치지직을 다시 두드리지 않는다 */

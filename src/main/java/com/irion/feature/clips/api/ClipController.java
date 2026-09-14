@@ -52,20 +52,34 @@ public class ClipController {
         return "pages/clips";
     }
 
+    /** 목록을 아직 덜 받았을 때 다시 오라고 이르는 시간(초) */
+    private static final String RETRY_AFTER = "30";
+
     /**
      * 클립 한 건.
      *
-     * 없는 클립 · 지워진 클립 · 남의 채널 클립이 모두 404 로 모인다.
+     * 없는 클립 · 지워진 클립 · 남의 채널 클립이 404 로 모인다.
      * findClip 이 우리 채널 목록에 있는지로 가리므로, 이 주소로 남의 클립이 열리지 않는다.
+     *
+     * <b>못 찾았다고 늘 404 는 아니다.</b> 목록을 아직 덜 받은 순간(캐시가 막 만료돼
+     * 다시 채우는 중이거나, 치지직이 죽었을 때)에도 못 찾는다. 그때 404 를 내면
+     * 멀쩡한 주소를 검색엔진이 "사라졌다" 로 읽고 색인에서 지운다 — 되돌리는 데 몇 주가 걸린다.
+     * 그래서 그 경우는 503 으로, 잠시 뒤 다시 오라고 답한다.
      */
     @GetMapping("/{clipId:" + CLIP_ID + "}")
     public String detail(@PathVariable String clipId, Model model, HttpServletResponse response)
             throws IOException {
 
-        Map<String, Object> clip = liveFeed.findClip(clipId);
+        LiveFeedService.ClipLookup lookup = liveFeed.findClip(clipId);
+        Map<String, Object> clip = lookup.getClip();
 
         if (clip == null) {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            if (lookup.isComplete()) {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            } else {
+                response.setHeader("Retry-After", RETRY_AFTER);
+                response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+            }
             return null;
         }
 

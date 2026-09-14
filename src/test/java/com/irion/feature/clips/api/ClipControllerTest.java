@@ -65,7 +65,7 @@ public class ClipControllerTest {
     // ── 소유 확인 ─────────────────────────────────────────
 
     @Test
-    public void 목록에_없는_클립은_404_다() throws Exception {
+    public void 목록을_다_받았는데_없으면_404_다() throws Exception {
         ClipController controller = controllerWith();   // 아무것도 못 찾는다
         FakeHttp.Response response = new FakeHttp.Response();
         Model model = new ExtendedModelMap();
@@ -74,6 +74,38 @@ public class ClipControllerTest {
 
         assertNull("404 를 낸 뒤에는 화면을 고르지 않는다", view);
         assertEquals(404, response.status);
+    }
+
+    /**
+     * 이 저장소에서 제일 비싼 실수를 막는 자리.
+     *
+     * 캐시가 막 만료돼 목록을 다시 채우는 중이거나 치지직이 죽었을 때도 클립을 못 찾는다.
+     * 그때 404 를 내면 멀쩡한 주소를 검색엔진이 "사라졌다" 로 읽고 색인에서 지운다 —
+     * 이 기능을 만든 이유가 색인인데 그것을 스스로 무너뜨린다.
+     */
+    @Test
+    public void 목록을_덜_받았으면_404_가_아니라_503_이다() throws Exception {
+        ClipController controller = controllerUnsure();
+        FakeHttp.Response response = new FakeHttp.Response();
+        Model model = new ExtendedModelMap();
+
+        String view = controller.detail("아직모름", model, response.build());
+
+        assertNull(view);
+        assertEquals("없다고 단정하면 안 된다", 503, response.status);
+        assertEquals("잠시 뒤 다시 오라고 알린다", "30", response.header("Retry-After"));
+    }
+
+    @Test
+    public void 목록을_덜_받았어도_찾았으면_그대로_보여준다() throws Exception {
+        ClipController controller = controllerUnsure(clip("abc123", "전문가 의사"));
+        FakeHttp.Response response = new FakeHttp.Response();
+        Model model = new ExtendedModelMap();
+
+        String view = controller.detail("abc123", model, response.build());
+
+        assertEquals("pages/clip-detail", view);
+        assertEquals(200, response.status);
     }
 
     @Test
@@ -250,25 +282,58 @@ public class ClipControllerTest {
         return clip;
     }
 
-    /** 주어진 클립만 아는 캐시를 물린 컨트롤러 */
+    /** 아직 목록을 다 받지 못한 캐시 — 못 찾아도 "없다" 고 단정하지 못한다 */
     @SafeVarargs
-    private static ClipController controllerWith(final Map<String, Object>... clips) throws Exception {
-        final Map<String, Map<String, Object>> known = new HashMap<String, Map<String, Object>>();
+    private static ClipController controllerUnsure(final Map<String, Object>... clips) throws Exception {
+        final Map<String, Map<String, Object>> known = index(clips);
+
+        return inject(new LiveFeedService() {
+            @Override
+            public ClipLookup findClip(String clipId) {
+                return lookup(known.get(clipId), false);
+            }
+        });
+    }
+
+    /** 패키지 밖에서는 ClipLookup 을 만들 수 없다 — 생성자가 패키지 전용이라 리플렉션으로 짓는다 */
+    private static LiveFeedService.ClipLookup lookup(Map<String, Object> clip, boolean complete) {
+        try {
+            java.lang.reflect.Constructor<LiveFeedService.ClipLookup> constructor =
+                    LiveFeedService.ClipLookup.class.getDeclaredConstructor(Map.class, boolean.class);
+            constructor.setAccessible(true);
+            return constructor.newInstance(clip, complete);
+        } catch (Exception e) {
+            throw new IllegalStateException("ClipLookup 을 만들지 못했다", e);
+        }
+    }
+
+    private static Map<String, Map<String, Object>> index(Map<String, Object>[] clips) {
+        Map<String, Map<String, Object>> known = new HashMap<String, Map<String, Object>>();
         for (Map<String, Object> clip : clips) {
             known.put((String) clip.get("clipId"), clip);
         }
+        return known;
+    }
 
-        LiveFeedService feed = new LiveFeedService() {
-            @Override
-            public Map<String, Object> findClip(String clipId) {
-                return known.get(clipId);
-            }
-        };
-
+    private static ClipController inject(LiveFeedService feed) throws Exception {
         ClipController controller = new ClipController();
         Field field = ClipController.class.getDeclaredField("liveFeed");
         field.setAccessible(true);
         field.set(controller, feed);
         return controller;
+    }
+
+    /** 주어진 클립만 아는 캐시를 물린 컨트롤러 */
+    @SafeVarargs
+    private static ClipController controllerWith(final Map<String, Object>... clips) throws Exception {
+        final Map<String, Map<String, Object>> known = index(clips);
+
+        return inject(new LiveFeedService() {
+            @Override
+            public ClipLookup findClip(String clipId) {
+                // 아는 목록이 전부다 — 못 찾으면 정말로 없는 것이다
+                return lookup(known.get(clipId), true);
+            }
+        });
     }
 }

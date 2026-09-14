@@ -132,18 +132,57 @@ public class LiveFeedService {
     }
 
     /**
+     * 클립 한 건을 찾은 결과.
+     *
+     * 못 찾았을 때 <b>"없는 것"과 "아직 모르는 것"을 가른다.</b> 이 구분이 없으면
+     * 목록을 덜 받은 순간에 들어온 멀쩡한 주소가 404 가 된다 — 검색엔진은 그것을
+     * "이 페이지는 사라졌다" 로 읽고 색인에서 지운다. 되돌리는 데 몇 주가 걸린다.
+     */
+    public static final class ClipLookup {
+        private final Map<String, Object> clip;
+        private final boolean complete;
+
+        ClipLookup(Map<String, Object> clip, boolean complete) {
+            this.clip = clip;
+            this.complete = complete;
+        }
+
+        /** 찾은 클립. 없으면 null */
+        public Map<String, Object> getClip() {
+            return clip;
+        }
+
+        /**
+         * 목록을 끝까지 받은 상태인가. 거짓이면 "없다" 고 단정할 수 없다.
+         *
+         * 참이면서 클립이 null 이면 정말로 없는 것이다 — 다만 상한(CLIP_MAX)에 닿아
+         * 멈춘 경우도 여기 들어간다. 채널 클립이 상한을 넘어가면 가장 오래된 것부터
+         * 찾지 못하게 된다 (현재 1,700개 남짓, 상한 3,000).
+         */
+        public boolean isComplete() {
+            return complete;
+        }
+    }
+
+    /**
      * 클립 한 건. 주소로 들어온 clipId 가 <b>이 채널 것인지</b>까지 여기서 가린다.
      *
      * 치지직의 단건 API(/clips/{uid}/detail)는 채널을 알려주지 않는다 — 그것만 믿으면
      * 남의 채널 클립도 우리 주소로 열려 버린다. 우리 목록에 있는지가 유일한 소유 확인이다.
-     * 없으면 null.
      */
-    public Map<String, Object> findClip(String clipId) {
+    public ClipLookup findClip(String clipId) {
         if (clipId == null || clipId.isEmpty()) {
-            return null;
+            // 모양부터 클립 아이디가 아니다. 목록을 더 받아도 나오지 않는다
+            return new ClipLookup(null, true);
         }
+
         ClipFeed feed = fullClips();
-        return (feed == null) ? null : feed.get(clipId);
+        if (feed == null) {
+            // 치지직이 죽어 목록이 아예 없다. 이 클립이 없다는 뜻이 아니다
+            return new ClipLookup(null, false);
+        }
+
+        return new ClipLookup(feed.get(clipId), !feed.canGrow());
     }
 
     /** 클립 전량. 일부만으로는 답이 틀리는 곳(최신순 · 검색 · 사이트맵)에 쓴다. 못 가져오면 null */
