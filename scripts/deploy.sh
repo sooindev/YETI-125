@@ -130,6 +130,7 @@ WEBAPPS=/var/lib/tomcat9/webapps
 CHECKS="
 http://localhost:8080/schedule/list?start=2020-01-01&end=2030-12-31
 http://localhost:8080/
+http://localhost:8080/clips
 http://localhost:8080/schedule
 http://localhost:8080/info
 http://localhost:8080/admin/admin-login
@@ -190,6 +191,28 @@ check_error_page() {
   fi
 }
 
+# 사이트맵이 실제로 만들어지는가.
+#
+# 손으로 적던 파일을 없애고 클립 캐시에서 뽑게 바꿨다(2026-09-14). 이제 사이트맵은
+# 코드라서 깨질 수 있고, 깨져도 다른 화면은 멀쩡하다 — 검색 유입만 조용히 죽는다.
+#
+# 다른 검증보다 시간을 길게 준다. 첫 호출은 클립 전량(30여 페이지)을 받아 오느라
+# 몇 초가 걸린다. 그 뒤 10분은 캐시가 답하므로 느린 것은 이 한 번뿐이다.
+check_sitemap() {
+  local body
+  body=$(curl -s --max-time 20 "http://localhost:8080/sitemap.xml" || true)
+
+  if ! printf '%s' "$body" | grep -q '</urlset>'; then
+    echo "http://localhost:8080/sitemap.xml → 사이트맵이 온전히 끝나지 않았습니다"
+    return 0
+  fi
+
+  # 고정 주소만 남고 클립이 하나도 없으면 치지직 연동이 끊긴 것이다
+  if ! printf '%s' "$body" | grep -q '<loc>https://yeti-125.com/clips/'; then
+    echo "http://localhost:8080/sitemap.xml → 클립 주소가 하나도 없습니다 (치지직 연동 확인)"
+  fi
+}
+
 # 홈이 실제로 부르는 css · js 가 전부 200 인가.
 #
 # 주소를 여기 박아두면 JSP 가 다른 경로를 부르도록 바뀐 순간 검증이 헛돈다 —
@@ -197,14 +220,31 @@ check_error_page() {
 #
 # 페이지만 보면 놓친다 (2026-09-10 디렉터리 세분화): css · js 경로가 통째로
 # 바뀌었는데, 자산이 하나도 안 내려와 스타일이 다 빠진 화면도 200 이라 그냥 통과한다.
+#
+# 홈만 보면 놓치는 것이 또 있다 (2026-09-14 클립 아카이브): /clips 는 홈이 부르지 않는
+# clips.css · clips.js 를 부른다. 화면마다 제 자산을 들고 있으므로 화면마다 확인한다.
 check_assets() {
-  local page assets url code
-  page=$(curl -s --max-time 3 "http://localhost:8080/" || true)
+  local path failed
+  for path in / /clips; do
+    failed="$(check_page_assets "$path")"
+    if [ -n "$failed" ]; then
+      echo "$failed"
+      return 0
+    fi
+  done
+}
+
+# 한 화면이 부르는 자산이 전부 200 인가.
+# 이 파일의 검증 함수는 모두 "아무 말도 없으면 통과" 다 — 반환값이 아니라 출력이 신호다
+check_page_assets() {
+  local path page assets url code
+  path="$1"
+  page=$(curl -s --max-time 3 "http://localhost:8080$path" || true)
   assets=$(printf '%s' "$page" | grep -oE '/resources/[A-Za-z0-9._/-]+\.(css|js)' | sort -u)
 
-  # 홈이 200 인데 자산 주소가 하나도 없으면 JSP 가 제대로 그려지지 않은 것이다
+  # 화면이 200 인데 자산 주소가 하나도 없으면 JSP 가 제대로 그려지지 않은 것이다
   if [ -z "$assets" ]; then
-    echo "홈에서 css · js 주소를 하나도 찾지 못했습니다 — 페이지가 제대로 렌더되지 않았을 수 있습니다"
+    echo "$path 에서 css · js 주소를 하나도 찾지 못했습니다 — 페이지가 제대로 렌더되지 않았을 수 있습니다"
     return 0
   fi
 
@@ -224,7 +264,8 @@ wait_ok() {
     failed="$(check_pages)"
     [ -n "$failed" ] || failed="$(check_error_page)"
     [ -n "$failed" ] || failed="$(check_assets)"
-    [ -z "$failed" ] && { echo "정상 페이지 + 오류 화면 + 자산 모두 통과"; return 0; }
+    [ -n "$failed" ] || failed="$(check_sitemap)"
+    [ -z "$failed" ] && { echo "정상 페이지 + 오류 화면 + 자산 + 사이트맵 모두 통과"; return 0; }
     sleep 2
   done
   echo "$failed"
@@ -234,7 +275,7 @@ wait_ok() {
 echo "   새 war 배포 중..."
 deploy_war /tmp/yeti-125.war
 
-echo "   DB 연동 · 페이지 · 오류 화면 · css/js 까지 검증 중 (최대 60초)..."
+echo "   DB 연동 · 페이지 · 오류 화면 · css/js · 사이트맵까지 검증 중..."
 if CODE=$(wait_ok); then
   echo "   검증 통과 ($CODE)"
   exit 0

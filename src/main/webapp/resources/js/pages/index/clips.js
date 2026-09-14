@@ -1,4 +1,14 @@
-/* 홈 — 인기 클립. 목록·더보기·모달 */
+/* 홈 — 인기 클립. 목록과 더보기.
+   카드를 누르면 뜨는 모달은 components/clip-modal.js 가 맡는다 (아카이브와 공용) */
+
+/*
+  홈에서 더보기로 늘릴 수 있는 최대치. 3열 그리드라 여섯 줄이고, 처음 6개에 더보기 두 번이다.
+
+  상한이 필요한 이유는 아카이브(/clips)가 생겼기 때문이다. 전에는 여기서 3,000개까지
+  끝없이 늘어났다 — 홈이 목록 화면 노릇까지 하면 둘 다 어중간해진다.
+  상한에 닿으면 버튼이 "아카이브에서 전체 보기" 로 바뀐다.
+*/
+const HOME_CLIP_MAX = 18;
 
 let clipOffset = 0;
 let hasMoreClips = false;
@@ -25,12 +35,7 @@ function loadClips() {
 
                 if (clips && clips.length > 0) {
                     renderClips(clips, false);
-
-                    if (hasMoreClips) {
-                        $('#clipsMore').show();
-                    } else {
-                        $('#clipsMore').hide();
-                    }
+                    syncClipsMore();
                 } else {
                     $('#clipsEmpty').show();
                 }
@@ -70,10 +75,7 @@ function loadMoreClips() {
 
                 if (clips && clips.length > 0) {
                     renderClips(clips, true);
-
-                    if (!hasMoreClips) {
-                        $('#clipsMore').hide();
-                    }
+                    syncClipsMore();
                 } else {
                     $('#clipsMore').hide();
                 }
@@ -85,43 +87,23 @@ function loadMoreClips() {
     });
 }
 
-// 클립 모달 — 치지직 공식 임베드로 사이트 안에서 재생
-function initClipModal() {
-    // 카드 클릭은 모달로 가로채고, 새 탭 열기는 원본으로 보낸다
-    $(document).on('click', '.clip-card', function(e) {
-        const clipId = $(this).attr('data-clip-id');
-        if (!clipId) return;
-        if (e.metaKey || e.ctrlKey || e.shiftKey || e.which === 2) return;
+/**
+ * 더보기 자리에 무엇을 세울지 정한다.
+ *
+ * 더 볼 것이 없으면 아무것도, 상한 전이면 더보기, 상한에 닿으면 아카이브 버튼.
+ * 상한에 닿았는데 더 볼 것도 없는 경우는 둘 다 감춘다 — 아카이브에 가도 같은 목록이다.
+ */
+function syncClipsMore() {
+    if (!hasMoreClips) {
+        $('#clipsMore').hide();
+        return;
+    }
 
-        e.preventDefault();
-        openClipModal(clipId, $(this).attr('data-clip-title'), $(this).attr('href'));
-    });
+    const capped = clipOffset >= HOME_CLIP_MAX;
 
-    // common.js 가 모달을 닫아도 iframe 은 남아 소리가 계속 난다 — 같은 신호로 src 를 거둔다
-    $(document).on('click', '#clipModal', function(e) {
-        if ($(e.target).is('#clipModal')) clearClipFrame();
-    });
-    $(document).on('click', '[data-close-modal="clipModal"]', clearClipFrame);
-    $(document).on('keydown', function(e) {
-        if (e.key === 'Escape') clearClipFrame();
-    });
-}
-
-function openClipModal(clipId, title, originUrl) {
-    $('#clipModalTitle').text(title || '클립');
-    $('#clipModalOrigin').attr('href', YetiUtil.safeUrl(originUrl) || 'https://chzzk.naver.com/clips/' + encodeURIComponent(clipId));
-    $('#clipModalFrame').attr('src', 'https://chzzk.naver.com/embed/clip/' + encodeURIComponent(clipId));
-    YetiUtil.openModal('clipModal');
-}
-
-function closeClipModal() {
-    clearClipFrame();
-    YetiUtil.closeModal('clipModal');
-}
-
-// src를 비워 플레이어를 완전히 내린다 (재생 중단)
-function clearClipFrame() {
-    $('#clipModalFrame').attr('src', '');
+    $('#clipsMore').show();
+    $('#loadMoreBtn').toggle(!capped);
+    $('#clipsArchiveLink').prop('hidden', !capped);
 }
 
 function renderClips(clips, append) {

@@ -544,6 +544,60 @@ img { display: block; max-width: 100%; }
 .mobile-menu-btn.active span:nth-child(2) { opacity: 0; }
 .mobile-menu-btn.active span:nth-child(3) { transform: translateY(-7.5px) rotate(-45deg); width: 100%; }
 
+/* Page masthead — 하위 화면의 머리. 일정 · 클립 아카이브가 함께 쓴다.
+   전에는 schedule.css 에만 있었다 (그 화면 전용인 줄 알았다) */
+/* Page masthead */
+.page-masthead {
+    padding: clamp(56px, 9vw, 130px) 0 clamp(36px, 5vw, 64px);
+    border-bottom: 1px solid var(--ink-line);
+}
+.masthead-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    gap: var(--gutter);
+    align-items: end;
+}
+.masthead-title {
+    font-size: clamp(3.4rem, 9vw, 8rem);
+    color: var(--bone);
+}
+.masthead-title em {
+    font-style: normal;
+    color: var(--frost);
+}
+.masthead-aside {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    justify-self: end;
+    text-align: right;
+    border-left: 1px solid var(--ink-line);
+    padding-left: var(--gutter);
+}
+.masthead-copy {
+    font-family: var(--f-mono);
+    font-size: 0.86rem;
+    color: var(--bone-dim);
+    max-width: 38ch;
+    line-height: 1.8;
+    /* wrap by word — never split a Korean word mid-character */
+    word-break: keep-all;
+}
+
+@media (max-width: 920px) {
+    .masthead-grid { grid-template-columns: 1fr; gap: 28px; }
+    .masthead-aside {
+        justify-self: start;
+        text-align: left;
+        border-left: none;
+        padding-left: 0;
+    }
+}
+
+@media (max-width: 560px) {
+    .page-masthead { padding: 36px 0 24px; }
+}
+
 /* Section scaffold — asymmetric header row */
 .section {
     padding: clamp(72px, 11vw, 150px) 0;
@@ -618,6 +672,10 @@ img { display: block; max-width: 100%; }
     overflow: hidden;
     transition: color var(--t-fast), border-color var(--t-fast);
 }
+/* [hidden] 의 display:none 은 UA 규칙이라 .btn 의 display 에 진다.
+   숨겼는데 그대로 보이는 자리가 생기므로 여기서 못 박는다 */
+.btn[hidden] { display: none; }
+
 .btn::before {
     content: "";
     position: absolute;
@@ -882,3 +940,23 @@ img { display: block; max-width: 100%; }
        한 번 확대되면 사용자가 직접 되돌려야 하므로 16px을 보장한다. */
     input, textarea, select { font-size: 16px; }
 }
+
+/* 섹션 머리말 안에서 다른 화면으로 건네주는 링크 (홈의 인기 클립 → 클립 아카이브) */
+.sec-head__link {
+    /* flex 라 제 줄을 차지한다 — 앞 문장 끝에 붙지 않는다.
+       머리말이 오른쪽 정렬이라 fit-content + auto 여백으로 오른쪽 끝에 맞춘다 */
+    display: flex;
+    width: fit-content;
+    margin-left: auto;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.9rem;
+    font-family: var(--f-mono);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--frost);
+}
+.sec-head__link:hover { color: var(--frost-deep); }
+.sec-head__link:hover .btn-arrow { transform: translateX(4px); }

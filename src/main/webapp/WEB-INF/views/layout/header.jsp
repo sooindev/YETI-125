@@ -1,5 +1,5 @@
 <%@ page pageEncoding="UTF-8" %>
-<%-- 공개 페이지 상단바. 지금 페이지는 active 파라미터로 알린다 — index / schedule / info --%>
+<%-- 공개 페이지 상단바. 지금 페이지는 active 파라미터로 알린다 — index / clips / schedule / info --%>
 <header class="header">
   <div class="header-inner">
     <a href="/" class="logo">
@@ -8,6 +8,7 @@
     </a>
     <nav class="nav">
       <a href="/" class="nav-link${param.active == 'index' ? ' active' : ''}">Index</a>
+      <a href="/clips" class="nav-link${param.active == 'clips' ? ' active' : ''}">Clips</a>
       <a href="/schedule" class="nav-link${param.active == 'schedule' ? ' active' : ''}">Schedule</a>
       <a href="/info" class="nav-link${param.active == 'info' ? ' active' : ''}">Profile</a>
     </nav>

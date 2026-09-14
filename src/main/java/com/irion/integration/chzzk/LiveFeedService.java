@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +38,15 @@ public class LiveFeedService {
     private static final int CLIP_INITIAL_PAGES = 2;   // 첫 요청에 미리 담아둘 분량
     public static final int CLIP_MAX = 3000;           // 메모리 상한
     private static final int CLIP_PAGES_PER_REQUEST = 10; // 한 요청이 외부에 낼 수 있는 최대 호출
+
+    /**
+     * 상한까지 채우는 데 필요한 확장 횟수. extendClips 한 번이 CLIP_PAGES_PER_REQUEST 장까지만
+     * 받아오므로, 전량이 필요한 쪽(상세 화면 · 최신순 · 검색 · 사이트맵)은 여러 번 불러야 한다.
+     * 한 번에 다 받게 고치지 않은 것은, 홈이 쓰는 "조금씩 늘리는" 경로를 그대로 두기 위해서다.
+     */
+    private static final int FULL_LOAD_ROUNDS =
+            (CLIP_MAX + CLIP_PAGES_PER_REQUEST * ChzzkClient.CLIP_PAGE_SIZE - 1)
+                    / (CLIP_PAGES_PER_REQUEST * ChzzkClient.CLIP_PAGE_SIZE);
 
     // 다시보기 — 현재 18개뿐이지만 쌓이면 한 페이지를 넘는다
     private static final int VIDEO_MAX_PAGES = 20;
@@ -68,14 +78,36 @@ public class LiveFeedService {
         private final String nextClipUID;
         private final String nextReadCount;
 
+        /** clipId → 클립. 상세 화면이 주소의 id 하나로 찾아가므로 목록을 매번 훑지 않는다 */
+        private final Map<String, Map<String, Object>> byId;
+
         ClipFeed(List<Map<String, Object>> clips, String nextClipUID, String nextReadCount) {
             this.clips = clips;
             this.nextClipUID = nextClipUID;
             this.nextReadCount = nextReadCount;
+
+            Map<String, Map<String, Object>> index =
+                    new HashMap<String, Map<String, Object>>(Math.max(16, clips.size() * 2));
+            for (Map<String, Object> clip : clips) {
+                Object id = clip.get("clipId");
+                if (id instanceof String) {
+                    index.put((String) id, clip);
+                }
+            }
+            this.byId = index;
         }
 
         public List<Map<String, Object>> getClips() {
             return clips;
+        }
+
+        /** 이 목록에 있는 클립인가. 없으면 null */
+        public Map<String, Object> get(String clipId) {
+            return (clipId == null) ? null : byId.get(clipId);
+        }
+
+        public int size() {
+            return clips.size();
         }
 
         boolean hasNext() {
@@ -97,6 +129,46 @@ public class LiveFeedService {
     public ClipFeed getClips(int need) {
         ClipFeed feed = cached("클립", clipsCache, clipsLock, CACHE_DURATION, this::loadClips);
         return (feed == null) ? null : extendClips(feed, need);
+    }
+
+    /**
+     * 클립 한 건. 주소로 들어온 clipId 가 <b>이 채널 것인지</b>까지 여기서 가린다.
+     *
+     * 치지직의 단건 API(/clips/{uid}/detail)는 채널을 알려주지 않는다 — 그것만 믿으면
+     * 남의 채널 클립도 우리 주소로 열려 버린다. 우리 목록에 있는지가 유일한 소유 확인이다.
+     * 없으면 null.
+     */
+    public Map<String, Object> findClip(String clipId) {
+        if (clipId == null || clipId.isEmpty()) {
+            return null;
+        }
+        ClipFeed feed = fullClips();
+        return (feed == null) ? null : feed.get(clipId);
+    }
+
+    /** 클립 전량. 일부만으로는 답이 틀리는 곳(최신순 · 검색 · 사이트맵)에 쓴다. 못 가져오면 null */
+    public ClipFeed getAllClips() {
+        return fullClips();
+    }
+
+    /**
+     * 커서가 마를 때까지 이어 받는다.
+     *
+     * 채널 클립이 1,700개 남짓(34페이지)이라 찬 캐시로 3초 안쪽이고, 그 뒤 10분은 캐시가 답한다.
+     * 확장이 다른 스레드와 겹치면 늘지 않은 채 돌아오므로, 크기가 그대로면 더 기다리지 않는다 —
+     * 여기서 기다리면 상세 화면 하나가 남의 적재를 붙들고 선다.
+     */
+    private ClipFeed fullClips() {
+        ClipFeed feed = getClips(CLIP_MAX);
+
+        for (int round = 0; round < FULL_LOAD_ROUNDS && feed != null && feed.canGrow(); round++) {
+            int before = feed.size();
+            feed = getClips(CLIP_MAX);
+            if (feed == null || feed.size() == before) {
+                break;
+            }
+        }
+        return feed;
     }
 
     /** 다시보기 목록. 못 가져오면 null. */

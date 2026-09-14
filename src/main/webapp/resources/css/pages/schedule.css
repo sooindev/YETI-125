@@ -2,44 +2,6 @@
 
 main { padding-top: var(--head-total); }
 
-/* Page masthead */
-.page-masthead {
-    padding: clamp(56px, 9vw, 130px) 0 clamp(36px, 5vw, 64px);
-    border-bottom: 1px solid var(--ink-line);
-}
-.masthead-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-    gap: var(--gutter);
-    align-items: end;
-}
-.masthead-title {
-    font-size: clamp(3.4rem, 9vw, 8rem);
-    color: var(--bone);
-}
-.masthead-title em {
-    font-style: normal;
-    color: var(--frost);
-}
-.masthead-aside {
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-    justify-self: end;
-    text-align: right;
-    border-left: 1px solid var(--ink-line);
-    padding-left: var(--gutter);
-}
-.masthead-copy {
-    font-family: var(--f-mono);
-    font-size: 0.86rem;
-    color: var(--bone-dim);
-    max-width: 38ch;
-    line-height: 1.8;
-    /* wrap by word — never split a Korean word mid-character */
-    word-break: keep-all;
-}
-
 /* Schedule grid — calendar (7) + upcoming rail (5) */
 .sched-grid {
     display: grid;
@@ -411,14 +373,6 @@ main { padding-top: var(--head-total); }
 
 /* Responsive */
 @media (max-width: 920px) {
-    .masthead-grid { grid-template-columns: 1fr; gap: 28px; }
-    .masthead-aside {
-        justify-self: start;
-        text-align: left;
-        border-left: none;
-        padding-left: 0;
-    }
-
     .sched-grid { grid-template-columns: 1fr; }
     .sched-cal {
         border-right: none;
@@ -427,8 +381,6 @@ main { padding-top: var(--head-total); }
 }
 
 @media (max-width: 560px) {
-    .page-masthead { padding: 36px 0 24px; }
-
     /* 칸 폭이 40px 남짓이라 유형 색 막대로만 표시한다 (색은 dot 의 인라인 border-color) */
     .fc-daygrid-event .fc-event-time,
     .fc-daygrid-event .fc-event-title,

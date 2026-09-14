@@ -1,0 +1,135 @@
+/*
+  클립 모달 — 치지직 공식 임베드를 사이트 안에서 재생한다.
+
+  전에는 홈 전용(pages/index/modal.css)에 있었다. 클립 아카이브(/clips)가 같은 모달을
+  쓰면서 두 화면의 공용이 되어 여기로 옮겼다. 다시보기의 이동 확인 모달은 홈에만 있어
+  옮기지 않았다.
+
+  껍데기(.modal · .modal-content · .modal-close)는 base/common.css 에 있다.
+*/
+
+.clip-modal-content {
+    max-width: 880px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+.clip-modal-title {
+    font-family: var(--f-kr);
+    font-size: 0.95rem;
+    font-weight: 700;
+    line-height: 1.4;
+    color: var(--bone);
+    /* 닫기 버튼(42px + 여백)을 피해 앉힌다 */
+    min-height: 42px;
+    padding-right: 56px;
+    display: flex;
+    align-items: center;
+}
+.clip-modal-frame {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: #000;
+    border: 1px solid var(--ink-line);
+}
+.clip-modal-frame iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+}
+/* 플레이어 아래 링크 줄. 왼쪽은 이 사이트의 클립 페이지, 오른쪽은 치지직 원본.
+   전에는 원본 링크 하나뿐이라 링크가 직접 줄을 맡았다 — 둘이 되면서 자리는 이 컨테이너가 잡는다 */
+.clip-modal-links {
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+}
+.clip-modal-link,
+.clip-modal-origin {
+    font-family: var(--f-mono);
+    font-size: 0.76rem;
+    color: var(--bone-dim);
+    transition: color var(--t-fast);
+}
+.clip-modal-link:hover,
+.clip-modal-origin:hover { color: var(--frost-deep); }
+.clip-modal-link:hover .btn-arrow,
+.clip-modal-origin:hover .btn-arrow { transform: translateX(4px); }
+
+/* ---- 터치 기기 — 폭이 아니라 포인터로 가른다 (눕힌 폰은 폭이 800px 을 넘는다) ---- */
+@media (pointer: coarse) {
+    .clip-modal-title {
+        /* 긴 제목은 두 줄에서 자른다 — 세 줄이 되면 플레이어가 밀려난다 */
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        /* orient가 vertical이라 box-pack이 세로 정렬을 맡는다.
+           한 줄짜리 제목이 위로 붙지 않고 닫기 버튼과 눈높이가 맞는다. */
+        -webkit-box-pack: center;
+        overflow: hidden;
+        min-height: 38px;
+    }
+
+    /* 텍스트 링크는 높이가 20px뿐이라 손가락으로 누르기 어렵다.
+       구분선을 둔 한 줄로 만들어 44px 탭 영역을 확보한다. */
+    .clip-modal-links {
+        min-height: 44px;
+        margin-top: -6px;
+        border-top: 1px solid var(--ink-line);
+    }
+    /* flex 컨테이너가 되면서 텍스트와 화살표 사이 공백 노드가 사라진다 */
+    .clip-modal-link,
+    .clip-modal-origin {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        min-height: 44px;
+    }
+}
+
+/* ---- 좁은 화면 — 여백보다 플레이어 크기를 우선한다 ---- */
+@media (max-width: 720px) {
+    /* 바깥 거터(--gutter 최소 20px)를 줄여 폭을 플레이어에 몰아준다 */
+    #clipModal { padding: 10px; }
+
+    .clip-modal-content {
+        padding: 12px;
+        gap: 12px;
+    }
+    .clip-modal-title {
+        font-size: 0.92rem;
+        /* 닫기 버튼(8px + 42px) 아래로 플레이어가 시작하도록 비워둔다 */
+        padding-right: 50px;
+    }
+    #clipModal .modal-close { top: 8px; right: 8px; }
+}
+
+/* ---- 눕힌 화면 — 16:9 를 풀고 높이를 화면에 맞춘다 ---- */
+@media (max-height: 520px) and (orientation: landscape) {
+    #clipModal { padding: 8px; }
+    .clip-modal-content { padding: 10px; gap: 8px; }
+
+    .clip-modal-frame {
+        aspect-ratio: auto;
+        height: 58vh;
+        height: 58dvh;
+    }
+    .clip-modal-title {
+        font-size: 0.86rem;
+        /* 세로가 좁으니 한 줄로 줄인다 */
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        -webkit-box-pack: center;
+        overflow: hidden;
+        /* 닫기 버튼(8 + 42)을 넘겨야 플레이어를 침범하지 않는다 */
+        min-height: 40px;
+    }
+}

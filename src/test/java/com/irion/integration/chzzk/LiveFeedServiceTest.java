@@ -533,6 +533,101 @@ public class LiveFeedServiceTest {
         }
     }
 
+    // ── 클립 한 건 찾기 (상세 화면) ──────────────────────
+
+    /**
+     * 상세 화면이 존재할 수 있는 근거.
+     *
+     * 첫 적재는 두 페이지(100개)뿐이다. 주소로 들어온 클립이 그 뒤에 있어도 찾아내야 한다 —
+     * 못 찾고 404 를 내면 검색엔진에 올린 주소가 어느 날 갑자기 없는 쪽이 된다.
+     */
+    @Test
+    public void 첫_묶음_너머의_클립도_찾아낸다() throws Exception {
+        FakeChzzk chzzk = new FakeChzzk();
+        chzzk.clipPage = finiteClipPages(6);   // 300개
+        LiveFeedService service = serviceWith(chzzk);
+
+        Map<String, Object> found = service.findClip("clip-250");
+
+        assertNotNull("첫 두 페이지 밖에 있어도 찾아야 한다", found);
+        assertEquals("클립 250", found.get("clipTitle"));
+    }
+
+    @Test
+    public void 우리_채널에_없는_클립은_못_찾는다() throws Exception {
+        FakeChzzk chzzk = new FakeChzzk();
+        chzzk.clipPage = finiteClipPages(2);
+        LiveFeedService service = serviceWith(chzzk);
+
+        assertNull("남의 채널 클립이 우리 주소로 열리면 안 된다", service.findClip("남의클립"));
+    }
+
+    @Test
+    public void 빈_clipId_는_치지직을_두드리지도_않는다() throws Exception {
+        FakeChzzk chzzk = new FakeChzzk();
+        chzzk.clipPage = finiteClipPages(2);
+        LiveFeedService service = serviceWith(chzzk);
+
+        assertNull(service.findClip(null));
+        assertNull(service.findClip(""));
+        assertEquals(0, chzzk.clipCalls.get());
+    }
+
+    @Test
+    public void 치지직이_죽어_있으면_못_찾는다() throws Exception {
+        FakeChzzk chzzk = new FakeChzzk();   // 모든 페이지가 실패한다
+        LiveFeedService service = serviceWith(chzzk);
+
+        assertNull(service.findClip("clip-0"));
+    }
+
+    /** 한 번 채워 두면 다음 상세 화면은 치지직을 다시 두드리지 않는다 */
+    @Test
+    public void 채워둔_목록은_다시_받지_않는다() throws Exception {
+        FakeChzzk chzzk = new FakeChzzk();
+        chzzk.clipPage = finiteClipPages(6);
+        LiveFeedService service = serviceWith(chzzk);
+
+        service.findClip("clip-250");
+        int afterFirst = chzzk.clipCalls.get();
+
+        service.findClip("clip-10");
+        service.findClip("clip-299");
+
+        assertEquals("TTL 안에서는 더 부르지 않는다", afterFirst, chzzk.clipCalls.get());
+    }
+
+    // ── 전량 적재 (최신순 · 검색 · 사이트맵) ─────────────
+
+    @Test
+    public void 커서가_마를_때까지_이어_받는다() throws Exception {
+        FakeChzzk chzzk = new FakeChzzk();
+        chzzk.clipPage = finiteClipPages(34);   // 실제 채널과 비슷한 분량
+        LiveFeedService service = serviceWith(chzzk);
+
+        LiveFeedService.ClipFeed feed = service.getAllClips();
+
+        assertNotNull(feed);
+        assertEquals(34 * ChzzkClient.CLIP_PAGE_SIZE, feed.size());
+        assertFalse("다 받았으면 더 늘 것이 없다", feed.canGrow());
+    }
+
+    /**
+     * 상한이 지켜지는지. 끝나지 않는 목록을 물려도 CLIP_MAX 에서 멈춰야 한다 —
+     * 멈추지 않으면 2GB 서버의 메모리가 클립으로 찬다.
+     */
+    @Test
+    public void 전량_적재도_상한을_넘지_않는다() throws Exception {
+        FakeChzzk chzzk = new FakeChzzk();
+        chzzk.clipPage = endlessClipPages();
+        LiveFeedService service = serviceWith(chzzk);
+
+        LiveFeedService.ClipFeed feed = service.getAllClips();
+
+        assertNotNull(feed);
+        assertEquals(LiveFeedService.CLIP_MAX, feed.size());
+    }
+
     private static ListAppender<ILoggingEvent> captureLog() {
         ListAppender<ILoggingEvent> appender = new ListAppender<ILoggingEvent>();
         appender.start();
@@ -712,6 +807,18 @@ public class LiveFeedServiceTest {
         Field field = LiveFeedService.class.getDeclaredField(cacheField);
         field.setAccessible(true);
         return (AtomicReference<Object>) field.get(service);
+    }
+
+    /** pages 장까지만 주고 그 뒤로는 커서를 끊는, 끝이 있는 목록 */
+    private static IntFunction<ChzzkClient.ClipPage> finiteClipPages(int pages) {
+        return call -> {
+            if (call >= pages) {
+                return null;
+            }
+            boolean last = (call == pages - 1);
+            return clipPage(call * ChzzkClient.CLIP_PAGE_SIZE,
+                    ChzzkClient.CLIP_PAGE_SIZE, last ? null : "cursor-" + call);
+        };
     }
 
     /** 매 호출마다 새 클립 50개와 다음 커서를 주는, 끝나지 않는 목록 */

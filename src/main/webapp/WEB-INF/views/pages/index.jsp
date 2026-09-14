@@ -104,8 +104,10 @@
   <link rel="stylesheet" href="/resources/css/base/common.css">
   <%-- 홈 스타일 — 순서가 곧 겹침 우선순위다. 바꾸지 말 것 --%>
   <link rel="stylesheet" href="/resources/css/pages/index/hero.css">
+  <link rel="stylesheet" href="/resources/css/components/media-card.css">
   <link rel="stylesheet" href="/resources/css/pages/index/media.css">
   <link rel="stylesheet" href="/resources/css/pages/index/community.css">
+  <link rel="stylesheet" href="/resources/css/components/clip-modal.css">
   <link rel="stylesheet" href="/resources/css/pages/index/modal.css">
   <link rel="stylesheet" href="/resources/css/features/door-intro.css">
   <link rel="stylesheet" href="/resources/css/base/scroll-animations.css">
@@ -247,6 +249,7 @@
         <h2 class="sec-head__title">인기<br><em>클립</em></h2>
         <p class="sec-head__aside">
           시청자들이 가장 많이 돌려본 순간들. 치지직 클립 아카이브에서 자동 수집됩니다.
+          <a href="/clips" class="sec-head__link">전체 아카이브 보기 <span class="btn-arrow">→</span></a>
         </p>
       </div>
 
@@ -258,8 +261,12 @@
       <div id="clipsEmpty" class="feed-state" style="display: none;">
         <span class="feed-state-mark">∅</span> 클립이 없습니다
       </div>
+      <%-- 홈의 더보기는 끝이 있다. 상한에 닿으면 버튼이 아카이브로 바뀐다 (clips.js 의 HOME_CLIP_MAX) --%>
       <div class="feed-more" id="clipsMore" style="display: none;">
         <button id="loadMoreBtn" class="btn">더 불러오기 <span class="btn-arrow">↓</span></button>
+        <a id="clipsArchiveLink" class="btn btn-primary" href="/clips" hidden>
+          클립 아카이브에서 전체 보기 <span class="btn-arrow">→</span>
+        </a>
       </div>
     </div>
   </section>
@@ -374,22 +381,8 @@
 
 </main>
 
-<%-- ===== Clip Modal ===== --%>
-<div id="clipModal" class="modal">
-  <div class="modal-content clip-modal-content">
-    <button class="modal-close" data-close-modal="clipModal">&times;</button>
-    <h3 id="clipModalTitle" class="clip-modal-title"></h3>
-    <div class="clip-modal-frame">
-      <iframe id="clipModalFrame" src="" title="치지직 클립 플레이어"
-              frameborder="0" scrolling="no"
-              allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
-              allowfullscreen></iframe>
-    </div>
-    <a id="clipModalOrigin" class="clip-modal-origin" href="https://chzzk.naver.com/" target="_blank" rel="noopener">
-      치지직에서 원본 보기 <span class="btn-arrow">↗</span>
-    </a>
-  </div>
-</div>
+<%-- ===== Clip Modal (홈 · 아카이브 공용) ===== --%>
+<jsp:include page="/WEB-INF/views/layout/clip-modal.jsp"/>
 
 <%-- ===== Video Leave Modal ===== --%>
 <div id="videoModal" class="modal">
@@ -427,7 +420,8 @@
 <script src="/resources/js/pages/index/bootstrap.js"></script>
 <script src="/resources/js/pages/index/live.js"></script>
 <script src="/resources/js/pages/index/next-schedule.js"></script>
-<script src="/resources/js/pages/index/media.js"></script>
+<script src="/resources/js/components/media-card.js"></script>
+<script src="/resources/js/components/clip-modal.js"></script>
 <script src="/resources/js/pages/index/clips.js"></script>
 <script src="/resources/js/pages/index/videos.js"></script>
 </body>

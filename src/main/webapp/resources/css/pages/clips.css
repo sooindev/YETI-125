@@ -1,0 +1,235 @@
+/* YETI-125 — Clips archive (목록 /clips · 상세 /clips/{clipId}) */
+
+main { padding-top: var(--head-total); }
+
+/* 화면에서는 감추고 스크린 리더에는 남긴다 */
+.sr-only {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* ===== 목록 — 검색과 정렬 ===== */
+
+.clips-section { padding-top: clamp(40px, 6vw, 72px); }
+
+.clips-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding-bottom: clamp(24px, 3vw, 36px);
+    border-bottom: 1px solid var(--ink-line);
+}
+
+.clips-search {
+    display: flex;
+    align-items: stretch;
+    border: 1px solid var(--ink-line-2);
+    background: var(--ink-raise);
+    min-width: min(320px, 100%);
+    transition: border-color var(--t-fast);
+}
+.clips-search:focus-within { border-color: var(--frost); }
+
+.clips-search-input {
+    flex: 1;
+    padding: 13px 16px;
+    font-family: var(--f-kr);
+    font-size: 0.88rem;
+    color: var(--bone);
+    background: transparent;
+    border: none;
+    outline: none;
+}
+.clips-search-input::placeholder { color: var(--bone-faint); }
+
+/* 검색 지우기 버튼(X)은 브라우저마다 모양이 달라 숨긴다 — 지우기는 입력칸을 비우면 된다 */
+.clips-search-input::-webkit-search-cancel-button { -webkit-appearance: none; }
+
+.clips-search-btn {
+    padding: 0 18px;
+    font-family: var(--f-mono);
+    font-size: 0.9rem;
+    color: var(--bone-dim);
+    background: transparent;
+    border: none;
+    border-left: 1px solid var(--ink-line);
+    cursor: pointer;
+    transition: color var(--t-fast), background var(--t-fast);
+}
+.clips-search-btn:hover { color: #fff; background: var(--frost); }
+
+.clips-sort {
+    display: flex;
+    border: 1px solid var(--ink-line-2);
+}
+
+.clips-sort-btn {
+    padding: 13px 22px;
+    font-family: var(--f-mono);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    color: var(--bone-dim);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: color var(--t-fast), background var(--t-fast);
+}
+.clips-sort-btn + .clips-sort-btn { border-left: 1px solid var(--ink-line); }
+.clips-sort-btn:hover { color: var(--bone); }
+.clips-sort-btn.is-active {
+    color: #fff;
+    background: var(--frost);
+}
+
+.clips-count {
+    margin: 22px 0 0;
+    font-family: var(--f-mono);
+    font-size: 0.74rem;
+    letter-spacing: 0.1em;
+    color: var(--bone-faint);
+}
+.clips-count[hidden] { display: none; }
+
+/* 카드 그리드는 머리말 아래로 한 칸 띄운다 */
+.clips-section .card-grid { margin-top: 28px; }
+
+/* ===== 상세 ===== */
+
+.clip-detail {
+    padding: clamp(40px, 6vw, 88px) 0 clamp(64px, 9vw, 130px);
+}
+
+.clip-crumb {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--f-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    color: var(--bone-faint);
+    padding-bottom: clamp(24px, 3vw, 40px);
+}
+.clip-crumb a { color: var(--bone-dim); }
+.clip-crumb a:hover { color: var(--frost); }
+.clip-crumb-current {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.clip-detail-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    gap: clamp(28px, 4vw, 64px);
+    align-items: start;
+}
+
+.clip-detail-media {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: var(--frost-soft);
+    border: 1px solid var(--ink-line);
+}
+.clip-detail-img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+}
+.clip-detail-img[hidden] { display: none; }
+.clip-detail-media .thumb-fallback[hidden] { display: none; }
+.clip-detail-media .thumb-fallback-badge[hidden] { display: none; }
+
+.clip-detail-duration {
+    position: absolute;
+    top: 12px; right: 12px;
+    font-family: var(--f-mono);
+    font-size: 0.74rem;
+    letter-spacing: 0.06em;
+    color: var(--bone);
+    background: var(--surface-blur-2);
+    border: 1px solid var(--ink-line-2);
+    padding: 5px 10px;
+}
+
+.clip-detail-body {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.clip-detail-title {
+    font-size: clamp(1.9rem, 4vw, 3.2rem);
+    line-height: 1.15;
+    color: var(--bone);
+    /* 제목은 시청자가 붙인 이름이라 길이를 예측할 수 없다 — 단어 단위로 접는다 */
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+}
+
+.clip-detail-meta {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    border-top: 1px solid var(--ink-line);
+}
+.clip-detail-meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+    padding: 13px 0;
+    border-bottom: 1px solid var(--ink-line);
+}
+.clip-detail-meta dt {
+    font-family: var(--f-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--bone-faint);
+}
+.clip-detail-meta dd {
+    margin: 0;
+    font-family: var(--f-mono);
+    font-size: 0.86rem;
+    color: var(--bone);
+    font-variant-numeric: tabular-nums;
+}
+
+.clip-detail-go { align-self: flex-start; }
+
+.clip-detail-note {
+    font-family: var(--f-kr);
+    font-size: 0.78rem;
+    line-height: 1.75;
+    color: var(--bone-faint);
+    word-break: keep-all;
+}
+
+.clip-detail-back {
+    margin-top: clamp(40px, 6vw, 72px);
+    padding-top: clamp(24px, 3vw, 40px);
+    border-top: 1px solid var(--ink-line);
+}
+
+/* ===== Responsive ===== */
+
+@media (max-width: 920px) {
+    .clip-detail-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 560px) {
+    .clips-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .clips-sort { align-self: stretch; }
+    .clips-sort-btn { flex: 1; }
+}

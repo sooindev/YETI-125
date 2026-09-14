@@ -111,7 +111,6 @@
     .live-hero-grid { grid-template-columns: 1fr; }
     .sec-head--flip { direction: ltr; }
 
-    .card-grid { grid-template-columns: repeat(2, 1fr); }
 
     .community-slab { grid-template-columns: 1fr; }
     .community-slab-left {
@@ -126,6 +125,3 @@
     .link-row-desc { display: none; }
 }
 
-@media (max-width: 560px) {
-    .card-grid { grid-template-columns: 1fr; }
-}
