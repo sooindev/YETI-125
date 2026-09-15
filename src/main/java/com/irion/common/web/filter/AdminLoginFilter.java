@@ -14,7 +14,7 @@ import java.util.Set;
 
 public class AdminLoginFilter implements Filter {
 
-    /** 로그인 없이 지나갈 경로. contains 로 판정하면 /admin/loginProc/../ 같은 요청에 뚫린다. */
+    /** 인증 면제 경로. contains 로 판정하면 /admin/loginProc/../ 에 뚫린다 */
     private static final Set<String> PUBLIC_PATHS = Collections.unmodifiableSet(
             new HashSet<String>(Arrays.asList(
                     "/admin/admin-login",
@@ -39,7 +39,7 @@ public class AdminLoginFilter implements Filter {
             HttpSession session = httpRequest.getSession(false);
 
             if (session == null || session.getAttribute("adminUser") == null) {
-                // AJAX 에 302 를 주면 jQuery 가 따라가 로그인 HTML 을 200 으로 받는다
+                // AJAX 에 302 를 주면 jQuery 가 따라가 로그인 HTML 을 200 으로 받음
                 if (RequestUtil.isAjaxRequest(httpRequest)) {
                     httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     httpResponse.setContentType("application/json;charset=UTF-8");
@@ -56,8 +56,8 @@ public class AdminLoginFilter implements Filter {
     }
 
     /**
-     * 관리자 영역인가. "/admin/" 으로만 보면 정확히 "/admin" 인 요청이 빠져나간다 —
-     * 톰캣의 /admin/* 매핑과 스프링의 /admin/** 매핑은 둘 다 그것까지 관리자로 본다.
+     * 관리자 영역 여부. "/admin/" 으로만 보면 정확히 "/admin" 인 요청이 빠져나간다 —
+     * 톰캣의 /admin/* 과 스프링의 /admin/** 은 둘 다 그것까지 관리자로 본다
      */
     private static boolean isAdminPath(String path) {
         return "/admin".equals(path) || path.startsWith("/admin/");

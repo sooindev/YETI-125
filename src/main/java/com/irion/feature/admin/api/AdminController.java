@@ -25,13 +25,13 @@ public class AdminController {
     @Autowired
     private AdminService adminService;
 
-    /** admin_login_id 의 컬럼 폭. 이보다 길면 어떤 계정과도 맞지 않는다 */
+    /** admin_login_id 컬럼 폭. 초과하면 어떤 계정과도 불일치 */
     private static final int MAX_LOGIN_ID_LENGTH = 50;
 
-    // 컨트롤러가 싱글턴이라 카운터도 하나면 된다
+    // 컨트롤러가 싱글턴이라 카운터도 하나
     private final LoginAttemptGuard loginGuard = new LoginAttemptGuard();
 
-    /** 로그인 페이지. HttpSession 을 파라미터로 받으면 빈 세션이 쌓인다. */
+    /** 로그인 페이지. HttpSession 을 파라미터로 받으면 빈 세션이 쌓인다 */
     @GetMapping("/admin-login")
     public String loginPage(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
@@ -41,13 +41,13 @@ public class AdminController {
         return "admin/admin-login";
     }
 
-    /** 로그인 처리. 성공하면 세션을 새로 발급한다 (세션 고정 방어) */
+    /** 로그인 처리. 성공 시 세션 재발급(세션 고정 방어) */
     @PostMapping("/loginProc")
     @ResponseBody
     public JsonResult loginProc(@RequestParam String adminLoginId, @RequestParam String password,
                                 HttpServletRequest request) {
 
-        // 흘려보내면 시도 카운터에 자리를 차지한다. 문구는 일반 실패와 똑같이 둔다
+        // 흘려보내면 시도 카운터를 차지. 문구는 일반 실패와 동일하게
         if (adminLoginId.length() > MAX_LOGIN_ID_LENGTH) {
             logger.warn("Admin login rejected (login id too long): {} chars", adminLoginId.length());
             return JsonResult.fail("아이디 또는 비밀번호가 일치하지 않습니다.");
@@ -71,7 +71,7 @@ public class AdminController {
         loginGuard.recordSuccess(adminLoginId);
         admin.setAdminPassword(null);
 
-        // 세션 고정 방어 — 기존 세션을 버리고 새 ID 를 발급받는다
+        // 세션 고정 방어 — 기존 세션 폐기 후 새 ID
         HttpSession previous = request.getSession(false);
         if (previous != null) {
             previous.invalidate();
@@ -84,14 +84,14 @@ public class AdminController {
         return JsonResult.success("로그인 성공");
     }
 
-    /** 관리자 화면이 정적 HTML 이라 서버가 토큰을 심어줄 자리가 없어 따로 받아간다 */
+    /** 관리자 화면이 정적 HTML 이라 토큰을 심을 자리가 없어 따로 조회 */
     @GetMapping("/csrf-token")
     @ResponseBody
     public Map<String, String> csrfToken(HttpSession session) {
         return Collections.singletonMap("token", CsrfTokens.issue(session));
     }
 
-    /** GET 이면 img 태그 하나로도 남의 세션을 끊을 수 있어 POST 로 둔다 */
+    /** GET 이면 img 태그 하나로 남의 세션을 끊을 수 있어 POST */
     @PostMapping("/logout")
     @ResponseBody
     public JsonResult logout(HttpSession session) {
@@ -108,7 +108,7 @@ public class AdminController {
         return "redirect:/admin/schedule";
     }
 
-    /** 로그에 계정 이름을 그대로 남기지 않는다. 뒤쫓을 만큼만 남기고 가린다 */
+    /** 계정 이름은 일부만 — 추적할 만큼만 남기고 가린다 */
     private static String mask(String loginId) {
         if (loginId == null || loginId.isEmpty()) {
             return "(none)";

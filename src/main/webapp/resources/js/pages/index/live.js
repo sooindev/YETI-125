@@ -1,4 +1,4 @@
-/* 홈 — 방송 상태. 1분마다 다시 물어본다 */
+/* 홈 — 방송 상태. 1분 주기 갱신 */
 
 function checkLiveStatus() {
     $.ajax({
@@ -25,17 +25,17 @@ function checkLiveStatus() {
 
 function showLiveHero(data) {
     const title = data.liveTitle || '이리온 방송 중!';
-    // 제목은 CSS 에서 세 줄에 자른다. 잘린 뒤를 마우스로도 볼 수 있게 원문을 남긴다
+    // 제목은 CSS 에서 세 줄로 자른다 — 원문은 title 속성에
     $('#liveTitle').text(title).attr('title', title);
     $('#liveLink').attr('href', YetiUtil.safeUrl(data.channelUrl));
 
-    // .attr() 은 값을 그대로 넣는다. 스킴은 여기서도 확인한다.
+    // .attr() 은 값을 그대로 넣는다 — 스킴 재확인
     const thumbnail = YetiUtil.safeUrl(data.thumbnail);
     if (thumbnail) {
         $('#liveThumbFallback').empty();
         $('#liveThumbnail').attr('src', thumbnail).show();
     } else {
-        // 19금 방송이면 치지직이 주소를 주지 않는다. 빈 src 를 남기면 깨진 이미지가 뜬다.
+        // 19금은 주소가 없다. 빈 src 는 깨진 이미지가 된다
         $('#liveThumbnail').removeAttr('src').hide();
         $('#liveThumbFallback').html(thumbFallbackHtml(data.adult));
     }
@@ -54,4 +54,4 @@ function showDefaultHero() {
     loadNextSchedule();
 }
 
-// 다음 방송 — 오프라인일 때만 쓴다. 방송 중이면 히어로가 통째로 바뀐다.
+// 다음 방송 — 오프라인 전용. 방송 중이면 히어로가 통째로 바뀐다

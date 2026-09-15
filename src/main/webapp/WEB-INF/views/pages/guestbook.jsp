@@ -27,11 +27,11 @@
 <jsp:include page="/WEB-INF/views/layout/head-assets.jsp"/>
   <link rel="stylesheet" href="/resources/css/base/common.css">
   <link rel="stylesheet" href="/resources/css/pages/guestbook.css">
-  <%-- 카드가 순서대로 떠오르는 등장 효과. guestbook.js 가 observeNewElements() 로 다시 태운다 --%>
+  <%-- 카드 등장 효과. guestbook.js 가 observeNewElements() 로 재등록 --%>
   <link rel="stylesheet" href="/resources/css/base/scroll-animations.css">
 </head>
-<%-- data-admin 은 삭제 버튼을 보이느냐만 정한다. 브라우저에서 Y 로 고쳐도
-     삭제 요청은 /admin/* 의 필터에 막힌다 --%>
+<%-- data-admin 은 삭제 버튼 표시만 결정. 브라우저에서 Y 로 고쳐도
+     삭제 요청은 /admin/* 필터에 막힌다 --%>
 <body class="gb-page" data-admin="${not empty sessionScope.adminUser ? 'Y' : 'N'}">
 
 <jsp:include page="/WEB-INF/views/layout/header.jsp">
@@ -76,7 +76,7 @@
         <div class="gb-field">
           <div class="gb-field-label">
             <label for="gbContent">축하 메시지<span class="gb-required">*</span></label>
-            <%-- maxlength 로 이미 막히지만, 얼마나 남았는지 보여야 글을 다듬는다 --%>
+            <%-- maxlength 로 막히지만 남은 글자 수를 보여야 다듬는다 --%>
             <span class="gb-counter"><span id="gbContentCount">0</span> / 500</span>
           </div>
           <textarea id="gbContent" name="content" maxlength="500" rows="4"

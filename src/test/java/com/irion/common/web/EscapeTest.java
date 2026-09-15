@@ -7,11 +7,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
- * 서버가 그리는 값의 이스케이프.
+ * 서버 렌더링 값의 이스케이프.
  *
- * 이 클래스가 필요한 이유는 JSP 에 JSTL 이 없어서다 — ${...} 는 받은 글자를 그대로 찍는다.
- * 클립 제목은 클립을 딴 시청자가 붙인 이름이라 우리가 쓴 글이 아니고,
- * 그 글자가 화면 세 군데(HTML · JSON-LD · 사이트맵 XML)로 각각 다른 규칙으로 나간다.
+ * JSTL 이 없어 ${...} 는 받은 글자를 그대로 찍는다. 클립 제목은 우리가 쓴 글이 아니고,
+ * HTML · JSON-LD · 사이트맵 XML 세 곳에 각각 다른 규칙으로 나간다
  */
 public class EscapeTest {
 
@@ -25,14 +24,14 @@ public class EscapeTest {
 
     @Test
     public void 속성을_빠져나가지_못하게_한다() {
-        // 큰따옴표로 감싼 속성값 안에서 따옴표를 닫고 onerror 를 붙이는 수법
+        // 속성값의 따옴표를 닫고 onerror 를 붙이는 수법
         assertEquals("&quot; onerror=&quot;alert(1)",
                 Escape.html("\" onerror=\"alert(1)"));
     }
 
     @Test
     public void 앰퍼샌드를_먼저_바꾼다() {
-        // & 를 나중에 바꾸면 &lt; 가 &amp;lt; 로 두 번 먹힌다
+        // & 를 나중에 바꾸면 &lt; 가 두 번 변환된다
         assertEquals("&amp;lt;", Escape.html("&lt;"));
     }
 
@@ -50,10 +49,8 @@ public class EscapeTest {
     // ── JSON ──────────────────────────────────────────────
 
     /**
-     * 이 파일에서 제일 중요한 약속.
-     *
-     * JSON 문법만 맞추면 "</script>" 가 날것으로 남는데, 그 값은
-     * <script type="application/ld+json"> 안에 들어간다 — HTML 파서가 거기서 스크립트를 닫는다.
+     * JSON 문법만 맞추면 "</script>" 가 날것으로 남는다.
+     * 그 값은 ld+json 스크립트 안이라 HTML 파서가 거기서 스크립트를 닫는다
      */
     @Test
     public void JSON_안에서도_스크립트를_닫지_못한다() {
@@ -83,7 +80,7 @@ public class EscapeTest {
 
     @Test
     public void XML_은_작은따옴표를_이름있는_실체로_쓰지_않는다() {
-        // &#039; 는 XML 에 없는 이름이다 — 사이트맵 파서가 깨진다
+        // &#039; 는 XML 에 없는 이름 — 사이트맵 파서가 깨진다
         assertEquals("&apos;", Escape.xml("'"));
     }
 

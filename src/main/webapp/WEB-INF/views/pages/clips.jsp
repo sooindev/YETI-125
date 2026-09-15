@@ -104,7 +104,7 @@
     <div class="shell">
 
       <div class="clips-controls">
-        <%-- 검색은 form 이다 — 엔터로 제출되고, 스크립트가 죽어도 입력칸이 남는다 --%>
+        <%-- 검색은 form — 엔터 제출, 스크립트가 죽어도 입력칸은 남는다 --%>
         <form id="clipSearchForm" class="clips-search" role="search" action="/clips" method="get">
           <label class="sr-only" for="clipSearch">클립 제목 검색</label>
           <input type="search" id="clipSearch" name="q" class="clips-search-input"

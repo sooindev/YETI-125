@@ -3,8 +3,8 @@
 let calendar;
 let currentScheduleId = null;
 
-// /admin/** 요청에 AJAX 표시와 CSRF 토큰을 붙인다.
-// 표시가 없으면 인증 실패가 리다이렉트로 와서 jQuery 가 200 + HTML 을 받아 401 분기를 놓친다.
+// /admin/** 요청에 AJAX 표시와 CSRF 토큰 부착.
+// 표시가 없으면 인증 실패가 리다이렉트로 와서 jQuery 가 200 + HTML 을 받는다
 let csrfToken = null;
 
 $.ajaxPrefilter(function(options) {
@@ -24,7 +24,7 @@ $.ajaxPrefilter(function(options) {
 });
 
 $(document).ready(function() {
-    // 실패해도 화면은 띄운다 — 조회에는 토큰이 필요 없고 저장 때 403 으로 알려준다
+    // 실패해도 화면은 띄운다 — 조회는 토큰이 불필요하고 저장 시 403 으로 알린다
     $.ajax({
         url: '/admin/csrf-token',
         type: 'GET',
@@ -40,7 +40,7 @@ $(document).ready(function() {
 function initCalendar() {
     const calendarEl = document.getElementById('calendar');
 
-    // 좁은 화면에서는 칸 폭이 40px 남짓이라 제목이 안 들어간다 — 목록으로 시작한다
+    // 좁은 화면은 칸 폭이 40px 남짓이라 제목이 안 들어간다 — 목록으로 시작
     const isNarrow = window.matchMedia('(max-width: 720px)').matches;
 
     calendar = new FullCalendar.Calendar(calendarEl, {
@@ -59,7 +59,7 @@ function initCalendar() {
         height: 'auto',
         editable: true,
         selectable: true,
-        // ko 로케일의 "26일" 은 좁은 화면에서 줄바꿈돼 행 높이를 늘린다 — 숫자만 표시
+        // ko 로케일 "26일" 은 좁은 화면에서 줄바꿈돼 행 높이가 늘어난다 — 숫자만
         dayCellContent: function(arg) {
             return arg.date.getDate();
         },
@@ -293,7 +293,7 @@ function deleteSchedule() {
 }
 
 function updateScheduleDate(event) {
-    // 서버가 Asia/Seoul 로 해석하므로 로컬 시각을 그대로 넘긴다
+    // 서버가 Asia/Seoul 로 해석 — 로컬 시각 그대로 전달
     const formatEventDate = (dateObj) => {
         if (!dateObj) return null;
         const p = (n) => String(n).padStart(2, '0');
@@ -333,17 +333,17 @@ function updateScheduleDate(event) {
     });
 }
 
-// datetime-local 값을 타임존 변환 없이 그대로 보낸다 — 서버가 Asia/Seoul 로 해석한다
+// datetime-local 값을 타임존 변환 없이 전달 — 서버가 Asia/Seoul 로 해석
 function formatDateForServer(dateTimeLocalString) {
     if (!dateTimeLocalString) return null;
 
-    // 초가 없으면 ":00"을 붙여 "yyyy-MM-dd'T'HH:mm:ss" 형식을 맞춘다.
+    // 초가 없으면 ":00" 을 붙여 "yyyy-MM-dd'T'HH:mm:ss" 로
     return dateTimeLocalString.length === 16
         ? dateTimeLocalString + ':00'
         : dateTimeLocalString;
 }
 
-/* GET 이면 img 태그 하나로도 남의 세션을 끊을 수 있어 POST 로 둔다 */
+/* GET 이면 img 태그 하나로 남의 세션을 끊을 수 있어 POST */
 function doLogout() {
     $.ajax({
         url: '/admin/logout',

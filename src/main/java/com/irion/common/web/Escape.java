@@ -1,21 +1,18 @@
 package com.irion.common.web;
 
 /**
- * 서버에서 그리는 값에 씌우는 이스케이프.
+ * 서버 렌더링용 이스케이프.
  *
- * 이 저장소의 JSP 에는 JSTL 이 없다 — <c:out> 이 없으니 ${...} 는 받은 글자를 그대로 찍는다.
- * 화면에 나가는 값 가운데 <b>우리가 쓰지 않은 글자</b>(치지직 클립 제목이 그렇다. 클립을 딴
- * 시청자가 붙인 이름이다)는 반드시 여기를 지나야 한다.
- *
- * 브라우저 쪽 짝은 YetiUtil.escapeHtml 이다. 두 곳에 있는 이유는 그리는 자리가 둘이기 때문이고,
- * 규칙은 같아야 한다.
+ * JSTL 이 없어 ${...} 는 받은 글자를 그대로 찍는다 —
+ * 우리가 쓰지 않은 값(클립 제목 등)은 반드시 여기를 거쳐야 한다.
+ * 브라우저 쪽 짝은 YetiUtil.escapeHtml. 규칙은 같아야 한다
  */
 public final class Escape {
 
     private Escape() {
     }
 
-    /** HTML 본문과 속성값에 함께 쓴다. 속성은 반드시 큰따옴표로 감쌀 것 */
+    /** HTML 본문·속성값 공용. 속성은 반드시 큰따옴표로 */
     public static String html(String value) {
         if (value == null || value.isEmpty()) {
             return "";
@@ -37,11 +34,11 @@ public final class Escape {
     }
 
     /**
-     * JSON 문자열 <b>안쪽</b>에 넣을 값. 감싸는 따옴표는 부르는 쪽이 붙인다.
+     * JSON 문자열 안쪽용. 감싸는 따옴표는 호출 쪽 몫.
      *
-     * '<' 까지 \\u003c 로 바꾸는 것이 핵심이다. 이 값은 &lt;script type="application/ld+json"&gt;
-     * 안에 들어가는데, 제목에 "&lt;/script&gt;" 가 들어 있으면 HTML 파서가 거기서 스크립트를
-     * 닫아 버린다 — JSON 문법만 맞춰서는 막지 못한다.
+     * '<' 까지 \\u003c 로 바꾸는 것이 핵심 — 이 값은 ld+json 스크립트 안에 들어가고,
+     * 제목에 "&lt;/script&gt;" 가 있으면 HTML 파서가 거기서 스크립트를 닫는다.
+     * JSON 문법만으로는 못 막는다
      */
     public static String json(String value) {
         if (value == null || value.isEmpty()) {
@@ -61,7 +58,7 @@ public final class Escape {
                 case '>':  out.append("\\u003e"); break;
                 case '&':  out.append("\\u0026"); break;
                 default:
-                    // 제어문자는 JSON 에서 날것으로 올 수 없다
+                    // 제어문자는 JSON 에 날것으로 못 옴
                     if (c < 0x20) {
                         out.append(String.format("\\u%04x", (int) c));
                     } else {
@@ -73,8 +70,8 @@ public final class Escape {
     }
 
     /**
-     * XML 텍스트 노드용. 사이트맵의 &lt;loc&gt; 이 쓴다.
-     * HTML 과 달리 &#039; 같은 이름 있는 실체를 쓸 수 없어 숫자 참조로 적는다.
+     * XML 텍스트 노드용(사이트맵 &lt;loc&gt;).
+     * HTML 과 달리 &#039; 같은 이름 실체를 못 써서 &apos; 로
      */
     public static String xml(String value) {
         if (value == null || value.isEmpty()) {

@@ -12,13 +12,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 사이트맵. 전에는 webapp 에 놓인 고정 파일이었다.
+ * 사이트맵. 전에는 고정 파일이었으나 클립 주소가 1,700개를 넘어 캐시에서 생성한다.
  *
- * 클립마다 주소가 생기면서 손으로 적을 수 있는 분량을 넘었다 — 1,700개가 넘고,
- * 새 클립은 우리가 모르는 사이에 늘어난다. 캐시가 들고 있는 목록에서 바로 뽑는다.
- *
- * 치지직이 죽어 목록을 못 받으면 고정 주소 넷만 내보낸다. 사이트맵이 500 을 내면
- * 검색엔진이 "이 사이트의 사이트맵은 고장났다"로 기억하므로, 짧게라도 성한 것을 주는 편이 낫다.
+ * 치지직 장애 시에는 고정 주소 넷만 내보낸다 —
+ * 500 을 내면 검색엔진이 "고장난 사이트맵" 으로 기억한다
  */
 @Controller
 public class SitemapController {
@@ -48,7 +45,7 @@ public class SitemapController {
         return xml.toString();
     }
 
-    /** 클립 전량. 연령 제한 클립은 뺀다 — 상세 화면도 noindex 라 여기 있으면 서로 어긋난다 */
+    /** 클립 전량. 연령 제한 제외 — 상세가 noindex 라 여기 있으면 어긋남 */
     private void appendClips(StringBuilder xml) {
         LiveFeedService.ClipFeed feed = liveFeed.getAllClips();
         if (feed == null) {
@@ -69,7 +66,7 @@ public class SitemapController {
 
             String lastmod = day(clip.get("createdAt"));
             if (!lastmod.isEmpty()) {
-                // 클립은 만들어진 뒤로 바뀌지 않는다 — 만든 날이 곧 마지막 수정일이다
+                // 클립은 생성 후 불변 — 만든 날이 곧 수정일
                 xml.append("    <lastmod>").append(lastmod).append("</lastmod>\n");
             }
 
@@ -97,7 +94,7 @@ public class SitemapController {
         xml.append("  </url>\n");
     }
 
-    /** "2025-07-30 21:54:50" → "2025-07-30". 모양이 다르면 빈 문자열 — lastmod 를 아예 빼기 위해서다 */
+    /** "2025-07-30 21:54:50" → "2025-07-30". 형식 불일치 시 빈 문자열(lastmod 생략용) */
     private static String day(Object createdAt) {
         if (!(createdAt instanceof String)) {
             return "";

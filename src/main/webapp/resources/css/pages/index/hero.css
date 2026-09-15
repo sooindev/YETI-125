@@ -1,7 +1,6 @@
-/* 홈 — 히어로. 오프라인 상태와 방송 중 상태가 같은 자리를 나눠 쓴다 */
+/* 홈 — 히어로. 오프라인·방송 중 상태가 같은 자리를 나눠 쓴다 */
 
-/* 이 폴더의 파일은 index.jsp 에 적힌 순서대로 겹쳐진다.
-   순서를 바꾸면 뒤 파일이 앞 파일을 덮는 규칙이 어긋난다. */
+/* 이 폴더의 파일은 index.jsp 에 적힌 순서로 겹쳐진다 — 순서를 바꾸면 덮어쓰기가 어긋난다 */
 
 main { padding-top: var(--head-total); }
 
@@ -16,9 +15,9 @@ main { padding-top: var(--head-total); }
     overflow: hidden;
 }
 
-/* 히어로 상단 흐르는 띠 — 바깥(.hero-noise-line)이 창, 안쪽(.hero-noise-track)이 흘러가는 띠다 */
+/* 상단 흐르는 띠 — 바깥이 창(.hero-noise-line), 안쪽이 띠(.hero-noise-track) */
 .hero-noise-line {
-    /* 문구 간격은 화면 폭에 비례 — 고정값이면 넓은 화면에서 두 개씩 들어찬다 */
+    /* 문구 간격은 화면 폭 비례 — 고정값이면 넓은 화면에서 두 개씩 들어찬다 */
     --marquee-gap: clamp(160px, 52vw, 1400px);
 
     position: absolute;
@@ -31,9 +30,9 @@ main { padding-top: var(--head-total); }
     letter-spacing: 0.28em;
     color: var(--bone-faint);
     text-transform: uppercase;
-    /* 눈에 먼저 들어오지 않도록 한 단계 물린다 */
+    /* 눈에 먼저 들어오지 않게 한 단계 물린다 */
     opacity: 0.72;
-    /* 배경 장식이므로 아래 요소의 클릭을 가리지 않는다 */
+    /* 배경 장식이라 아래 요소의 클릭을 가리지 않는다 */
     pointer-events: none;
 }
 
@@ -53,7 +52,7 @@ main { padding-top: var(--head-total); }
     to   { transform: translateX(-50%); }
 }
 
-/* 움직임을 줄이도록 설정한 사용자에게는 멈춰 세운다 */
+/* prefers-reduced-motion 에서는 정지 */
 @media (prefers-reduced-motion: reduce) {
     .hero-noise-track { animation: none; }
 }
@@ -185,24 +184,22 @@ main { padding-top: var(--head-total); }
     0%, 100% { opacity: 1; box-shadow: 0 0 0 0 var(--frost-glow); }
     50%      { opacity: 0.5; box-shadow: 0 0 0 7px transparent; }
 }
-/* 방송 제목만 길이를 모르는 실데이터다. 고정 워드마크용 .display 를 쓰지 않는다 —
-   Anton 에는 한글 글리프가 없어 폴백이 걸리고(영문만 Anton, 한글은 Noto),
-   uppercase 는 섞인 영문만 바꾸며, 줄높이 0.92 는 한글 잉크(줄상자의 102%)를
-   윗줄과 겹치게 만든다. 한글 본문 규칙(--f-kr · keep-all · 줄 자르기)을 따른다. */
+/* 방송 제목만 길이를 모르는 실데이터 — 워드마크용 .display 를 쓰지 않는다.
+   Anton 은 한글 글리프가 없어 폴백이 걸리고, uppercase 는 영문만 바꾸며,
+   줄높이 0.92 는 한글 잉크를 윗줄과 겹치게 한다. 한글 본문 규칙을 따른다 */
 .live-title {
     font-family: var(--f-kr);
     font-weight: 700;
-    /* 한 줄에 16~18자가 들어가는 크기. 보통 길이 제목이 세 줄 안에 다 들어간다 */
+    /* 한 줄에 16~18자. 보통 길이의 제목이 세 줄 안에 들어간다 */
     font-size: clamp(1.35rem, 0.95rem + 1.55vw, 2.05rem);
     line-height: 1.4;
     letter-spacing: -0.015em;
     color: var(--bone);
     margin: 18px 0 26px;
-    /* 한글은 단어 중간에서 끊지 않는다. 띄어쓰기 없는 긴 영문·URL 만 강제로 접는다 */
+    /* 한글은 단어 중간에서 끊지 않는다. 긴 영문·URL 만 강제 줄바꿈 */
     word-break: keep-all;
     overflow-wrap: anywhere;
-    /* 제목이 길어도 시청자 수와 썸네일이 화면 밖으로 밀려나지 않게 세 줄에서 자른다.
-       잘린 전체 제목은 index.js 가 title 속성으로 남긴다 */
+    /* 시청자 수·썸네일이 밀려나지 않게 세 줄에서 자른다. 전체 제목은 title 속성에 */
     display: -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;

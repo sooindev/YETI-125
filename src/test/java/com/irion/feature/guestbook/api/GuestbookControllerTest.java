@@ -18,13 +18,12 @@ import static org.junit.Assert.*;
 
 /**
  * 공개 방명록 API 의 약속.
- *
- * 화면에서 입력칸을 없애는 것은 방어가 아니다 — 주소만 알면 아무 값이나 실어 보낼 수 있다.
- * 이름과 식별자를 서버가 다시 정한다는 것을 여기서 못 박는다.
+ * 입력칸 제거는 방어가 아니다 — 주소만 알면 아무 값이나 보낼 수 있다.
+ * 이름과 식별자는 서버가 다시 정한다
  */
 public class GuestbookControllerTest {
 
-    /** DB 로 내려가기 직전의 VO 를 붙잡아 두는 가짜 서비스 */
+    /** DB 직전의 VO 를 붙잡는 가짜 서비스 */
     private static final class Captor {
         GuestbookVO saved;
     }
@@ -44,7 +43,7 @@ public class GuestbookControllerTest {
         assertEquals("익명", captor.saved.getNickname());
     }
 
-    /** 아이디를 실어 보내 남의 글을 덮어쓰려는 시도를 막는다 */
+    /** 아이디를 실어 남의 글을 덮어쓰려는 시도 차단 */
     @Test
     public void 실려_온_아이디와_삭제표시는_버린다() {
         Captor captor = new Captor();
@@ -61,7 +60,7 @@ public class GuestbookControllerTest {
         assertNull(captor.saved.getDelYn());
     }
 
-    /** 새로고침 도배를 막는 간격 제한. 두 번째 글은 거절돼야 한다 */
+    /** 도배 방지 간격 — 두 번째 글은 거절 */
     @Test
     public void 연달아_올리면_두_번째는_거절한다() {
         Captor captor = new Captor();
@@ -81,7 +80,7 @@ public class GuestbookControllerTest {
                 result.getMessage().contains("초 후에"));
     }
 
-    /** 목록 응답에 삭제 표시가 섞이면 지운 글의 존재가 드러난다 */
+    /** 응답에 삭제 표시가 섞이면 지운 글의 존재가 드러난다 */
     @Test
     public void 목록은_삭제표시를_내보내지_않는다() {
         Captor captor = new Captor();

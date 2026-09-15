@@ -1,4 +1,4 @@
-/* 홈 — 다음 방송. 오프라인일 때 히어로 아래에 남은 시간을 센다 */
+/* 홈 — 다음 방송. 오프라인일 때 히어로 아래 남은 시간 */
 
 let nextScheduleTimer = null;
 
@@ -18,11 +18,11 @@ function loadNextSchedule() {
         success: function (events) {
             showNextSchedule(pickNextSchedule(events));
         }
-        // 실패하면 기본 문구가 그대로 남는다
+        // 실패 시 기본 문구 유지
     });
 }
 
-/** 아직 시작하지 않은 일정 중 가장 이른 것 */
+/** 미시작 일정 중 가장 이른 것 */
 function pickNextSchedule(events) {
     if (!$.isArray(events)) return null;
 
@@ -58,7 +58,7 @@ function showNextSchedule(event) {
     const tick = function () {
         const left = at.getTime() - Date.now();
         if (left <= 0) {
-            // 시작 시각을 넘겼다 — 그 다음 일정으로 넘어간다
+            // 시작 시각 경과 — 다음 일정으로
             clearInterval(nextScheduleTimer);
             nextScheduleTimer = null;
             loadNextSchedule();
@@ -68,11 +68,11 @@ function showNextSchedule(event) {
     };
 
     tick();
-    // 분 단위로만 보여주므로 30초면 충분하다
+    // 분 단위 표시라 30초면 충분
     nextScheduleTimer = setInterval(tick, 30000);
 }
 
-/** 남은 시간을 "2일 4시간" / "3시간 20분" / "12분" 으로 */
+/** 남은 시간 표기 — "2일 4시간" · "3시간 20분" · "12분" */
 function formatTimeLeft(ms) {
     const totalMin = Math.floor(ms / 60000);
     const days = Math.floor(totalMin / 1440);

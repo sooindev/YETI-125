@@ -1,7 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" isErrorPage="true" %>
 <%--
-    500 에러 페이지. web.xml 의 <error-page> 가 이 경로를 가리킨다.
-    스택 트레이스 대신 발생 시각만 보여줘 서버 로그와 대조하게 한다.
+    500·503 에러 페이지. web.xml 의 <error-page> 가 가리킨다.
+    스택 트레이스 대신 발생 시각만 보여 서버 로그와 대조하게 한다
 --%>
 <%
     String occurredAt = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss")

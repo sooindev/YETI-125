@@ -9,7 +9,7 @@ import javax.servlet.http.HttpSession;
 
 import static org.junit.Assert.*;
 
-/** CSRF 방어 — 상태 변경만 검사하는가, 토큰이 틀리면 막는가, 로그인 예외를 빌려쓸 수 없는가. */
+/** CSRF 방어 — 상태 변경만 검사, 토큰 불일치 차단, 로그인 예외 악용 불가 */
 public class CsrfFilterTest {
 
 
@@ -93,13 +93,13 @@ public class CsrfFilterTest {
     }
 
 
-    /** 로그인 시점에는 세션이 없어 토큰을 줄 수가 없다 */
+    /** 로그인 시점에는 세션이 없어 토큰을 줄 수 없다 */
     @Test
     public void 로그인_처리는_예외로_통과시킨다() throws Exception {
         assertPassed(request("/admin/loginProc").method("POST"));
     }
 
-    /** 컨테이너에 닿는 실제 대상은 /admin/schedule 이다 */
+    /** 실제 도달 대상은 /admin/schedule */
     @Test
     public void 예외_경로를_빌려_다른_요청을_통과시킬_수_없다() throws Exception {
         FakeHttp.Response response =
@@ -114,7 +114,7 @@ public class CsrfFilterTest {
         assertEquals(403, run(request("/admin/loginProc/extra").method("POST"), false).status);
     }
 
-    /** 반대로, 경로를 비틀어 들어와도 진짜 loginProc 이면 예외가 유지된다 */
+    /** 경로를 비틀어도 실제 loginProc 이면 예외 유지 */
     @Test
     public void 비틀린_경로라도_정규화_결과가_로그인이면_통과한다() throws Exception {
         assertPassed(request("/admin/schedule/../loginProc").method("POST"));
@@ -139,7 +139,7 @@ public class CsrfFilterTest {
         assertEquals("CSRF token mismatch", response.body());
     }
 
-    /** 이 필터를 만든 이유 — JSON Content-Type 은 방어가 아니라 우연이었다 */
+    /** 이 필터의 존재 이유 — JSON Content-Type 은 방어가 아니라 우연이었다 */
     @Test
     public void 폼으로_위장한_요청도_막는다() throws Exception {
         FakeHttp.Response response = run(request("/admin/schedule")

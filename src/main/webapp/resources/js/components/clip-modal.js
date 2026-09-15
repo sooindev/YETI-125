@@ -21,7 +21,7 @@ function initClipModal() {
         openClipModal(clipId, $(this).attr('data-clip-title'));
     });
 
-    // common.js 가 모달을 닫아도 iframe 은 남아 소리가 계속 난다 — 같은 신호로 src 를 거둔다
+    // common.js 가 모달을 닫아도 iframe 은 남아 소리가 계속난다 — 같은 신호로 src 제거
     $(document).on('click', '#clipModal', function(e) {
         if ($(e.target).is('#clipModal')) clearClipFrame();
     });
@@ -42,7 +42,7 @@ function openClipModal(clipId, title) {
     YetiUtil.openModal('clipModal');
 }
 
-// src를 비워 플레이어를 완전히 내린다 (재생 중단)
+// src 를 비워 플레이어 정지
 function clearClipFrame() {
     $('#clipModalFrame').attr('src', '');
 }

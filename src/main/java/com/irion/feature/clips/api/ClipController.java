@@ -16,31 +16,23 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 클립 아카이브 화면.
+ * 클립 아카이브. 목록은 브라우저가, 상세는 서버가 그린다.
  *
- * 목록은 홈과 같은 방식으로 브라우저가 그리지만(/live/clips), <b>상세는 서버가 그린다</b>.
- * 이 화면이 존재하는 이유가 "클립 하나가 자기 주소를 갖는 것"이라서다 — 제목과 썸네일이
- * HTML 에 박혀 나가야 검색엔진이 색인하고 카카오톡·X 가 미리보기를 뽑는다.
- * 자바스크립트가 채우는 화면은 그 둘 다 놓친다.
- *
- * 재생은 여기서 하지 않는다. 치지직 임베드를 쓰지 않고 원본으로 보낸다 —
- * 다시보기가 이미 그렇게 동작하고, 이 화면도 같은 규칙을 따른다.
+ * 상세를 서버 렌더링하는 이유 — 검색엔진 색인과 공유 미리보기.
+ * 재생은 없음. 치지직 원본으로 이동(다시보기와 동일)
  */
 @Controller
 @RequestMapping("/clips")
 public class ClipController {
 
-    /**
-     * 치지직 clipUID 의 모양. 주소에서 받은 값을 화면에 그대로 싣기 전에 여기서 한 번 거른다.
-     * 여기 걸리지 않는 주소는 아무 핸들러에도 닿지 않아 404 가 된다.
-     */
+    /** clipUID 모양. 불일치 시 핸들러에 닿지 않아 404 */
     private static final String CLIP_ID = "[A-Za-z0-9_-]{1,64}";
 
-    /** 썸네일이 없을 때 자리를 채우는 투명 1x1. src 를 비우면 브라우저가 현재 페이지를 이미지로 받아 온다 */
+    /** 썸네일 자리용 투명 1x1. src 를 비우면 현재 페이지를 이미지로 요청함 */
     private static final String BLANK_PIXEL =
             "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 
-    /** 썸네일이 없거나 가려진 클립의 공유 미리보기. 빈 카드보다는 사이트 얼굴이 낫다 */
+    /** 썸네일 없을 때의 공유 미리보기 */
     private static final String FALLBACK_OG_IMAGE =
             Site.url("/resources/images/profile/Irion-profile.jpg");
 
@@ -52,19 +44,14 @@ public class ClipController {
         return "pages/clips";
     }
 
-    /** 목록을 아직 덜 받았을 때 다시 오라고 이르는 시간(초) */
+    /** 재시도 안내 시간(초) */
     private static final String RETRY_AFTER = "30";
 
     /**
-     * 클립 한 건.
+     * 클립 한 건. 없음 · 삭제됨 · 남의 채널 → 404.
      *
-     * 없는 클립 · 지워진 클립 · 남의 채널 클립이 404 로 모인다.
-     * findClip 이 우리 채널 목록에 있는지로 가리므로, 이 주소로 남의 클립이 열리지 않는다.
-     *
-     * <b>못 찾았다고 늘 404 는 아니다.</b> 목록을 아직 덜 받은 순간(캐시가 막 만료돼
-     * 다시 채우는 중이거나, 치지직이 죽었을 때)에도 못 찾는다. 그때 404 를 내면
-     * 멀쩡한 주소를 검색엔진이 "사라졌다" 로 읽고 색인에서 지운다 — 되돌리는 데 몇 주가 걸린다.
-     * 그래서 그 경우는 503 으로, 잠시 뒤 다시 오라고 답한다.
+     * 단, 캐시 재적재 중이거나 치지직 장애 시에도 못 찾는다 —
+     * 그때 404 를 내면 멀쩡한 주소가 색인에서 지워지므로 503
      */
     @GetMapping("/{clipId:" + CLIP_ID + "}")
     public String detail(@PathVariable String clipId, Model model, HttpServletResponse response)
@@ -88,10 +75,8 @@ public class ClipController {
     }
 
     /**
-     * 화면이 그대로 찍어도 되는 모양으로 다듬은 클립 하나.
-     *
-     * 이스케이프를 화면이 아니라 여기서 하는 것은, JSP 에 JSTL 이 없어 ${...} 가 받은 글자를
-     * 그대로 내보내기 때문이다. 클립 제목은 클립을 딴 시청자가 붙인 이름이라 우리가 쓴 글이 아니다.
+     * 화면이 그대로 찍어도 되게 다듬은 클립.
+     * JSTL 이 없어 ${...} 는 받은 글자를 그대로 내보냄 — 이스케이프도 여기서
      */
     static final class ClipView {
 
@@ -122,7 +107,7 @@ public class ClipController {
             model.put("description", Escape.html(description));
             model.put("descriptionJson", Escape.json(description));
 
-            // 썸네일이 없으면 img 를 숨기고 대체 자리를 켠다. 홈 카드(media.js)와 같은 모양이다
+            // 썸네일 없으면 img 숨김 + 대체 자리 표시 (홈 카드와 동일)
             model.put("thumbnailUrl", thumbnail.isEmpty() ? BLANK_PIXEL : Escape.html(thumbnail));
             model.put("thumbnailHidden", thumbnail.isEmpty() ? " hidden" : "");
             model.put("fallbackHidden", thumbnail.isEmpty() ? "" : " hidden");
@@ -139,10 +124,7 @@ public class ClipController {
             model.put("createdText", koreanDate(text("createdAt")));
             model.put("createdIso", isoDate(text("createdAt")));
 
-            /*
-             * 연령 제한 클립은 색인에서 뺀다. 막을 방법이 우리에게 없는 화면을
-             * 검색 결과로 데려오지 않겠다는 뜻이고, follow 는 남겨 목록으로는 이어지게 둔다.
-             */
+            // 연령 제한은 색인 제외. follow 는 유지
             model.put("robots", adult ? "noindex, follow" : "index, follow");
 
             return model;
@@ -153,7 +135,7 @@ public class ClipController {
             return (value == null) ? "" : value.toString();
         }
 
-        /** 치지직이 주는 조회수·길이는 문자열이다. 숫자가 아니면 0 으로 본다 */
+        /** 조회수·길이는 문자열. 숫자 아니면 0 */
         private long number(String key) {
             try {
                 String value = text(key);
@@ -163,7 +145,7 @@ public class ClipController {
             }
         }
 
-        /** 화면과 og:image 에 실어도 되는 주소인가. 스킴이 https 가 아니면 버린다 */
+        /** https 만 허용 */
         private static String safeImageUrl(String url) {
             return url.startsWith("https://") ? url : "";
         }
@@ -177,7 +159,7 @@ public class ClipController {
             return String.format("%,d", value);
         }
 
-        /** "0:15" · 한 시간을 넘기면 "1:02:03" */
+        /** "0:15", 한 시간 초과 시 "1:02:03" */
         static String duration(long seconds) {
             if (seconds <= 0) {
                 return "0:00";
@@ -192,7 +174,7 @@ public class ClipController {
             return String.format("%d:%02d", minutes, rest);
         }
 
-        /** schema.org 의 duration 은 ISO 8601 이라야 한다 — "PT15S" */
+        /** schema.org duration 은 ISO 8601 — "PT15S" */
         static String isoDuration(long seconds) {
             if (seconds <= 0) {
                 return "PT0S";
@@ -208,10 +190,7 @@ public class ClipController {
             return out.toString();
         }
 
-        /**
-         * "2025-07-30 21:54:50" → "2025년 7월 30일".
-         * 치지직이 주는 모양이 바뀌면 빈 문자열이 되어 화면에서 날짜 줄만 비고, 나머지는 그대로 선다.
-         */
+        /** "2025-07-30 21:54:50" → "2025년 7월 30일". 형식 불일치 시 빈 문자열 */
         static String koreanDate(String createdAt) {
             if (createdAt.length() < 10) {
                 return "";
@@ -226,7 +205,7 @@ public class ClipController {
             }
         }
 
-        /** "2025-07-30 21:54:50" → "2025-07-30T21:54:50+09:00". 치지직 시각은 KST 다 */
+        /** "2025-07-30 21:54:50" → "2025-07-30T21:54:50+09:00". 치지직 시각은 KST */
         static String isoDate(String createdAt) {
             if (createdAt.length() < 19) {
                 return "";

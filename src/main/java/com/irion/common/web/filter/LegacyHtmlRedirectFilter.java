@@ -11,13 +11,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 주소를 정규 주소 하나로 모은다 — 옛 .html, 그리고 //schedule 이나 /schedule/ 같은 다른 표기.
- *
- * REQUEST 디스패치에만 걸린다(필터 기본값). forward 까지 걸리면 301 과 forward 가 서로를 부른다.
+ * 주소를 정규 주소로 통일 — 옛 .html, //schedule, /schedule/ 같은 표기.
+ * REQUEST 디스패치에만(필터 기본값) — forward 까지 걸리면 301 과 forward 가 서로를 부른다
  */
 public class LegacyHtmlRedirectFilter implements Filter {
 
-    /** 옮긴 주소. 값이 정규 주소다 */
+    /** 이전된 주소 표. 값이 정규 주소 */
     private static final Map<String, String> MOVED;
 
     static {
@@ -41,7 +40,7 @@ public class LegacyHtmlRedirectFilter implements Filter {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
 
-        // 루트 배포가 아닐 수 있어 컨텍스트 경로를 떼고 본다
+        // 루트 배포가 아닐 수 있어 컨텍스트 경로 제거 후 판정
         String contextPath = httpRequest.getContextPath();
         String path = httpRequest.getRequestURI().substring(contextPath.length());
 
@@ -54,27 +53,27 @@ public class LegacyHtmlRedirectFilter implements Filter {
         String query = httpRequest.getQueryString();
         String location = contextPath + target + (query != null ? "?" + query : "");
 
-        // sendRedirect 는 302 다. 영구 이전이므로 301 을 직접 쓴다
+        // sendRedirect 는 302 — 영구 이전이라 301 을 직접
         httpResponse.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
         httpResponse.setHeader("Location", location);
     }
 
-    /** 보내야 할 정규 주소. 이미 정규 주소면 null */
+    /** 보낼 정규 주소. 이미 정규면 null */
     private static String canonicalOf(HttpServletRequest request, String path) {
 
-        // %2E 나 // 같은 표기로도 옛 주소에 닿으므로 정규화해서 판정한다.
-        // 목적지는 표에 박힌 값 — 요청에서 만들면 되돌아온 요청이 또 걸린다.
+        // %2E 나 // 표기로도 옛 주소에 닿으므로 정규화 후 판정.
+        // 목적지는 표에 박힌 값 — 요청에서 만들면 되돌아온 요청이 또 걸린다
         String moved = MOVED.get(RequestUtil.normalizedPath(request));
         if (moved != null) {
             return moved;
         }
 
-        // 표기만 손본다. 디코딩하면 브라우저가 다시 인코딩해 보내 무한 왕복이 된다.
+        // 표기만 수정. 디코딩하면 브라우저가 재인코딩해 무한 왕복
         String tidied = collapseSlashes(path);
         return tidied.equals(path) ? null : tidied;
     }
 
-    /** 겹친 슬래시를 하나로, 끝 슬래시는 뗀다. 루트(/)는 그대로 둔다 */
+    /** 중복 슬래시 병합 + 끝 슬래시 제거. 루트(/)는 유지 */
     private static String collapseSlashes(String path) {
         StringBuilder out = new StringBuilder(path.length());
         for (int i = 0; i < path.length(); i++) {

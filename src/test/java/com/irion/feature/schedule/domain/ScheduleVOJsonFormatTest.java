@@ -21,11 +21,10 @@ import java.util.regex.Pattern;
 import static org.junit.Assert.*;
 
 /**
- * 같은 일정이 주소에 따라 다른 날짜 모양으로 나가지 않는지 본다.
+ * 같은 일정이 주소에 따라 다른 날짜 형식으로 나가지 않는지.
  *
- * 목록 API 는 Map 을 내보내 VO 의 @JsonFormat 을 타지 않고 servlet-context.xml 의
- * 전역 dateFormat 을 쓴다. 둘이 어긋나면 프론트가 두 형식을 다 다뤄야 한다.
- * 한쪽만 고치는 일이 없도록 설정 파일에서 값을 직접 읽어 대조한다.
+ * 목록 API 는 Map 이라 VO 의 @JsonFormat 대신 servlet-context.xml 의 전역 dateFormat 을 쓴다.
+ * 어긋나면 프론트가 두 형식을 다 다뤄야 하므로 설정 파일에서 직접 읽어 대조한다
  */
 public class ScheduleVOJsonFormatTest {
 
@@ -36,7 +35,7 @@ public class ScheduleVOJsonFormatTest {
     public static void servlet_context_에서_설정을_읽는다() throws Exception {
         String xml = readResource("spring/servlet-context.xml");
 
-        // dateFormat 프로퍼티 안의 SimpleDateFormat 선언만 잘라낸다
+        // dateFormat 프로퍼티의 SimpleDateFormat 선언만 추출
         int from = xml.indexOf("<property name=\"dateFormat\">");
         assertTrue("dateFormat 설정을 찾지 못했다", from >= 0);
         String block = xml.substring(from, xml.indexOf("</property>", from));
@@ -49,7 +48,7 @@ public class ScheduleVOJsonFormatTest {
                 + "서버 시간대가 바뀔 때 VO 쪽과 조용히 어긋난다", xmlTimeZone);
     }
 
-    /** 전역 설정과 VO 애너테이션이 같은 패턴이어야 한다 */
+    /** 전역 설정과 VO 애너테이션이 같은 패턴 */
     @Test
     public void 전역_설정과_VO_애너테이션의_형식이_같다() throws Exception {
         JsonFormat annotation = ScheduleVO.class
@@ -62,16 +61,16 @@ public class ScheduleVOJsonFormatTest {
                 annotation.timezone(), xmlTimeZone);
     }
 
-    /** 실제로 찍어보고 같은 글자가 나오는지 확인한다 */
+    /** 실제 출력이 같은지 확인 */
     @Test
     public void 목록과_VO_가_같은_글자로_직렬화된다() throws Exception {
         ObjectMapper mapper = mapperFromXmlConfig();
         Date when = seoul(2026, 5, 20, 8, 0, 0);
 
-        // 목록 API 가 내보내는 모양 — Map 이라 애너테이션을 타지 않는다
+        // 목록 API 의 출력 — Map 이라 애너테이션 미적용
         String fromMap = mapper.writeValueAsString(Collections.singletonMap("start", when));
 
-        // VO 를 그대로 내보내는 모양
+        // VO 를 그대로 내보낼 때
         ScheduleVO vo = new ScheduleVO();
         vo.setStartDate(when);
         String fromVo = mapper.writeValueAsString(vo);
@@ -82,7 +81,7 @@ public class ScheduleVOJsonFormatTest {
                 fromVo.contains("\"startDate\":\"2026-05-20T08:00:00\""));
     }
 
-    /** 공백으로 구분하던 옛 형식이 되살아나면 잡는다 */
+    /** 공백 구분 옛 형식의 부활 감지 */
     @Test
     public void 공백_구분_형식으로_되돌아가지_않는다() {
         assertFalse("날짜 사이는 'T' 로 구분한다 (옛 형식: yyyy-MM-dd HH:mm:ss): " + xmlPattern,
@@ -90,7 +89,7 @@ public class ScheduleVOJsonFormatTest {
     }
 
 
-    /** servlet-context.xml 에 적힌 그대로 ObjectMapper 를 만든다 */
+    /** servlet-context.xml 설정 그대로 ObjectMapper 생성 */
     private static ObjectMapper mapperFromXmlConfig() {
         SimpleDateFormat format = new SimpleDateFormat(xmlPattern);
         format.setTimeZone(TimeZone.getTimeZone(xmlTimeZone));

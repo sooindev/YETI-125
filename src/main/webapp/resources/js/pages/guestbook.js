@@ -7,13 +7,13 @@ let gbHasMore = false;
 let gbSubmitting = false;
 let gbCsrfToken = null;
 
-/** 관리자로 접속했는가. 삭제 버튼을 그릴지만 정한다 — 실제 권한은 서버가 본다 */
+/** 관리자 여부. 삭제 버튼 표시만 결정 — 실제 권한은 서버가 본다 */
 function gbIsAdmin() {
     return document.body.getAttribute('data-admin') === 'Y';
 }
 
-// /admin/** 요청에 AJAX 표시와 CSRF 토큰을 붙인다.
-// 표시가 없으면 인증 실패가 리다이렉트로 와서 jQuery 가 200 + HTML 을 받아 401 분기를 놓친다.
+// /admin/** 요청에 AJAX 표시와 CSRF 토큰 부착.
+// 표시가 없으면 인증 실패가 리다이렉트로 와서 jQuery 가 200 + HTML 을 받는다
 $.ajaxPrefilter(function(options) {
     if (!options.url || options.url.indexOf('/admin/') !== 0) return;
 
@@ -48,19 +48,19 @@ $(document).ready(function() {
         $('.gb-counter').toggleClass('is-full', len >= 500);
     });
 
-    // 카드가 나중에 그려지므로 위임으로 받는다
+    // 카드가 나중에 그려지므로 이벤트 위임
     $('#gbList').on('click', '.gb-card-delete', function() {
         deleteGuestbook($(this).attr('data-id'));
     });
 
-    // 관리자일 때만 토큰을 받아둔다. 방문자에게는 /admin/* 이 401 이라 부를 이유가 없다
+    // 관리자일 때만 토큰 조회. 방문자에게는 /admin/* 이 401
     if (gbIsAdmin()) {
         $.ajax({ url: '/admin/csrf-token', type: 'GET', dataType: 'json' })
             .done(function(res) { gbCsrfToken = res && res.token; });
     }
 });
 
-/** 첫 로딩 동안 자리를 잡아 두는 뼈대. 빈 화면이 덜컥 나타났다 바뀌는 것을 막는다 */
+/** 첫 로딩 자리를 잡는 뼈대. 빈 화면이 나타났다 바뀌는 것을 방지 */
 function skeletonHtml(count) {
     let html = '';
     for (let i = 0; i < count; i++) {
@@ -77,12 +77,12 @@ function skeletonHtml(count) {
     return html;
 }
 
-/** 목록 조회. reset 이면 처음부터 다시 그린다 */
+/** 목록 조회. reset 이면 처음부터 다시 */
 function loadGuestbook(reset) {
     if (reset) {
         gbOffset = 0;
         $('#gbEmpty').hide();
-        // 첫 화면에만 뼈대를 깐다. 더 보기로 이어 붙일 때는 이미 카드가 있다
+        // 첫 화면에만 뼈대. 더 보기는 이미 카드가 있다
         if ($('#gbList').children().length === 0) {
             $('#gbList').html(skeletonHtml(6));
         }
@@ -90,7 +90,7 @@ function loadGuestbook(reset) {
 
     $('#gbMoreBtn').prop('disabled', true);
 
-    // 응답이 온 뒤에는 gbOffset 이 이미 다음 값으로 바뀌므로 지금 붙잡아 둔다
+    // 응답 후에는 gbOffset 이 이미 바뀌므로 지금 붙잡아 둔다
     const requestOffset = gbOffset;
 
     $.ajax({
@@ -113,7 +113,7 @@ function loadGuestbook(reset) {
 
         $('#gbTotal').text(YetiUtil.numberFormat(data.total || 0));
 
-        // 가장 오래된 글이 1번. 최신순 목록이라 맨 위가 가장 큰 번호다
+        // 가장 오래된 글이 1번. 최신순이라 맨 위가 가장 큰 번호
         renderGuestbook(entries, !reset, (data.total || 0) - requestOffset);
         showEmptyIfBlank();
         $('#gbMore').toggle(gbHasMore);
@@ -130,7 +130,7 @@ function showEmptyIfBlank() {
     $('#gbEmpty').toggle($('#gbList').children().length === 0);
 }
 
-/** 카드를 그린다. startOrdinal 부터 아래로 내려가며 번호가 1씩 줄어든다 */
+/** 카드 렌더. startOrdinal 부터 아래로 번호가 1씩 감소 */
 function renderGuestbook(entries, append, startOrdinal) {
     let html = '';
 
@@ -144,16 +144,16 @@ function renderGuestbook(entries, append, startOrdinal) {
         $('#gbList').html(html);
     }
 
-    // 카드는 JS 가 나중에 그리므로 관찰자에 다시 태워야 떠오른다 (scroll-animations.js)
+    // 카드는 나중에 그려지므로 관찰자에 다시 등록(scroll-animations.js)
     if (typeof window.observeNewElements === 'function') {
         window.observeNewElements();
     }
 }
 
 /**
- * 카드 한 장. ordinal 은 몇 번째 축하인가 — 가장 오래된 글이 1번이다.
- * 값은 전부 사용자가 적은 글이라 찍기 직전 반드시 이스케이프한다. 빠뜨리면
- * 방명록에 <script> 를 적는 것만으로 보는 사람 브라우저에서 실행된다.
+ * 카드 한 장. ordinal 은 몇 번째 축하인지 — 가장 오래된 글이 1번.
+ * 값은 전부 사용자가 적은 글이라 찍기 직전 반드시 이스케이프 —
+ * 빠뜨리면 <script> 를 적는 것만으로 보는 사람 브라우저에서 실행된다
  */
 function guestbookCard(entry, ordinal) {
     const nickname = YetiUtil.escapeHtml(entry.nickname);
@@ -185,7 +185,7 @@ function guestbookCard(entry, ordinal) {
     return card + '</article>';
 }
 
-/** 001 · 023 · 1024 — 세 자리까지는 0 을 채워 자릿수를 맞춘다 */
+/** 001 · 023 · 1024 — 세 자리까지 0 채움 */
 function padOrdinal(n) {
     const value = n > 0 ? n : 0;
     return value < 1000 ? String(value).padStart(3, '0') : String(value);
@@ -193,7 +193,7 @@ function padOrdinal(n) {
 
 /** 등록 */
 function submitGuestbook() {
-    // 두 번 눌러 같은 글이 두 번 들어가는 것을 막는다 (서버에도 30초 간격 제한이 있다)
+    // 중복 등록 방지(서버에도 30초 간격 제한)
     if (gbSubmitting) return;
 
     const content = $('#gbContent').val().trim();
@@ -214,7 +214,7 @@ function submitGuestbook() {
         contentType: 'application/json;charset=UTF-8',
         dataType: 'json',
         timeout: 10000,
-        // 닉네임은 보내지 않는다 — 서버가 어차피 '익명' 으로 덮어쓴다
+        // 닉네임 미전송 — 서버가 '익명' 으로 덮어쓴다
         data: JSON.stringify({ content: content, cheer: cheer })
     }).done(function(response) {
         if (!response || !response.success) {
@@ -229,7 +229,7 @@ function submitGuestbook() {
         $('#gbContentCount').text('0');
         $('.gb-counter').removeClass('is-full');
 
-        // 방금 쓴 글이 맨 위에 오도록 처음부터 다시 읽는다
+        // 방금 쓴 글이 맨 위에 오도록 처음부터 재조회
         loadGuestbook(true);
     }).fail(function() {
         showToast('등록에 실패했습니다. 잠시 후 다시 시도해 주세요.', 'error');
@@ -239,7 +239,7 @@ function submitGuestbook() {
     });
 }
 
-/** 삭제 (관리자) */
+/** 삭제 — 관리자 */
 function deleteGuestbook(guestbookId) {
     if (!guestbookId) return;
     if (!confirm('이 방명록을 삭제할까요?')) return;
@@ -257,7 +257,7 @@ function deleteGuestbook(guestbookId) {
         showToast(response.message || '삭제했습니다.', 'success');
         loadGuestbook(true);
     }).fail(function(xhr) {
-        // 세션이 끊기면 401 이 온다 — 조용히 실패하면 왜 안 지워지는지 알 수 없다
+        // 세션 만료 시 401 — 조용히 실패하면 원인을 알 수 없다
         if (xhr && xhr.status === 401) {
             showToast('로그인이 풀렸습니다. 다시 로그인해 주세요.', 'error');
             return;

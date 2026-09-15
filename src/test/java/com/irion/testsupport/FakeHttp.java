@@ -13,9 +13,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 서블릿 가짜 객체. 목 프레임워크 대신 JDK 동적 Proxy 를 쓴다.
- *
- * 필터와 인터셉터 테스트가 함께 쓴다 — 한쪽 패키지에 두면 다른 쪽이 못 가져다 쓴다.
+ * 서블릿 가짜 객체. 목 프레임워크 없이 JDK 동적 Proxy 로.
+ * 필터·인터셉터 테스트 공용이라 testsupport 에 둔다
  */
 public final class FakeHttp {
 
@@ -34,10 +33,10 @@ public final class FakeHttp {
         private final Map<String, String> headers = new HashMap<String, String>();
         private final Map<String, String> params = new HashMap<String, String>();
 
-        /** 요청 속성. 스프링 핸들러 매핑이 계산한 경로를 여기 캐시해 두고 다시 꺼내 쓴다 */
+        /** 요청 속성. 스프링이 계산한 경로를 여기 캐시한다 */
         private final Map<String, Object> attributes = new HashMap<String, Object>();
 
-        /** getSession(true) 가 불렸는지 — 필터가 세션을 새로 만들면 안 된다 */
+        /** getSession(true) 호출 여부 — 필터가 세션을 만들면 안 된다 */
         public boolean sessionCreated;
 
         public Request uri(String value) {
@@ -75,7 +74,7 @@ public final class FakeHttp {
             return this;
         }
 
-        /** 톰캣이 보는 상대 주소. 프록시를 거치면 nginx 의 주소가 들어온다 */
+        /** 톰캣이 보는 주소. 프록시를 거치면 nginx 주소 */
         public Request remoteAddr(String value) {
             this.remoteAddr = value;
             return this;
@@ -86,12 +85,12 @@ public final class FakeHttp {
             return this;
         }
 
-        /** 화면이 보내는 AJAX 요청 모양 */
+        /** AJAX 요청 */
         public Request ajax() {
             return header("X-Requested-With", "XMLHttpRequest").header("Accept", "application/json");
         }
 
-        /** 주소창으로 들어온 요청 모양 */
+        /** 주소창 진입 요청 */
         public Request browser() {
             return header("Accept", "text/html,application/xhtml+xml");
         }
@@ -118,11 +117,8 @@ public final class FakeHttp {
                                 return headers.get((String) args[0]);
                             case "getParameter":
                                 return params.get((String) args[0]);
-                            /*
-                             * 서블릿 4.0. 스프링의 UrlPathHelper 가 "요청이 어느 서블릿 매핑으로
-                             * 들어왔나" 를 여기서 묻는다 — null 이면 핸들러 매핑이 NPE 로 죽는다.
-                             * DispatcherServlet 이 "/" 에 걸린 상태를 흉내 낸다.
-                             */
+                            // 서블릿 4.0. 스프링 UrlPathHelper 가 서블릿 매핑을 여기서 묻는다 —
+                            // null 이면 핸들러 매핑이 NPE. DispatcherServlet 이 "/" 에 걸린 상태
                             case "getAttribute":
                                 return attributes.get((String) args[0]);
                             case "setAttribute":
@@ -149,12 +145,12 @@ public final class FakeHttp {
     }
 
 
-    /** 로그인 전 — 속성이 비어 있는 세션 */
+    /** 로그인 전 — 빈 세션 */
     public static HttpSession session() {
         return session(new HashMap<String, Object>());
     }
 
-    /** 관리자로 로그인된 세션 */
+    /** 관리자 로그인 세션 */
     public static HttpSession loggedIn() {
         Map<String, Object> attributes = new HashMap<String, Object>();
         attributes.put("adminUser", "관리자");
@@ -182,7 +178,7 @@ public final class FakeHttp {
     }
 
 
-    /** DispatcherServlet 이 "/" 에 매핑된 상태 (web.xml 과 같다) */
+    /** DispatcherServlet 이 "/" 에 매핑된 상태(web.xml 과 동일) */
     private static HttpServletMapping rootServletMapping() {
         return (HttpServletMapping) Proxy.newProxyInstance(
                 HttpServletMapping.class.getClassLoader(),
@@ -209,7 +205,7 @@ public final class FakeHttp {
             return written.toString();
         }
 
-        /** 301 은 sendRedirect 가 아니라 setStatus + Location 으로 나간다 */
+        /** 301 은 sendRedirect 가 아니라 setStatus + Location */
         public String header(String name) {
             return headers.get(name);
         }
@@ -230,7 +226,7 @@ public final class FakeHttp {
                                 status = 302;
                                 return null;
                             case "sendError":
-                                // sendError(int) 와 sendError(int, String) 둘 다 첫 값이 상태 코드다
+                                // sendError 두 오버로드 모두 첫 값이 상태 코드
                                 status = (Integer) args[0];
                                 return null;
                             case "setHeader":
@@ -254,7 +250,7 @@ public final class FakeHttp {
 
 
     public static final class Chain {
-        /** 필터가 요청을 다음으로 넘겼는가 */
+        /** 필터가 요청을 통과시켰는지 */
         public boolean passed;
 
         public FilterChain build() {
@@ -262,7 +258,7 @@ public final class FakeHttp {
         }
     }
 
-    /** 프록시가 기본형을 돌려주는 메서드를 물어봐도 터지지 않도록 */
+    /** 기본형 반환 메서드에도 프록시가 터지지 않도록 */
     private static Object blank(Class<?> type) {
         if (!type.isPrimitive() || type == void.class) {
             return null;

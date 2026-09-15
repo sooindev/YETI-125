@@ -1,6 +1,6 @@
-/* 홈 — 다시보기 이동 확인 모달. 클립 모달은 components/clip-modal.css 로 옮겼다 */
+/* 홈 — 다시보기 이동 확인 모달. 클립 모달은 components/clip-modal.css */
 
-/* 이동 확인 모달 — 다시보기는 임베드 경로가 없어 치지직으로 나간다 */
+/* 이동 확인 — 다시보기는 임베드 경로가 없어 치지직으로 나간다 */
 .leave-modal-content {
     max-width: 460px;
     padding: 26px;
@@ -15,7 +15,7 @@
     letter-spacing: 0.18em;
     text-transform: uppercase;
     color: var(--frost-deep);
-    /* 닫기 버튼(42px + 여백)을 피한다 */
+    /* 닫기 버튼(42px + 여백) 회피 */
     padding-right: 50px;
 }
 .leave-modal-title {
@@ -24,7 +24,7 @@
     font-weight: 700;
     line-height: 1.45;
     color: var(--bone);
-    /* 긴 제목이 모달을 세로로 늘리지 않게 세 줄에서 자른다 */
+    /* 긴 제목이 모달을 늘리지 않게 세 줄에서 자른다 */
     display: -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
@@ -38,8 +38,7 @@
     padding-top: 4px;
     border-top: 1px solid var(--ink-line);
 }
-/* 다시 묻지 않기 — 체크박스는 기본 크기가 13px이라 손가락으로
-   누르기 어렵다. 라벨 전체를 탭 영역으로 쓰고 44px을 확보한다. */
+/* 다시 묻지 않기 — 체크박스 기본 13px 는 누르기 어렵다. 라벨 전체를 44px 탭 영역으로 */
 .leave-modal-skip {
     display: flex;
     align-items: center;
@@ -76,8 +75,7 @@
 @media (max-width: 720px) {
     .leave-modal-content { padding: 18px; }
     .leave-modal-title { font-size: 0.95rem; }
-    /* 좁은 화면에서는 나란히 두면 둘 다 좁아진다. 쌓고 폭을 채운다.
-       기본 동작(이동)이 위로, 취소가 아래로 간다. */
+    /* 좁은 화면은 나란히 두면 둘 다 좁아진다 — 쌓고 폭을 채운다(이동 위, 취소 아래) */
     .leave-modal-actions {
         flex-direction: column-reverse;
         gap: 8px;
@@ -85,8 +83,7 @@
     .leave-modal-actions .btn { width: 100%; }
 }
 
-/* 이동 확인 되돌리기 — "다시 묻지 않기"를 켠 사람에게만 보인다.
-   머리말 보조 문구에 딸린 각주라 본문보다 한 단계 작고 흐리다. */
+/* 이동 확인 되돌리기 — "다시 묻지 않기" 를 켠 사람에게만. 각주라 한 단계 작고 흐리다 */
 .aside-restore {
     display: block;
     margin-top: 8px;
@@ -104,17 +101,17 @@
     color: var(--frost-deep);
     border-color: var(--frost);
 }
-/* 위에서 display 를 지정하면 [hidden] 기본 규칙을 이겨 숨김이 풀린다 — 다시 눌러준다 */
+/* display 를 지정하면 [hidden] 기본 규칙을 이겨 숨김이 풀린다 — 다시 지정 */
 .aside-restore[hidden] { display: none; }
-/* 머리말이 우측 정렬이라 각주도 같은 모서리에 붙인다 */
+/* 머리말이 우측 정렬이라 각주도 같은 모서리에 */
 .sec-head__aside .aside-restore { margin-left: auto; }
 .sec-head--flip .sec-head__aside .aside-restore { margin-left: 0; margin-right: auto; }
 
 @media (max-width: 900px) {
-    /* 이 폭부터 머리말이 좌측 정렬로 바뀐다 */
+    /* 이 폭부터 머리말이 좌측 정렬 */
     .sec-head__aside .aside-restore { margin-left: 0; margin-right: auto; }
 }
 @media (pointer: coarse) {
-    /* 손가락으로 누를 수 있게 세로 여유를 준다 */
+    /* 터치용 세로 여유 */
     .aside-restore { padding: 8px 0; margin-top: 4px; }
 }

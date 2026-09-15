@@ -8,7 +8,7 @@ import javax.servlet.http.HttpSession;
 
 import static org.junit.Assert.*;
 
-/** 관리자 인증 필터 — 공개 경로만 열려 있는가, 경로를 비틀어 뚫을 수 없는가, 막는 방식이 맞는가. */
+/** 관리자 인증 필터 — 공개 경로만 개방, 경로 우회 차단, 차단 방식 확인 */
 public class AdminLoginFilterTest {
 
     private static final String LOGIN_PAGE = "/admin/admin-login";
@@ -70,7 +70,7 @@ public class AdminLoginFilterTest {
     }
 
 
-    /** 정규화된 경로를 보는지, 화이트리스트를 정확히 일치로 따지는지 둘 다 본다. */
+    /** 정규화 경로 사용 여부와 화이트리스트 정확 일치 여부 */
     @Test
     public void 상위_경로_기호로_우회할_수_없다() throws Exception {
         assertBlocked("/admin/loginProc/../admin-schedule.html");
@@ -95,9 +95,8 @@ public class AdminLoginFilterTest {
     }
 
     /**
-     * 톰캣은 /admin;x=1/schedule 을 /admin/* 매핑으로 이 필터에 넘기고,
-     * 스프링도 ';x=1' 을 떼고 관리자 컨트롤러로 보낸다. 필터만 딴 주소로 보면
-     * 인증 검사를 건너뛴 채 관리자 화면까지 흘러간다.
+     * 톰캣은 /admin;x=1/schedule 을 이 필터로 넘기고 스프링도 ';x=1' 을 떼고 관리자로 보낸다.
+     * 필터만 다른 주소로 보면 인증을 건너뛴 채 관리자 화면까지 간다
      */
     @Test
     public void 경로_파라미터로_우회할_수_없다() throws Exception {
@@ -106,13 +105,13 @@ public class AdminLoginFilterTest {
         assertBlocked("/admin;x=1/loginProc/../admin-schedule.html");
     }
 
-    /** /admin 은 관리자 첫 화면으로 보내는 자리다 — 여기도 로그인 뒤에 볼 일이다 */
+    /** /admin 은 관리자 첫 화면 — 여기도 로그인 후에만 */
     @Test
     public void 슬래시_없는_admin_도_막는다() throws Exception {
         assertBlocked("/admin");
     }
 
-    /** 반대 방향 — 공개 경로에 뭔가 덧붙인 것은 공개가 아니다 */
+    /** 반대 방향 — 공개 경로에 덧붙인 것은 공개가 아니다 */
     @Test
     public void 공개_경로에_덧붙인_것은_공개가_아니다() throws Exception {
         assertBlocked("/admin/loginProc-backup");
@@ -121,7 +120,7 @@ public class AdminLoginFilterTest {
     }
 
 
-    /** jQuery 가 302 를 따라가 200 을 받으면 화면은 세션이 끊긴 것을 모른다 */
+    /** jQuery 가 302 를 따라가 200 을 받으면 화면은 세션 만료를 모른다 */
     @Test
     public void AJAX_요청에는_401_JSON_을_준다() throws Exception {
         FakeHttp.Response response = run(request("/admin/schedule/list").ajax(), null, false);
@@ -134,7 +133,7 @@ public class AdminLoginFilterTest {
 
     @Test
     public void 헤더가_없어도_JSON_요청이면_401_로_본다() throws Exception {
-        // X-Requested-With 를 빠뜨린 호출도 놓치지 않는다
+        // X-Requested-With 없는 호출도 감지
         FakeHttp.Response response = run(
                 request("/admin/schedule").method("POST").contentType("application/json;charset=UTF-8"),
                 null, false);
@@ -161,7 +160,7 @@ public class AdminLoginFilterTest {
         run(request, session, true);
     }
 
-    /** 로그인 없이 접근할 수 없어야 하는 경로 */
+    /** 인증 없이 접근 불가여야 하는 경로 */
     private static void assertBlocked(String uri) throws Exception {
         FakeHttp.Request request = request(uri).browser();
         FakeHttp.Response response = run(request, null, false);

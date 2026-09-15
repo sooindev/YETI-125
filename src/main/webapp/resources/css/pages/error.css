@@ -39,7 +39,7 @@
     color: var(--bone-dim);
     max-width: 46ch;
     margin-top: 14px;
-    /* 한글 단어가 중간에서 끊기지 않도록 */
+    /* 한글 단어가 중간에서 끊기지 않게 */
     word-break: keep-all;
 }
 
@@ -59,8 +59,7 @@
 }
 
 @media (max-width: 720px) {
-    /* common.css 가 모바일에서 .btn 을 전체 폭으로 만든다.
-       에러 페이지에서는 버튼이 여러 개 나란히 서므로 되돌린다. */
+    /* common.css 가 모바일에서 .btn 을 전체 폭으로 만든다 — 여기선 여러 개가 나란히 서므로 해제 */
     .error-actions .btn {
         width: auto;
         flex: 1 1 auto;

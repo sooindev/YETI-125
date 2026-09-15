@@ -11,10 +11,10 @@ import java.util.Date;
 
 import static org.junit.Assert.*;
 
-/** 저장 직전 기본값 채우기. 컬럼을 직접 지정하면 schema.sql 의 DEFAULT 가 안 쓰인다. */
+/** 저장 직전 기본값 채우기. 컬럼을 직접 지정하면 schema.sql 의 DEFAULT 가 안 먹는다 */
 public class ScheduleServiceImplTest {
 
-    /** DB 로 내려가기 직전의 VO 를 붙잡아 두는 가짜 매퍼 */
+    /** DB 직전의 VO 를 붙잡는 가짜 매퍼 */
     private static final class Captor {
         ScheduleVO saved;
     }
@@ -27,7 +27,7 @@ public class ScheduleServiceImplTest {
         ScheduleVO schedule = new ScheduleVO();
         schedule.setTitle("합방");
         schedule.setStartDate(new Date());
-        // scheduleType 을 넣지 않는다
+        // scheduleType 미지정
 
         service.createSchedule(schedule);
 
@@ -71,7 +71,7 @@ public class ScheduleServiceImplTest {
         assertEquals("#FF0000", captor.saved.getColor());
     }
 
-    /** @Pattern 이 빈 문자열을 허용해서, '' 가 NOT NULL 을 통과해 눌러앉는다 */
+    /** @Pattern 이 빈 문자열을 허용해 '' 가 NOT NULL 을 통과한다 */
     @Test
     public void 빈_문자열도_기본값으로_바꾼다() {
         Captor captor = new Captor();
@@ -91,7 +91,7 @@ public class ScheduleServiceImplTest {
         assertEquals("Y", captor.saved.getDisplayYn());
     }
 
-    /** 수정 경로에도 같은 처리가 필요하다 — UPDATE 문이 NOT NULL 컬럼을 그대로 덮어쓴다 */
+    /** 수정 경로도 동일 — UPDATE 가 NOT NULL 컬럼을 그대로 덮어쓴다 */
     @Test
     public void 수정할_때도_기본값을_채운다() {
         Captor captor = new Captor();
@@ -108,7 +108,7 @@ public class ScheduleServiceImplTest {
         assertEquals("N", captor.saved.getAllDayYn());
     }
 
-    /** 채워 넣으면 숨긴 일정이 공개되거나 그 반대가 된다. 비운 채로 넘긴다. */
+    /** 채우면 숨긴 일정이 공개되거나 그 반대가 된다 — 비운 채로 전달 */
     @Test
     public void 수정할_때_공개여부가_없으면_비운_채로_넘긴다() {
         Captor captor = new Captor();
@@ -118,7 +118,7 @@ public class ScheduleServiceImplTest {
         schedule.setScheduleId(7L);
         schedule.setTitle("제목만 고침");
         schedule.setStartDate(new Date());
-        // displayYn 을 넣지 않는다
+        // displayYn 미지정
 
         service.updateSchedule(schedule);
 
@@ -143,7 +143,7 @@ public class ScheduleServiceImplTest {
     }
 
 
-    /** 가짜 매퍼를 꽂은 서비스. 스프링 없이 필드에 직접 넣는다. */
+    /** 가짜 매퍼를 꽂은 서비스. 스프링 없이 필드 직접 주입 */
     private static ScheduleService service(Captor captor) {
         ScheduleMapper mapper = (ScheduleMapper) Proxy.newProxyInstance(
                 ScheduleMapper.class.getClassLoader(),

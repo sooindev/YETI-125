@@ -8,14 +8,14 @@ import java.util.Map;
 
 import static org.junit.Assert.*;
 
-/** 파싱 회귀 테스트. 옛 indexOf 구현은 제목에 큰따옴표가 들어가면 그 앞에서 잘렸다. */
+/** 파싱 회귀. 옛 indexOf 구현은 제목에 큰따옴표가 있으면 그 앞에서 잘렸다 */
 public class ChzzkClientTest {
 
     private final ChzzkClient client = new ChzzkClient();
 
     @Test
     public void 제목에_큰따옴표가_있어도_끝까지_읽는다() throws Exception {
-        // 옛 구현은 여기서 [이리온 \] 를 돌려줬다
+        // 옛 구현은 [이리온 \] 를 반환했다
         JsonNode node = ChzzkClient.parse(
                 "{\"clipUID\":\"abc\",\"clipTitle\":\"이리온 \\\"레전드\\\" 순간\"}");
 
@@ -87,7 +87,7 @@ public class ChzzkClientTest {
         assertNull(client.parseClip(ChzzkClient.parse("{\"clipTitle\":\"제목뿐\"}")));
     }
 
-    /** 19금은 썸네일이 null 로 온다. 화면이 대체 자리를 그리려면 adult 가 함께 와야 한다 */
+    /** 19금은 썸네일이 null — 대체 자리를 그리려면 adult 가 함께 와야 한다 */
     @Test
     public void 연령제한_클립은_썸네일이_비고_adult_가_참이다() throws Exception {
         JsonNode node = ChzzkClient.parse("{"
@@ -139,7 +139,7 @@ public class ChzzkClientTest {
         assertEquals(Boolean.TRUE, video.get("adult"));
     }
 
-    /** adult 가 아예 없거나 참/거짓이 아니면 제한 없음으로 본다 */
+    /** adult 가 없거나 불리언이 아니면 제한 없음 */
     @Test
     public void adult_가_없으면_제한_없음이다() throws Exception {
         assertEquals(Boolean.FALSE,
@@ -171,7 +171,7 @@ public class ChzzkClientTest {
 
     @Test
     public void 중괄호가_섞인_제목에도_배열_경계를_잃지_않는다() throws Exception {
-        // 옛 findBracket 구현이 흔들리던 모양
+        // 옛 findBracket 이 흔들리던 형태
         JsonNode root = ChzzkClient.parse("{\"content\":{\"data\":["
                 + "{\"clipUID\":\"a\",\"clipTitle\":\"{ 중괄호 } 와 [ 대괄호 ]\"},"
                 + "{\"clipUID\":\"b\",\"clipTitle\":\"끝\"}"

@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
-/** 치지직 목록 캐시. 만료되면 한 스레드만 갱신한다. */
+/** 치지직 목록 캐시. 만료 시 한 스레드만 갱신 */
 @Service
 public class LiveFeedService {
 
@@ -26,32 +26,23 @@ public class LiveFeedService {
     private static final long CACHE_DURATION = 10 * 60 * 1000; // 10분 (클립/비디오)
     private static final long LIVE_CACHE_DURATION = 1 * 60 * 1000; // 1분 (방송 상태)
 
-    /**
-     * 갱신에 실패한 뒤 다시 두드리기까지. 치지직이 죽으면 호출 하나가 5초(READ_TIMEOUT)를
-     * 통째로 쓰므로, 이 시간이 없으면 요청마다 그 5초를 처음부터 다시 기다린다.
-     *
-     * 가장 짧은 TTL(방송 상태 1분)보다 짧게 둔다 — 복구를 알아채는 데 걸리는 시간이
-     * 정상일 때의 갱신 주기보다 늦어지면 안 된다.
-     */
+    // 실패 후 재시도 간격. 없으면 요청마다 5초 타임아웃 재대기.
+    // 가장 짧은 TTL(1분)보다 짧게 — 복구 감지가 늦어지면 안 됨
     private static final long FAILURE_BACKOFF = 30 * 1000; // 30초
 
     private static final int CLIP_INITIAL_PAGES = 2;   // 첫 요청에 미리 담아둘 분량
     public static final int CLIP_MAX = 3000;           // 메모리 상한
     private static final int CLIP_PAGES_PER_REQUEST = 10; // 한 요청이 외부에 낼 수 있는 최대 호출
 
-    /**
-     * 상한까지 채우는 데 필요한 확장 횟수. extendClips 한 번이 CLIP_PAGES_PER_REQUEST 장까지만
-     * 받아오므로, 전량이 필요한 쪽(상세 화면 · 최신순 · 검색 · 사이트맵)은 여러 번 불러야 한다.
-     * 한 번에 다 받게 고치지 않은 것은, 홈이 쓰는 "조금씩 늘리는" 경로를 그대로 두기 위해서다.
-     */
+    // 상한까지 채우는 확장 횟수. extendClips 는 한 번에 10장까지
     private static final int FULL_LOAD_ROUNDS =
             (CLIP_MAX + CLIP_PAGES_PER_REQUEST * ChzzkClient.CLIP_PAGE_SIZE - 1)
                     / (CLIP_PAGES_PER_REQUEST * ChzzkClient.CLIP_PAGE_SIZE);
 
-    // 다시보기 — 현재 18개뿐이지만 쌓이면 한 페이지를 넘는다
+    // 다시보기 페이지 상한 — 쌓이면 한 페이지를 넘음
     private static final int VIDEO_MAX_PAGES = 20;
 
-    /** 이 사이트에서만 감출 다시보기. 제목은 바뀌므로 videoNo 로 거른다. */
+    /** 이 사이트에서만 감출 다시보기. 제목은 바뀌므로 videoNo 기준 */
     private static final Set<String> HIDDEN_VIDEO_NOS = Collections.unmodifiableSet(
             new HashSet<String>(Arrays.asList(
                     "319019" // 이리온의 재채기.mp4 (2024-02-29)
@@ -60,7 +51,7 @@ public class LiveFeedService {
     @Autowired
     private ChzzkClient chzzk;
 
-    // 싱글턴이라 여러 스레드가 함께 쓴다. 참조만 교체하고 갱신은 락으로 한 스레드에만 맡긴다.
+    // 싱글턴 — 참조만 교체, 갱신은 락으로 한 스레드만
     private final AtomicReference<Snapshot<Map<String, Object>>> liveStatusCache = new AtomicReference<>();
     private final AtomicReference<Snapshot<ClipFeed>> clipsCache = new AtomicReference<>();
     private final AtomicReference<Snapshot<List<Map<String, Object>>>> videosCache = new AtomicReference<>();
@@ -69,16 +60,16 @@ public class LiveFeedService {
     private final Object clipsLock = new Object();
     private final Object videosLock = new Object();
 
-    /** 클립을 이어 받는 중인가. 확장은 락 밖에서 하고, 겹치면 있는 만큼만 준다. */
+    /** 확장 진행 중 여부. 확장은 락 밖에서, 겹치면 있는 만큼만 */
     private final AtomicBoolean clipsExtending = new AtomicBoolean(false);
 
-    /** 클립 조각과 다음 커서. chzzk 의 클립 페이징은 offset 이 아니라 커서다. */
+    /** 클립 조각과 다음 커서. chzzk 페이징은 offset 이 아니라 커서 */
     public static final class ClipFeed {
         private final List<Map<String, Object>> clips;
         private final String nextClipUID;
         private final String nextReadCount;
 
-        /** clipId → 클립. 상세 화면이 주소의 id 하나로 찾아가므로 목록을 매번 훑지 않는다 */
+        /** clipId → 클립. 상세 화면의 단건 조회용 */
         private final Map<String, Map<String, Object>> byId;
 
         ClipFeed(List<Map<String, Object>> clips, String nextClipUID, String nextReadCount) {
@@ -101,7 +92,7 @@ public class LiveFeedService {
             return clips;
         }
 
-        /** 이 목록에 있는 클립인가. 없으면 null */
+        /** 목록에 있으면 클립, 없으면 null */
         public Map<String, Object> get(String clipId) {
             return (clipId == null) ? null : byId.get(clipId);
         }
@@ -114,29 +105,26 @@ public class LiveFeedService {
             return nextClipUID != null && !nextClipUID.isEmpty();
         }
 
-        /** 커서가 남았고 상한에도 닿지 않았는가 */
+        /** 커서 남음 + 상한 미도달 */
         public boolean canGrow() {
             return hasNext() && clips.size() < CLIP_MAX;
         }
     }
 
-    /** 방송 상태. 못 가져오면 null. */
+    /** 방송 상태. 실패 시 null */
     public Map<String, Object> getLiveStatus() {
         return cached("방송 상태", liveStatusCache, liveStatusLock, LIVE_CACHE_DURATION, chzzk::fetchLiveStatus);
     }
 
-    /** 클립을 need 개까지 채워서 돌려준다. 못 가져오면 null. */
+    /** 클립을 need 개까지. 실패 시 null */
     public ClipFeed getClips(int need) {
         ClipFeed feed = cached("클립", clipsCache, clipsLock, CACHE_DURATION, this::loadClips);
         return (feed == null) ? null : extendClips(feed, need);
     }
 
     /**
-     * 클립 한 건을 찾은 결과.
-     *
-     * 못 찾았을 때 <b>"없는 것"과 "아직 모르는 것"을 가른다.</b> 이 구분이 없으면
-     * 목록을 덜 받은 순간에 들어온 멀쩡한 주소가 404 가 된다 — 검색엔진은 그것을
-     * "이 페이지는 사라졌다" 로 읽고 색인에서 지운다. 되돌리는 데 몇 주가 걸린다.
+     * 클립 조회 결과 — "없음" 과 "아직 모름" 의 구분.
+     * 구분하지 않으면 목록을 덜 받은 순간의 멀쩡한 주소가 404 → 색인 삭제
      */
     public static final class ClipLookup {
         private final Map<String, Object> clip;
@@ -147,17 +135,14 @@ public class LiveFeedService {
             this.complete = complete;
         }
 
-        /** 찾은 클립. 없으면 null */
+        /** 찾은 클립, 없으면 null */
         public Map<String, Object> getClip() {
             return clip;
         }
 
         /**
-         * 목록을 끝까지 받은 상태인가. 거짓이면 "없다" 고 단정할 수 없다.
-         *
-         * 참이면서 클립이 null 이면 정말로 없는 것이다 — 다만 상한(CLIP_MAX)에 닿아
-         * 멈춘 경우도 여기 들어간다. 채널 클립이 상한을 넘어가면 가장 오래된 것부터
-         * 찾지 못하게 된다 (현재 1,700개 남짓, 상한 3,000).
+         * 목록을 끝까지 받았는지. 거짓이면 "없음" 으로 단정 불가.
+         * 상한(CLIP_MAX) 도달도 참 — 상한을 넘는 클립은 오래된 것부터 조회 불가
          */
         public boolean isComplete() {
             return complete;
@@ -165,37 +150,32 @@ public class LiveFeedService {
     }
 
     /**
-     * 클립 한 건. 주소로 들어온 clipId 가 <b>이 채널 것인지</b>까지 여기서 가린다.
-     *
-     * 치지직의 단건 API(/clips/{uid}/detail)는 채널을 알려주지 않는다 — 그것만 믿으면
-     * 남의 채널 클립도 우리 주소로 열려 버린다. 우리 목록에 있는지가 유일한 소유 확인이다.
+     * 클립 한 건 + 우리 채널 소유 확인.
+     * 치지직 단건 API 는 채널을 주지 않아, 우리 목록에 있는지가 유일한 판단 근거
      */
     public ClipLookup findClip(String clipId) {
         if (clipId == null || clipId.isEmpty()) {
-            // 모양부터 클립 아이디가 아니다. 목록을 더 받아도 나오지 않는다
+            // 아이디 모양 아님 — 더 받아도 없음
             return new ClipLookup(null, true);
         }
 
         ClipFeed feed = fullClips();
         if (feed == null) {
-            // 치지직이 죽어 목록이 아예 없다. 이 클립이 없다는 뜻이 아니다
+            // 목록 자체가 없음 — 클립이 없다는 뜻은 아님
             return new ClipLookup(null, false);
         }
 
         return new ClipLookup(feed.get(clipId), !feed.canGrow());
     }
 
-    /** 클립 전량. 일부만으로는 답이 틀리는 곳(최신순 · 검색 · 사이트맵)에 쓴다. 못 가져오면 null */
+    /** 클립 전량. 최신순 · 검색 · 사이트맵용. 실패 시 null */
     public ClipFeed getAllClips() {
         return fullClips();
     }
 
     /**
-     * 커서가 마를 때까지 이어 받는다.
-     *
-     * 채널 클립이 1,700개 남짓(34페이지)이라 찬 캐시로 3초 안쪽이고, 그 뒤 10분은 캐시가 답한다.
-     * 확장이 다른 스레드와 겹치면 늘지 않은 채 돌아오므로, 크기가 그대로면 더 기다리지 않는다 —
-     * 여기서 기다리면 상세 화면 하나가 남의 적재를 붙들고 선다.
+     * 커서가 마를 때까지 적재. 34페이지에 3초쯤, 이후 10분은 캐시.
+     * 다른 스레드가 확장 중이면 크기 그대로 반환 — 대기 없이 있는 만큼만
      */
     private ClipFeed fullClips() {
         ClipFeed feed = getClips(CLIP_MAX);
@@ -210,27 +190,27 @@ public class LiveFeedService {
         return feed;
     }
 
-    /** 다시보기 목록. 못 가져오면 null. */
+    /** 다시보기 목록. 실패 시 null */
     public List<Map<String, Object>> getVideos() {
         return cached("다시보기", videosCache, videosLock, CACHE_DURATION, this::loadVideos);
     }
 
-    /** 인기 클립 첫 묶음 로드 */
+    /** 인기 클립 첫 묶음 */
     private ClipFeed loadClips() {
         ClipFeed feed = new ClipFeed(new ArrayList<Map<String, Object>>(), null, null);
         feed = fetchMoreClips(feed, CLIP_INITIAL_PAGES);
 
-        // 빈 목록을 캐시하면 장애가 10분간 굳는다
+        // 빈 목록 캐시 금지 — 장애가 10분간 굳음
         return feed.clips.isEmpty() ? null : feed;
     }
 
-    /** need 개까지 늘린다. 적재 시각을 새로 찍어 더보기 도중 TTL 만료를 막는다. */
+    /** need 개까지 확장. 적재 시각 갱신으로 더보기 중 TTL 만료 방지 */
     private ClipFeed extendClips(ClipFeed feed, int need) {
         if (feed.clips.size() >= need || !feed.hasNext() || feed.clips.size() >= CLIP_MAX) {
             return feed;
         }
 
-        // 어디서부터 이어 받을지만 락 안에서 정한다
+        // 시작 지점만 락 안에서 결정
         ClipFeed base;
         synchronized (clipsLock) {
             Snapshot<ClipFeed> snapshot = clipsCache.get();
@@ -239,7 +219,7 @@ public class LiveFeedService {
             if (base.clips.size() >= need || !base.hasNext()) {
                 return base;
             }
-            // 이미 누가 받아오는 중이면 기다리지 않는다
+            // 이미 확장 중이면 대기하지 않음
             if (!clipsExtending.compareAndSet(false, true)) {
                 return base;
             }
@@ -250,19 +230,19 @@ public class LiveFeedService {
                 CLIP_PAGES_PER_REQUEST);
 
         try {
-            // 외부 호출은 락 밖에서 — 여기가 오래 걸리는 구간이다
+            // 외부 호출은 락 밖에서 — 가장 오래 걸리는 구간
             ClipFeed grown = fetchMoreClips(base, pages);
 
             synchronized (clipsLock) {
                 Snapshot<ClipFeed> snapshot = clipsCache.get();
                 ClipFeed current = (snapshot != null) ? snapshot.value : null;
 
-                // 받는 사이 목록이 다시 쌓였으면 우리 커서는 지난 세대다
+                // 받는 사이 목록이 교체됐으면 우리 커서는 지난 세대
                 if (current != null && current != base) {
                     return current;
                 }
 
-                // 이어 받는 데 성공했으니 실패 기록도 지운다
+                // 성공 — 실패 기록도 제거
                 clipsCache.set(new Snapshot<ClipFeed>(grown, System.currentTimeMillis(), 0L));
                 return grown;
             }
@@ -271,7 +251,7 @@ public class LiveFeedService {
         }
     }
 
-    /** 커서를 따라 pages 만큼 이어 받아 뒤에 붙인다 */
+    /** 커서를 따라 pages 만큼 적재 후 뒤에 추가 */
     private ClipFeed fetchMoreClips(ClipFeed feed, int pages) {
         List<Map<String, Object>> clips = new ArrayList<Map<String, Object>>(feed.clips);
 
@@ -304,7 +284,7 @@ public class LiveFeedService {
             readCount = fetched.getNextReadCount();
             first = false;
 
-            // 커서가 돌지 않아 같은 페이지가 또 오면 무한 루프가 된다
+            // 같은 페이지 반복 시 무한 루프 방지
             if (clips.size() == before)
                 break;
         }
@@ -315,7 +295,7 @@ public class LiveFeedService {
         return new ClipFeed(clips, uid, readCount);
     }
 
-    /** 다시보기 로드. 한 페이지에 맞추면 쌓였을 때 잘리므로 빌 때까지 이어 받는다. */
+    /** 다시보기 적재. 빈 페이지가 나올 때까지 */
     private List<Map<String, Object>> loadVideos() {
         List<Map<String, Object>> videos = new ArrayList<Map<String, Object>>();
         Set<String> ids = new HashSet<String>();
@@ -339,19 +319,16 @@ public class LiveFeedService {
                 break;
         }
 
-        // 첫 페이지부터 실패했으면 만료된 캐시로 폴백시킨다
+        // 첫 페이지부터 실패 시 만료 캐시로 폴백
         return videos.isEmpty() ? null : videos;
     }
 
-    /**
-     * 값·적재 시각·마지막 실패 시각을 함께 담는다. 따로 두면 "새 값 + 옛 시각" 조합이 보인다.
-     * 실패 시각도 여기 둔다 — 값과 짝이 맞아야 "언제 받은 값을 언제부터 못 갱신하고 있는지"가 하나로 읽힌다.
-     */
+    /** 값 · 적재 시각 · 마지막 실패 시각. 따로 두면 "새 값 + 옛 시각" 조합이 생김 */
     private static final class Snapshot<T> {
         final T value;
         final long loadedAt;
 
-        /** 마지막으로 갱신에 실패한 시각. 실패한 적이 없으면 0 */
+        /** 마지막 실패 시각. 없으면 0 */
         final long failedAt;
 
         Snapshot(T value, long loadedAt, long failedAt) {
@@ -360,24 +337,20 @@ public class LiveFeedService {
             this.failedAt = failedAt;
         }
 
-        /** 실패 기록은 값 없이도 남으므로 value 를 함께 본다 */
+        /** 실패 기록은 값 없이도 남으므로 value 도 확인 */
         boolean isFresh(long ttl) {
             return value != null && System.currentTimeMillis() - loadedAt <= ttl;
         }
 
-        /** 방금 실패했는가 — 그렇다면 다시 두드리지 않는다 */
+        /** 백오프 중 — 재호출 금지 */
         boolean inBackoff() {
             return failedAt != 0 && System.currentTimeMillis() - failedAt < FAILURE_BACKOFF;
         }
     }
 
     /**
-     * 만료면 갱신한다. 갱신은 한 스레드만, 실패하면 만료된 값이라도 돌려준다.
-     *
-     * 실패를 적어두는 것이 중요하다. 안 적으면 치지직이 죽었을 때 요청마다 락 안에서
-     * 5초 타임아웃을 처음부터 다시 기다린다 — 스레드가 줄줄이 밀린다.
-     * 락 안에서도 백오프를 보는 이유는, 이미 락 앞에 줄 서 있던 스레드들이
-     * 첫 스레드의 실패를 보고 그 자리에서 물러나야 하기 때문이다.
+     * 만료 시 갱신. 한 스레드만 진입, 실패하면 만료값이라도 반환.
+     * 락 안에서도 백오프 확인 — 줄 서 있던 스레드가 첫 실패를 보고 물러나야 함
      */
     private <T> T cached(String name, AtomicReference<Snapshot<T>> ref, Object lock,
                          long ttl, Supplier<T> loader) {
@@ -388,13 +361,13 @@ public class LiveFeedService {
         }
 
         synchronized (lock) {
-            // 기다리는 동안 다른 스레드가 갱신했거나, 갱신에 실패했을 수 있다
+            // 대기 중 다른 스레드가 갱신했거나 실패했을 수 있음
             snapshot = ref.get();
             if (snapshot != null && (snapshot.isFresh(ttl) || snapshot.inBackoff())) {
                 return snapshot.value;
             }
 
-            // 실패한 상태였는가. 상태가 바뀌는 순간에만 로그를 남기려고 미리 본다
+            // 상태 전환 시에만 로그를 남기려고 미리 확인
             boolean wasFailing = snapshot != null && snapshot.failedAt != 0;
             String thrown = null;
 
@@ -404,24 +377,21 @@ public class LiveFeedService {
                     if (wasFailing) {
                         logger.info("치지직 {} 갱신이 다시 됩니다", name);
                     }
-                    // 성공했으니 실패 기록도 지운다 — 치지직이 돌아왔다
+                    // 성공 — 실패 기록 제거
                     ref.set(new Snapshot<>(loaded, System.currentTimeMillis(), 0L));
                     return loaded;
                 }
             } catch (Exception e) {
-                // 아래에서 실패를 적어두고 만료된 값으로 물러난다.
-                // 여기까지 왔다면 호출이 아니라 우리 파싱이 깨진 것이다 — 원인을 들고 간다
+                // 여기까지 왔으면 호출이 아니라 파싱이 깨진 것 — 원인을 들고 간다
                 thrown = e.getClass().getSimpleName()
                         + (e.getMessage() != null ? ": " + e.getMessage() : "");
             }
 
-            // 값과 적재 시각은 그대로 두고 실패 시각만 새로 찍는다.
-            // 값을 버리면 백오프 동안 화면이 빈다.
+            // 값 유지, 실패 시각만 갱신. 버리면 백오프 동안 화면이 빔
             T stale = (snapshot != null) ? snapshot.value : null;
             long staleAt = (snapshot != null) ? snapshot.loadedAt : 0L;
 
-            // 실패가 "시작되는" 순간에만 남긴다. 백오프가 30초라 매번 남기면
-            // 장애 하루에 수천 줄이 쌓이고, 정작 언제 시작됐는지가 묻힌다.
+            // 실패 시작 시에만. 매번 남기면 장애 하루에 수천 줄
             if (!wasFailing) {
                 logFailureStarted(name, stale, staleAt, thrown);
             }
@@ -431,7 +401,7 @@ public class LiveFeedService {
         }
     }
 
-    /** 무엇이, 언제부터, 왜 안 되는지 한 줄로 남긴다. 원인은 ChzzkClient 가 따로 남긴다 */
+    /** 무엇이 · 언제부터 · 왜 안 되는지 한 줄로 */
     private void logFailureStarted(String name, Object stale, long staleAt, String thrown) {
         String cause = (thrown != null) ? thrown : "치지직이 값을 주지 않았습니다";
 

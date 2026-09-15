@@ -3,16 +3,16 @@
 (function () {
     'use strict';
 
-    // 연출을 켜 두는 기간. 창을 벗어나면 아무것도 하지 않으므로 기념 주간이 끝나면
-    // 저절로 평소 모습으로 돌아간다. 아예 걷어내려면 각 JSP 의 두 줄을 지운다.
+    // 연출 기간. 창을 벗어나면 아무것도 하지 않아 저절로 평소 모습으로 돌아간다.
+    // 완전히 걷어내려면 각 JSP 의 두 줄을 제거
     const DEBUT_TEXT  = '2023.09.12';   // 이리온 데뷔일
     const ANNIV_TEXT  = '2026.09.12';   // 3주년 당일
     const ANNIV_DATE  = '2026-09-12';   // D-day 계산용
     const SHOW_FROM   = '2026-09-05';
     const SHOW_TO     = '2026-09-19';   // 이 날까지 (당일 포함)
 
-    // 축하 인사는 12시간에 한 번. door-intro.js 와 같은 방식으로 localStorage 에
-    // 남기되, 날짜가 아니라 마지막으로 띄운 시각(epoch ms)을 적는다
+    // 축하 인사는 12시간에 한 번. door-intro.js 와 같은 방식이되
+    // 날짜가 아니라 마지막으로 띄운 시각(epoch ms)을 적는다
     const SHOWN_AT_KEY = 'anniv_3rd_popup_at';
     const OLD_SEEN_KEY = 'anniv_3rd_popup_date';   // 하루 한 번이던 시절의 키
     const POPUP_GAP_MS = 12 * 60 * 60 * 1000;
@@ -21,8 +21,7 @@
     const POPUP_DELAY_MS = 900;   // 폭죽이 먼저 터지고, 뒤이어 팝업이 뜬다
     const INTRO_DELAY_MS = 500;   // 문이 걷히기 시작한 뒤 기다리는 시간
 
-    // door-intro.js 와 같은 이유로 로컬 기준으로 만든다 —
-    // toISOString() 은 한국에서 오전 9시에 날짜가 바뀐다
+    // 로컬 기준 — toISOString() 은 한국에서 오전 9시에 날짜가 바뀐다
     function todayKey() {
         const now = new Date();
         const pad = function (n) { return String(n).padStart(2, '0'); };
@@ -35,16 +34,16 @@
     }
 
     /**
-     * 마지막으로 띄운 뒤로 12시간이 지났는지.
-     * 사파리 프라이빗 모드에서는 접근 자체가 예외라 감싸지 않으면 연출이 통째로 멈춘다.
+     * 마지막 표시 후 12시간 경과 여부.
+     * 사파리 프라이빗 모드는 접근 자체가 예외라 감싸지 않으면 연출이 통째로 멈춘다
      */
     function popupDue() {
         try {
-            // 기록이 없거나 옛 형식('YYYY-MM-DD')이 남아 있으면 NaN 이라 한 번 띄운다
+            // 기록이 없거나 옛 형식이면 NaN — 한 번 띄운다
             const last = parseInt(localStorage.getItem(SHOWN_AT_KEY), 10);
             if (!last) return true;
 
-            // 기기 시계를 되돌리면 last 가 미래로 남아 영영 안 뜬다 — 그때도 띄운다
+            // 시계를 되돌리면 last 가 미래로 남아 영영 안 뜬다 — 그때도 띄운다
             const now = Date.now();
             return now < last || now - last >= POPUP_GAP_MS;
         } catch (e) {
@@ -59,7 +58,7 @@
         } catch (e) {}
     }
 
-    /** 3주년까지 남은 날. 당일이면 0, 지났으면 음수 */
+    /** 3주년까지 남은 날. 당일 0, 이후 음수 */
     function daysUntilAnniv() {
         const parts = ANNIV_DATE.split('-');
         const target = new Date(+parts[0], +parts[1] - 1, +parts[2]);
@@ -70,7 +69,7 @@
 
     if (!inShowWindow()) return;
 
-    // 12시간이 안 지난 사람에게는 팝업만 빠진다 — 폭죽과 반짝이는 그대로다
+    // 12시간이 안 지났으면 팝업만 생략 — 폭죽·반짝이는 그대로
     const popupDueNow = popupDue();
 
     /* 폭죽은 홈에서만 터진다. index.jsp 의 <script ... data-confetti="on"> 이 스위치다 —
@@ -82,8 +81,7 @@
     const reduceMotion = !!(window.matchMedia
             && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 
-    // 폭죽과 반짝이가 캔버스 하나와 루프를 같이 쓴다.
-    // 알갱이가 하나도 없으면 루프를 멈추므로 평소에는 아무것도 돌지 않는다.
+    // 폭죽과 반짝이가 캔버스·루프를 공유. 알갱이가 없으면 루프를 멈춘다
     const particles = [];
     let canvas = null;
     let ctx = null;
@@ -99,12 +97,12 @@
         document.body.appendChild(canvas);
         ctx = canvas.getContext('2d');
         resizeCanvas();
-        // 주소창이 접혔다 펴지는 모바일에서도 좌표가 어긋나지 않게 다시 잡는다
+        // 주소창이 접혔다 펴지는 모바일에서 좌표가 어긋나지 않게 재계산
         window.addEventListener('resize', resizeCanvas, { passive: true });
     }
 
     function resizeCanvas() {
-        // 3배 이상은 눈에 띄는 차이 없이 그리는 양만 늘어난다
+        // 3배 이상은 차이 없이 그리는 양만 늘어난다
         const dpr = Math.min(window.devicePixelRatio || 1, 2);
         vw = window.innerWidth;
         vh = window.innerHeight;
@@ -122,7 +120,7 @@
     function tick(ts) {
         rafId = null;
 
-        // 60fps 한 프레임을 1 로 본다. 탭이 잠깐 멈췄다 돌아와도 순간이동하지 않게 3 프레임에서 자른다
+        // 60fps 한 프레임을 1 로. 탭 복귀 시 순간이동을 막으려 3 프레임에서 자른다
         const dt = lastTs ? Math.min((ts - lastTs) / 16.67, 3) : 1;
         lastTs = ts;
 
@@ -163,14 +161,14 @@
         ctx.rotate(p.rot);
 
         if (p.shape === 'ring') {
-            // 클릭 자리에서 퍼지는 테두리 원. 굵기는 그대로 두고 반지름만 키운다
+            // 클릭 지점에서 퍼지는 테두리 원. 굵기 고정, 반지름만 확대
             ctx.strokeStyle = p.color;
             ctx.lineWidth = p.line;
             ctx.beginPath();
             ctx.arc(0, 0, p.size + p.grow * p.life, 0, Math.PI * 2);
             ctx.stroke();
         } else if (p.shape === 'star') {
-            // 오목한 네 꼭짓점 — 사라지면서 작아진다
+            // 오목한 네 꼭짓점 — 소멸하며 축소
             const r = p.size * (1 - 0.45 * (p.life / p.maxLife));
             ctx.beginPath();
             ctx.moveTo(0, -r);
@@ -180,7 +178,7 @@
             ctx.quadraticCurveTo(0, 0, 0, -r);
             ctx.fill();
         } else {
-            // 가로만 눌렀다 펴서 종이가 팔랑이는 느낌을 낸다
+            // 가로만 눌렀다 펴서 종이가 팔랑이는 느낌
             ctx.scale(Math.cos(p.flutter + p.life * 0.14), 1);
             if (p.shape === 'circle') {
                 ctx.beginPath();
@@ -194,7 +192,7 @@
         ctx.restore();
     }
 
-    /** 색은 테마 토큰에서 가져온다 — 다크 테마에서도 그대로 뜬다 */
+    /** 색은 테마 토큰에서 — 다크 테마에서도 그대로 */
     function readPalette() {
         const cs = getComputedStyle(document.documentElement);
         function token(name, fallback) {
@@ -223,7 +221,7 @@
         return list[(Math.random() * list.length) | 0];
     }
 
-    /** 한 지점에서 부채꼴로 쏜다. angle/spread 는 라디안, 캔버스 좌표라 위쪽이 음수다 */
+    /** 한 지점에서 부채꼴 발사. angle/spread 는 라디안, 캔버스 좌표라 위쪽이 음수 */
     function cannon(x, y, angle, spread, count, power) {
         for (let i = 0; i < count; i++) {
             const a = angle + (Math.random() - 0.5) * spread;
@@ -249,7 +247,7 @@
         startLoop();
     }
 
-    /** 화면 위에서 천천히 내려오는 조각 — 발사 사이를 메운다 */
+    /** 위에서 내려오는 조각 — 발사 사이를 메운다 */
     function drift(count) {
         for (let i = 0; i < count; i++) {
             particles.push({
@@ -275,7 +273,7 @@
     }
 
     function fireConfetti() {
-        // 화면 높이에 맞춘 발사력. 중간 세기 알갱이가 화면의 3분의 2쯤까지 올라간다
+        // 화면 높이에 맞춘 발사력. 중간 세기가 화면 2/3 까지 올라간다
         const power = Math.max(18, Math.min(vh, 1300) / 28);
 
         function volley() {
@@ -294,8 +292,8 @@
             clearInterval(drizzle);
         }, CONFETTI_MS - 900);
 
-        // 남은 조각을 한꺼번에 거둔다. 이게 없으면 늦게 뜬 조각이 8초 넘게 흩날린다.
-        // 반짝이(star)는 계속 살아 있어야 하므로 폭죽 조각만 고른다.
+        // 남은 조각 일괄 정리. 없으면 늦게 뜬 조각이 8초 넘게 흩날린다.
+        // 반짝이(star)는 유지해야 하므로 폭죽 조각만
         setTimeout(function () {
             for (let i = 0; i < particles.length; i++) {
                 const p = particles[i];
@@ -327,7 +325,7 @@
         startLoop();
     }
 
-    /** 클릭한 자리에서 링 하나가 퍼지고 파편이 튄다. 0.5초 안에 끝난다 */
+    /** 클릭 지점에서 링이 퍼지고 파편이 튄다. 0.5초 내 종료 */
     function clickBurst(x, y) {
         particles.push({
             shape: 'ring',
@@ -373,7 +371,7 @@
         let lastX = 0;
         let lastY = 0;
 
-        // 손가락에는 커서가 없다. 터치 기기에서는 배경 반짝이만 남는다
+        // 터치 기기는 커서가 없어 배경 반짝이만
         const finePointer = !!(window.matchMedia
                 && window.matchMedia('(hover: hover) and (pointer: fine)').matches);
 
@@ -387,7 +385,7 @@
                 lastX = e.clientX;
                 lastY = e.clientY;
 
-                // 거의 멈춰 있으면 만들지 않는다 — 커서 자리에 반짝이가 쌓이는 걸 막는다
+                // 거의 멈춰 있으면 생성 안 함 — 커서 자리에 쌓이는 것 방지
                 if (dx * dx + dy * dy < 36) return;
 
                 lastAt = now;
@@ -411,12 +409,12 @@
 
         document.addEventListener('click', function (e) {
             if (lastPointerType !== 'touch') return;      // 마우스는 위에서 이미 터뜨렸다
-            // 키보드(Enter/Space)로 눌린 클릭은 좌표가 0 이라 화면 구석에서 터진다
+            // 키보드 클릭은 좌표가 0 이라 화면 구석에서 터진다
             if (!e.clientX && !e.clientY) return;
             clickBurst(e.clientX, e.clientY);
         }, { passive: true });
 
-        // 배경 반짝이. 사람이 "어, 방금 뭐 반짝였나" 할 정도로만 띄운다
+        // 배경 반짝이. 눈치챌 듯 말 듯한 빈도로
         setInterval(function () {
             if (document.hidden) return;
             sparkle(Math.random() * vw, Math.random() * vh * 0.92,
@@ -438,7 +436,7 @@
         pop = document.createElement('div');
         pop.className = 'anniv-pop';
         pop.setAttribute('role', 'dialog');
-        // 뒤쪽 페이지를 막지 않는 안내창이라 modal 이 아니다
+        // 뒤 페이지를 막지 않는 안내창이라 modal 아님
         pop.setAttribute('aria-modal', 'false');
         pop.setAttribute('aria-labelledby', 'annivPopTitle');
 
@@ -467,7 +465,7 @@
 
     function showPopup() {
         pop.classList.add('show');
-        // 닫을 때가 아니라 뜨는 순간 적는다 — 안 닫고 페이지를 옮겨도 12시간은 다시 뜨지 않는다
+        // 닫을 때가 아니라 뜨는 순간 기록 — 안 닫고 이동해도 12시간은 유지
         rememberPopupShown();
     }
 
@@ -475,7 +473,7 @@
         pop.classList.remove('show');
     }
 
-    // 공용 모달의 ESC 처리와 겹치지 않는다 — 서로 자기 것만 닫는다
+    // 공용 모달의 ESC 와 겹치지 않는다 — 각자 자기 것만
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape' && pop && pop.classList.contains('show')) {
             closePopup();
@@ -490,7 +488,7 @@
         }
     }
 
-    /** 백그라운드 탭에서는 requestAnimationFrame 이 멈춰 폭죽만 낭비된다. 돌아올 때까지 미룬다 */
+    /** 백그라운드 탭은 rAF 가 멈춰 폭죽만 낭비 — 복귀까지 대기 */
     function whenVisible(fn) {
         if (!document.hidden) {
             fn();
@@ -504,7 +502,7 @@
         document.addEventListener('visibilitychange', onVisible);
     }
 
-    /** 홈의 문 인트로가 걷힌 뒤에 터뜨린다 — 문 뒤에서 터지면 아무도 못 본다 */
+    /** 문 인트로가 걷힌 뒤 발사 — 문 뒤에서 터지면 안 보인다 */
     function whenIntroGone(fn) {
         const intro = document.querySelector('.door-intro');
         if (!intro || intro.classList.contains('hidden')) {
@@ -513,7 +511,7 @@
         }
 
         const observer = new MutationObserver(function () {
-            // fading 이 붙는 순간이 문이 다 열리고 화면이 드러나기 시작하는 때다
+            // fading 이 붙는 순간이 문이 열리고 화면이 드러나는 시점
             if (!intro.isConnected
                     || intro.classList.contains('fading')
                     || intro.classList.contains('hidden')) {
@@ -526,8 +524,8 @@
     }
 
     /**
-     * 캔버스와 반짝이만 켠다. 폭죽·팝업을 건너뛰는 날에도 이것만은 남는다.
-     * 움직임을 줄이도록 설정한 사용자에게는 아무것도 켜지 않는다(false 를 돌려준다).
+     * 캔버스와 반짝이만. 폭죽·팝업을 건너뛰는 날에도 이것은 남는다.
+     * prefers-reduced-motion 이면 아무것도 켜지 않는다(false 반환)
      */
     function startSparkles() {
         if (reduceMotion) return false;
@@ -542,7 +540,7 @@
 
         if (moving && confettiEnabled) fireConfetti();
 
-        // 폭죽이 없으면 팝업을 늦출 이유가 없다
+        // 폭죽이 없으면 팝업을 늦출 이유 없음
         if (popupDueNow) {
             setTimeout(showPopup, (moving && confettiEnabled) ? POPUP_DELAY_MS : 300);
         }

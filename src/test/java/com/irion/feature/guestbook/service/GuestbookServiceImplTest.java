@@ -10,10 +10,10 @@ import java.lang.reflect.Proxy;
 
 import static org.junit.Assert.*;
 
-/** 저장 직전 다듬기와 조회 범위 제한. 매퍼는 가짜라 DB 없이 돈다. */
+/** 저장 직전 정리와 조회 범위 제한. 매퍼가 가짜라 DB 없이 돈다 */
 public class GuestbookServiceImplTest {
 
-    /** DB 로 내려가기 직전의 값을 붙잡아 두는 가짜 매퍼 */
+    /** DB 직전의 값을 붙잡는 가짜 매퍼 */
     private static final class Captor {
         GuestbookVO saved;
         int offset = -1;
@@ -36,7 +36,7 @@ public class GuestbookServiceImplTest {
         assertEquals("반짝이길", captor.saved.getCheer());
     }
 
-    /** 공백만 넣은 응원 한마디가 '' 로 저장되면 카드에 빈 줄이 생긴다 */
+    /** 공백만 든 응원이 '' 로 저장되면 카드에 빈 줄이 생긴다 */
     @Test
     public void 공백만_있는_응원_한마디는_NULL_이_된다() {
         Captor captor = new Captor();
@@ -51,7 +51,7 @@ public class GuestbookServiceImplTest {
         assertNull(captor.saved.getCheer());
     }
 
-    /** 주소로 limit 을 키워 통째로 긁어가는 것을 막는다 */
+    /** limit 을 키워 통째로 긁어가는 것을 방지 */
     @Test
     public void 한_번에_가져갈_수_있는_개수에_상한이_있다() {
         Captor captor = new Captor();
@@ -70,7 +70,7 @@ public class GuestbookServiceImplTest {
         assertEquals(12, captor.limit);
     }
 
-    /** 음수 offset 은 SQL 문법 오류가 되어 500 이 난다 */
+    /** 음수 offset 은 SQL 문법 오류 → 500 */
     @Test
     public void 음수_offset_은_0_으로_눕힌다() {
         Captor captor = new Captor();

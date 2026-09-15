@@ -13,8 +13,8 @@ import java.util.Map;
 import static org.junit.Assert.*;
 
 /**
- * 인증 두 겹 중 안쪽. 바깥 겹인 AdminLoginFilter 와 같은 판정을 내려야 한다 —
- * 한쪽만 통과시키면 필터를 우회하는 경로가 생기고, 응답 모양이 갈리면 화면이 엇갈린다.
+ * 인증 두 겹 중 안쪽. AdminLoginFilter 와 같은 판정을 내려야 한다 —
+ * 한쪽만 통과하면 우회 경로가 생기고, 응답이 갈리면 화면이 엇갈린다
  */
 public class AdminLoginInterceptorTest {
 
@@ -31,7 +31,7 @@ public class AdminLoginInterceptorTest {
         assertEquals("/admin/admin-login", response.redirect);
     }
 
-    /** 컨텍스트 경로가 붙은 배포에서도 주소가 맞아야 한다 */
+    /** 컨텍스트 경로가 붙어도 주소가 맞아야 한다 */
     @Test
     public void 리다이렉트에_컨텍스트_경로를_붙인다() throws Exception {
         FakeHttp.Request request = new FakeHttp.Request()
@@ -43,7 +43,7 @@ public class AdminLoginInterceptorTest {
         assertEquals("/yeti/admin/admin-login", response.redirect);
     }
 
-    /** 302 를 주면 jQuery 가 따라가 로그인 HTML 을 200 으로 받는다 — 필터와 같은 판정 */
+    /** 302 면 jQuery 가 따라가 로그인 HTML 을 200 으로 받는다 — 필터와 동일 판정 */
     @Test
     public void AJAX_요청에는_401_을_준다() throws Exception {
         FakeHttp.Request request = new FakeHttp.Request().uri("/admin/schedule/list").ajax();
@@ -83,7 +83,7 @@ public class AdminLoginInterceptorTest {
         assertEquals(200, response.status);
     }
 
-    /** getSession(true) 로 물으면 로그인하지 않은 요청마다 빈 세션이 쌓인다 */
+    /** getSession(true) 면 미인증 요청마다 빈 세션이 쌓인다 */
     @Test
     public void 세션을_새로_만들지_않는다() throws Exception {
         FakeHttp.Request request = new FakeHttp.Request().uri("/admin/schedule").browser();
@@ -94,7 +94,7 @@ public class AdminLoginInterceptorTest {
         assertFalse("로그인 검사가 세션을 만들면 안 된다", request.sessionCreated);
     }
 
-    /** 세션에 든 값은 AdminVO 다 — 다른 타입이 들어오면 여기서 드러난다 */
+    /** 세션 값은 AdminVO — 다른 타입이면 여기서 드러난다 */
     private static HttpSession adminSession() {
         AdminVO admin = new AdminVO();
         admin.setAdminId(1L);

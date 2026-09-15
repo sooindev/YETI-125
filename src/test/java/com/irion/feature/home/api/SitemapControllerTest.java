@@ -11,11 +11,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
- * 사이트맵.
- *
- * 손으로 적던 파일을 없애고 캐시에서 뽑게 바꾼 자리다. 지켜야 할 것이 셋 있다 —
- * 고정 주소가 빠지지 않을 것, 연령 제한 클립이 실리지 않을 것(상세 화면이 noindex 라 서로 어긋난다),
- * 그리고 치지직이 죽어도 500 이 아니라 짧은 사이트맵이 나갈 것.
+ * 사이트맵. 고정 파일을 없애고 캐시에서 뽑는다. 지킬 것 셋 —
+ * 고정 주소 유지, 연령 제한 제외(상세가 noindex 라 어긋남), 치지직 장애 시 500 대신 짧은 사이트맵
  */
 public class SitemapControllerTest {
 
@@ -47,7 +44,7 @@ public class SitemapControllerTest {
         assertTrue(xml.contains("<lastmod>2025-07-30</lastmod>"));
     }
 
-    /** 날짜 모양이 바뀌어도 사이트맵 전체가 깨지면 안 된다 — 그 항목의 lastmod 만 빠진다 */
+    /** 날짜 형식이 바뀌어도 전체가 깨지면 안 된다 — 그 항목의 lastmod 만 생략 */
     @Test
     public void 날짜를_못_읽으면_lastmod_를_아예_뺀다() throws Exception {
         String xml = sitemapWith(ClipFeeds.of(
@@ -76,10 +73,7 @@ public class SitemapControllerTest {
         assertFalse(xml.contains("/clips/null"));
     }
 
-    /**
-     * 치지직이 죽었을 때. 사이트맵이 500 을 내면 검색엔진이 "이 사이트의 사이트맵은 고장났다"로
-     * 기억하므로, 짧게라도 성한 것을 준다.
-     */
+    /** 치지직 장애 시. 500 을 내면 검색엔진이 "고장난 사이트맵" 으로 기억한다 */
     @Test
     public void 클립을_못_받아도_고정_주소는_나간다() throws Exception {
         String xml = sitemapWith(null);

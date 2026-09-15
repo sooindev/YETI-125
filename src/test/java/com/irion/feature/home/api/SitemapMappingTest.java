@@ -14,15 +14,13 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
- * "/sitemap.xml 이 정말 컨트롤러에 걸리는가."
+ * /sitemap.xml 이 컨트롤러에 걸리는지.
  *
- * 운영 배포에서 사이트맵이 우리 컨트롤러의 출력과 다른 것이 나와, 매핑 자체를 의심했다.
- * 주소 끝의 <b>.xml 확장자</b>가 의심스러운 자리다 — 스프링은 예전에 확장자를 보고
- * 응답 형식을 협상했고(useSuffixPatternMatch · favorPathExtension), 그 동작에 걸리면
- * 확장자가 붙은 주소는 조용히 다른 곳으로 간다.
+ * 운영에서 사이트맵 출력이 달라 매핑을 의심했다. 의심 지점은 .xml 확장자 —
+ * 스프링이 확장자로 응답 형식을 협상하던 동작(useSuffixPatternMatch · favorPathExtension)에
+ * 걸리면 확장자 붙은 주소가 조용히 다른 곳으로 간다.
  *
- * 톰캣 없이 핸들러 매핑만 세워서 확인한다. 이 테스트가 통과하는 한, 사이트맵이
- * 이상하게 나오는 원인은 매핑이 아니라 그 바깥(배포본·서버 설정)에 있다.
+ * 톰캣 없이 핸들러 매핑만 세워 확인. 통과하는 한 원인은 매핑 바깥에 있다
  */
 public class SitemapMappingTest {
 
@@ -35,13 +33,13 @@ public class SitemapMappingTest {
         assertEquals("sitemap", handler.getMethod().getName());
     }
 
-    /** 확장자를 뗀 주소까지 덩달아 걸리면 안 된다 — 그런 주소는 없다 */
+    /** 확장자를 뗀 주소는 걸리면 안 된다 — 그런 주소는 없다 */
     @Test
     public void 확장자를_뗀_주소는_걸리지_않는다() throws Exception {
         assertEquals(null, handlerFor("/sitemap"));
     }
 
-    /** 클립 상세도 같은 매핑을 쓰므로 함께 못 박는다 */
+    /** 클립 상세도 같은 매핑이라 함께 검증 */
     @Test
     public void 클립_상세_주소는_정규식_모양만_받는다() throws Exception {
         assertNotNull(handlerFor("/clips/kJ3y4mwyqe"));

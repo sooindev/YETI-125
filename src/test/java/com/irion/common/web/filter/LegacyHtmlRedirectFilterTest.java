@@ -9,7 +9,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-/** 옛 주소가 정규 주소로 301 되는지. 301 은 되돌리기 어려우므로 목적지를 못 박아둔다. */
+/** 옛 주소의 301 정규화. 301 은 되돌리기 어려워 목적지를 고정한다 */
 public class LegacyHtmlRedirectFilterTest {
 
     @Test
@@ -25,7 +25,7 @@ public class LegacyHtmlRedirectFilterTest {
         assertMoved("/admin/admin-schedule.html", "/admin/schedule");
     }
 
-    /** 유입 경로를 잃지 않으려면 utm 같은 파라미터가 살아 있어야 한다 */
+    /** utm 같은 파라미터가 살아야 유입 경로를 잃지 않는다 */
     @Test
     public void 쿼리스트링은_그대로_넘긴다() throws Exception {
         FakeHttp.Response response = run(
@@ -34,7 +34,7 @@ public class LegacyHtmlRedirectFilterTest {
         assertEquals("/schedule?utm_source=x&y=2", response.header("Location"));
     }
 
-    /** ROOT 가 아닌 컨텍스트에 배포해도 주소가 깨지면 안 된다 */
+    /** ROOT 가 아닌 컨텍스트에서도 주소가 깨지면 안 된다 */
     @Test
     public void 컨텍스트_경로를_붙여준다() throws Exception {
         FakeHttp.Response response = run(
@@ -44,7 +44,7 @@ public class LegacyHtmlRedirectFilterTest {
         assertEquals("/yeti/schedule", response.header("Location"));
     }
 
-    /** 정규 주소까지 건드리면 301 과 forward 가 서로를 부르며 끝없이 돈다. */
+    /** 정규 주소까지 건드리면 301 과 forward 가 서로를 부른다 */
     @Test
     public void 정규_주소는_건드리지_않는다() throws Exception {
         assertPassed("/");
@@ -53,7 +53,7 @@ public class LegacyHtmlRedirectFilterTest {
         assertPassed("/admin/schedule");
     }
 
-    /** 톰캣이 /./ 와 /../ 는 정리해주지만 겹친 슬래시와 퍼센트 인코딩은 그대로 넘어온다. */
+    /** 톰캣이 /./ · /../ 는 정리하지만 중복 슬래시와 퍼센트 인코딩은 그대로 온다 */
     @Test
     public void 다른_표기로도_옛_주소에_닿을_수_없다() throws Exception {
         assertMoved("//schedule.html", "/schedule");
@@ -61,7 +61,7 @@ public class LegacyHtmlRedirectFilterTest {
         assertMoved("//admin//admin-schedule.html", "/admin/schedule");
     }
 
-    /** 같은 곳을 가리키는 표기는 정규 표기 하나로 모은다 */
+    /** 같은 곳을 가리키는 표기는 하나로 통일 */
     @Test
     public void 겹친_슬래시와_끝_슬래시를_정리한다() throws Exception {
         assertMoved("/schedule/", "/schedule");
@@ -71,7 +71,7 @@ public class LegacyHtmlRedirectFilterTest {
         assertMoved("//", "/");
     }
 
-    /** 루트는 끝 슬래시가 정규 표기다 — 떼면 빈 주소가 된다 */
+    /** 루트는 끝 슬래시가 정규 — 떼면 빈 주소 */
     @Test
     public void 루트는_그대로_둔다() throws Exception {
         assertPassed("/");
@@ -85,7 +85,7 @@ public class LegacyHtmlRedirectFilterTest {
         assertPassed("/sitemap.xml");
     }
 
-    /** 목록에 없는 .html 은 옮긴 적이 없으니 404 로 가야 한다 */
+    /** 표에 없는 .html 은 이전한 적이 없으니 404 */
     @Test
     public void 목록에_없는_html_은_지나간다() throws Exception {
         assertPassed("/nope.html");

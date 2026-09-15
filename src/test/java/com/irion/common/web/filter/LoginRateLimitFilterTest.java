@@ -7,15 +7,12 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
- * 로그인 빈도 제한 필터 — 로그인 POST 만 세는가, 한도를 넘으면 해시 계산 앞에서 끊는가,
- * 헤더를 지어내 우회할 수 없는가.
- *
- * 한도(20회/분)는 상수라 테스트에서 바꿀 수 없다. 대신 그 횟수만큼 실제로 두드린다 —
- * 필터가 무엇을 세는 요청으로 보는지가 여기서 확인하고 싶은 것이다.
+ * 로그인 빈도 제한 필터 — 로그인 POST 만 집계, 한도 초과 시 해시 앞에서 차단, 헤더 우회 불가.
+ * 한도(20회/분)가 상수라 그 횟수만큼 실제로 호출한다 — 무엇을 세는 요청으로 보는지가 관심사
  */
 public class LoginRateLimitFilterTest {
 
-    /** LoginRateLimiter 의 기본 한도. 넘겨야 막히는 것을 보려면 여기서도 알아야 한다 */
+    /** LoginRateLimiter 기본 한도. 초과 동작을 보려면 여기서도 필요 */
     private static final int LIMIT = 20;
 
     @Test
@@ -63,7 +60,7 @@ public class LoginRateLimitFilterTest {
         assertTrue("옆집이 막혔다고 같이 막히면 안 된다", chain.passed);
     }
 
-    /** 헤더는 보낸 쪽이 지어낼 수 있다. 앞에 뭘 적어 보내도 nginx 가 덧붙인 마지막 값으로 센다 */
+    /** 헤더는 지어낼 수 있다 — nginx 가 덧붙인 마지막 값으로 집계 */
     @Test
     public void X_Forwarded_For_를_지어내도_우회할_수_없다() throws Exception {
         LoginRateLimitFilter filter = new LoginRateLimitFilter();
@@ -112,7 +109,7 @@ public class LoginRateLimitFilterTest {
         }
     }
 
-    /** 원본 주소로 판정하면 이 요청이 검사를 비켜 간다 */
+    /** 원본 주소로 판정하면 이 요청이 비켜 간다 */
     @Test
     public void 경로를_비틀어도_같은_요청으로_센다() throws Exception {
         LoginRateLimitFilter filter = new LoginRateLimitFilter();
@@ -156,7 +153,7 @@ public class LoginRateLimitFilterTest {
     }
 
 
-    /** nginx 를 거쳐 들어온 로그인 요청 한 건 */
+    /** nginx 를 거친 로그인 요청 한 건 */
     private static FakeHttp.Request loginRequest(String clientIp) {
         return new FakeHttp.Request()
                 .uri("/admin/loginProc").method("POST").ajax()

@@ -3,7 +3,7 @@
 /* ---- Fonts ------------------------------------------------- */
 /* Anton  — compressed display  | JetBrains Mono — body/meta    */
 
-/* ---- 토큰 — --ink* 는 표면 스케일 이름이다 (pale → near-white → ink) ---- */
+/* ---- 토큰 — --ink* 는 표면 스케일(pale → near-white → ink) ---- */
 :root {
     /* surfaces — pale to bright */
     --ink:        #f3f8fc;  /* page background — pale sky */
@@ -56,21 +56,21 @@
     --gutter:   clamp(20px, 4vw, 56px);
     --head-h:   76px;
 
-    /* 노치 영역. viewport-fit=cover 와 짝 — 없으면 헤더 위에 빈 띠가 남는다 */
+    /* 노치 영역. viewport-fit=cover 와 짝 — 없으면 헤더 위에 빈 띠 */
     --safe-top:   env(safe-area-inset-top, 0px);
     --head-total: calc(var(--head-h) + var(--safe-top));
     --ease:     cubic-bezier(0.16, 1, 0.3, 1);
     --t-fast:   0.32s var(--ease);
     --t-slow:   0.7s var(--ease);
 
-    /* 커서 그림 — 화살표 옆에 눈송이. 테마마다 화살표 색이 뒤집힌다 */
+    /* 커서 — 화살표 옆 눈송이. 테마마다 화살표 색 반전 */
     --cursor-1x: url("/resources/images/cursors/cursor-snow-32.png");
     --cursor-2x: url("/resources/images/cursors/cursor-snow-64.png");
 
     color-scheme: light;
 }
 
-/* ---- 다크 테마 — 같은 토큰에 야간 값. 액센트는 한 단계 밝힌다 ---- */
+/* ---- 다크 테마 — 같은 토큰의 야간 값. 액센트는 한 단계 밝게 ---- */
 :root[data-theme="dark"] {
     /* surfaces — deep to raised */
     --ink:        #0e161d;
@@ -113,14 +113,14 @@
     --grain-blend:   screen;
     --grain-opacity: 0.07;
 
-    /* 어두운 바탕에서는 화살표를 흰색으로 뒤집는다 */
+    /* 어두운 바탕에서는 화살표를 흰색으로 */
     --cursor-1x: url("/resources/images/cursors/cursor-snow-dark-32.png");
     --cursor-2x: url("/resources/images/cursors/cursor-snow-dark-64.png");
 
     color-scheme: dark;
 }
 
-/* JS 가 꺼졌을 때만 쓰인다 — 평소에는 theme-init.js 가 첫 페인트 전에 data-theme 을 찍는다 */
+/* JS 가 꺼졌을 때만 — 평소에는 theme-init.js 가 첫 페인트 전에 data-theme 을 찍는다 */
 @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
         --ink:        #0e161d;
@@ -157,7 +157,7 @@
         --grain-blend:   screen;
         --grain-opacity: 0.07;
 
-        /* 어두운 바탕에서는 화살표를 흰색으로 뒤집는다 */
+        /* 어두운 바탕에서는 화살표를 흰색으로 */
         --cursor-1x: url("/resources/images/cursors/cursor-snow-dark-32.png");
         --cursor-2x: url("/resources/images/cursors/cursor-snow-dark-64.png");
 
@@ -186,7 +186,7 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
-/* ---- 그레인 — 화면 전체에 깔리는 SVG 노이즈 레이어 ---- */
+/* ---- 그레인 — 전체에 깔리는 SVG 노이즈 ---- */
 body::after {
     content: "";
     position: fixed;
@@ -343,12 +343,12 @@ img { display: block; max-width: 100%; }
 .header {
     position: fixed;
     top: 0; left: 0; right: 0;
-    /* 안전 영역까지 배경이 닿도록 헤더를 키우고 내용은 그 아래에서 시작한다 */
+    /* 안전 영역까지 배경이 닿도록 헤더를 키우고 내용은 그 아래부터 */
     height: var(--head-total);
     padding-top: var(--safe-top);
     z-index: 1000;
 
-    /* 최상단에서는 묻혀 있다가 스크롤이 시작되면 흐린 배경이 배어 나온다 (is-stuck) */
+    /* 최상단에서는 묻혀 있다가 스크롤 시작 시 흐린 배경(is-stuck) */
     background: transparent;
     border-bottom: 1px solid transparent;
 
@@ -363,7 +363,7 @@ img { display: block; max-width: 100%; }
     will-change: transform;
 }
 
-/* 스크롤이 시작되면 배경이 배어 나온다 */
+/* 스크롤 시작 시 배경 노출 */
 .header.is-stuck {
     background: var(--surface-blur);
     backdrop-filter: blur(14px) saturate(150%);
@@ -371,7 +371,7 @@ img { display: block; max-width: 100%; }
     border-bottom-color: var(--ink-line);
 }
 
-/* backdrop-filter 미지원(인앱 브라우저)에서는 본문이 헤더 글자와 겹쳐 보여 불투명으로 떨어뜨린다 */
+/* backdrop-filter 미지원(인앱 브라우저)은 본문이 헤더 글자와 겹쳐 불투명 처리 */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
     .header.is-stuck { background: var(--ink); }
 }
@@ -456,7 +456,7 @@ img { display: block; max-width: 100%; }
    색이면 상단바에서 서로를 흐린다. 내릴 때는 header.jsp 의 클래스만 떼면 된다.
    ----------------------------------------------------------- */
 .nav-link--event {
-    /* 가로 메뉴와 모바일 세로 메뉴 양쪽에서 점이 글자를 따라가도록 */
+    /* 가로·세로 메뉴 양쪽에서 점이 글자를 따라가도록 */
     display: inline-flex;
     align-items: center;
     gap: 0.55em;
@@ -465,7 +465,7 @@ img { display: block; max-width: 100%; }
 }
 .nav-link--event::before {
     content: "";
-    /* 글자 뒤에 놓는다 — 앞에 두면 목록 기호처럼 읽힌다 */
+    /* 글자 뒤에 — 앞이면 목록 기호처럼 읽힌다 */
     order: 1;
     width: 5px;
     height: 5px;
@@ -475,10 +475,10 @@ img { display: block; max-width: 100%; }
 }
 .nav-link--event:hover { color: var(--rose-deep); }
 .nav-link--event.active { color: var(--rose); }
-/* 밑줄도 같은 색으로 — frost 밑줄이 남으면 두 색이 겹쳐 지저분해진다 */
+/* 밑줄도 같은 색 — frost 밑줄이 남으면 두 색이 겹친다 */
 .nav-link--event::after { background: var(--rose); }
 
-/* ---- 테마 토글 — 아이콘 셋 모두 DOM 에 두고 하나만 보인다 (레이아웃 비용 없음) ---- */
+/* ---- 테마 토글 — 아이콘 셋을 모두 DOM 에 두고 하나만 노출 ---- */
 .theme-toggle {
     display: inline-flex;
     align-items: center;
@@ -509,15 +509,15 @@ img { display: block; max-width: 100%; }
     stroke-linecap: round;
     stroke-linejoin: round;
 }
-/* 아이콘은 칠해진 색이 아니라 고른 모드를 보여준다. data-mode 는 theme-init.js 가 찍는다 */
+/* 아이콘은 칠해진 색이 아니라 선택한 모드를 표시. data-mode 는 theme-init.js 가 찍는다 */
 .theme-toggle[data-mode="system"] .icon-auto { display: block; }
 .theme-toggle[data-mode="light"]  .icon-sun  { display: block; }
 .theme-toggle[data-mode="dark"]   .icon-moon { display: block; }
 
-/* JS 가 꺼져 있으면 data-mode 가 없다 — 시스템을 따르는 상태이므로 자동 아이콘 */
+/* JS 가 꺼지면 data-mode 가 없다 — 시스템을 따르므로 자동 아이콘 */
 .theme-toggle:not([data-mode]) .icon-auto { display: block; }
 
-/* 자동 아이콘의 반쪽만 채워 명암 대비를 나타낸다 */
+/* 자동 아이콘은 반쪽만 채워 명암 대비 표시 */
 .theme-toggle .icon-auto .half {
     fill: currentColor;
     stroke: none;
@@ -544,8 +544,7 @@ img { display: block; max-width: 100%; }
 .mobile-menu-btn.active span:nth-child(2) { opacity: 0; }
 .mobile-menu-btn.active span:nth-child(3) { transform: translateY(-7.5px) rotate(-45deg); width: 100%; }
 
-/* Page masthead — 하위 화면의 머리. 일정 · 클립 아카이브가 함께 쓴다.
-   전에는 schedule.css 에만 있었다 (그 화면 전용인 줄 알았다) */
+/* Page masthead — 하위 화면의 머리. 일정 · 클립 아카이브 공용 */
 /* Page masthead */
 .page-masthead {
     padding: clamp(56px, 9vw, 130px) 0 clamp(36px, 5vw, 64px);
@@ -580,7 +579,7 @@ img { display: block; max-width: 100%; }
     color: var(--bone-dim);
     max-width: 38ch;
     line-height: 1.8;
-    /* wrap by word — never split a Korean word mid-character */
+    /* 단어 단위 줄바꿈 — 한글이 중간에서 잘리지 않게 */
     word-break: keep-all;
 }
 
@@ -672,8 +671,7 @@ img { display: block; max-width: 100%; }
     overflow: hidden;
     transition: color var(--t-fast), border-color var(--t-fast);
 }
-/* [hidden] 의 display:none 은 UA 규칙이라 .btn 의 display 에 진다.
-   숨겼는데 그대로 보이는 자리가 생기므로 여기서 못 박는다 */
+/* [hidden] 의 display:none 은 UA 규칙이라 .btn 의 display 에 진다 */
 .btn[hidden] { display: none; }
 
 .btn::before {
@@ -941,10 +939,9 @@ img { display: block; max-width: 100%; }
     input, textarea, select { font-size: 16px; }
 }
 
-/* 섹션 머리말 안에서 다른 화면으로 건네주는 링크 (홈의 인기 클립 → 클립 아카이브) */
+/* 섹션 머리말의 이동 링크 (홈 인기 클립 → 클립 아카이브) */
 .sec-head__link {
-    /* flex 라 제 줄을 차지한다 — 앞 문장 끝에 붙지 않는다.
-       머리말이 오른쪽 정렬이라 fit-content + auto 여백으로 오른쪽 끝에 맞춘다 */
+    /* flex 라 제 줄을 차지한다. 머리말이 오른쪽 정렬이라 fit-content + auto 여백 */
     display: flex;
     width: fit-content;
     margin-left: auto;

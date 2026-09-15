@@ -3,8 +3,8 @@
 (function() {
     'use strict';
 
-    // 하루에 한 번만. 탭을 닫아도 유지돼야 해서 localStorage 를 쓰고,
-    // 날짜는 로컬 기준으로 만든다 — toISOString() 은 한국에서 오전 9시에 날짜가 바뀐다.
+    // 하루 한 번. 탭을 닫아도 유지돼야 해 localStorage 를 쓴다.
+    // 날짜는 로컬 기준 — toISOString() 은 한국에서 오전 9시에 날짜가 바뀐다
     const INTRO_DATE_KEY = 'door_intro_date';
 
     function today() {
@@ -13,7 +13,7 @@
         return now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate());
     }
 
-    // 사파리 프라이빗 모드에서는 접근 자체가 예외라, 감싸지 않으면 인트로가 영영 안 열린다
+    // 사파리 프라이빗 모드는 접근 자체가 예외 — 감싸지 않으면 인트로가 안 열린다
     function introShownToday() {
         try {
             return localStorage.getItem(INTRO_DATE_KEY) === today();

@@ -20,24 +20,20 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 /**
- * 클립 상세 화면이 서버에서 그려지기 직전의 값.
+ * 클립 상세가 서버에서 그려지기 직전의 값.
  *
- * 이 화면은 이 저장소에서 유일하게 <b>바깥에서 온 글자를 서버가 HTML 에 박는</b> 곳이다.
- * JSTL 이 없어 JSP 가 대신 막아 주지 않으므로, 여기서 이스케이프를 마쳤는지가 곧 방어다.
+ * 바깥에서 온 글자를 서버가 HTML 에 박는 유일한 곳 —
+ * JSTL 이 없어 JSP 가 막아주지 않으므로 여기 이스케이프가 곧 방어다.
  *
- * 함께 못 박는 것 하나 더 — 우리 채널 목록에 없는 clipId 는 404 여야 한다.
- * 치지직 단건 API 는 채널을 알려주지 않아, 그것만 믿으면 남의 클립이 우리 주소로 열린다.
+ * 함께 검증 — 우리 채널 목록에 없는 clipId 는 404
  */
 public class ClipControllerTest {
 
     // ── 주소 모양 ─────────────────────────────────────────
 
     /**
-     * clipId 의 모양을 매핑에서 거른다. 여기 걸리지 않는 주소는 아무 핸들러에도 닿지 않아 404 다.
-     *
-     * 이 테스트가 있는 이유는 패턴 안에 중괄호가 또 들어 있기 때문이다 —
-     * {clipId:[A-Za-z0-9_-]{1,64}} 의 {1,64} 를 스프링이 경로 변수의 끝으로 읽어 버리면
-     * 매핑이 조용히 엉뚱한 것을 받는다.
+     * clipId 모양을 매핑에서 필터링. 불일치 시 핸들러에 안 닿아 404.
+     * 패턴 안에 중괄호가 또 있어서다 — {1,64} 를 스프링이 경로 변수의 끝으로 읽으면 매핑이 어긋난다
      */
     @Test
     public void 주소의_clipId_모양을_매핑에서_거른다() throws Exception {
@@ -77,11 +73,8 @@ public class ClipControllerTest {
     }
 
     /**
-     * 이 저장소에서 제일 비싼 실수를 막는 자리.
-     *
-     * 캐시가 막 만료돼 목록을 다시 채우는 중이거나 치지직이 죽었을 때도 클립을 못 찾는다.
-     * 그때 404 를 내면 멀쩡한 주소를 검색엔진이 "사라졌다" 로 읽고 색인에서 지운다 —
-     * 이 기능을 만든 이유가 색인인데 그것을 스스로 무너뜨린다.
+     * 캐시 재적재 중이거나 치지직 장애일 때도 클립을 못 찾는다.
+     * 그때 404 를 내면 멀쩡한 주소가 색인에서 지워진다 — 색인하려고 만든 기능이 스스로를 무너뜨린다
      */
     @Test
     public void 목록을_덜_받았으면_404_가_아니라_503_이다() throws Exception {
@@ -141,7 +134,7 @@ public class ClipControllerTest {
         assertTrue(titleJson.contains("\\u003c"));
     }
 
-    /** 설명(meta description)은 제목을 큰따옴표로 감싸 만든다 — 제목의 따옴표가 그대로 새면 속성이 닫힌다 */
+    /** meta description 이 제목을 큰따옴표로 감싼다 — 제목의 따옴표가 새면 속성이 닫힌다 */
     @Test
     public void 설명에도_제목이_들어가므로_함께_막는다() {
         Map<String, Object> model = view(clip("abc123", "\"따옴표\""));
@@ -150,7 +143,7 @@ public class ClipControllerTest {
                 ((String) model.get("description")).contains("\""));
         assertTrue(((String) model.get("description")).contains("&quot;"));
 
-        // JSON 쪽은 지우는 것이 아니라 역슬래시를 앞세워 살려 둔다
+        // JSON 은 삭제가 아니라 역슬래시로 이스케이프
         assertTrue(((String) model.get("descriptionJson")).contains("\\\""));
     }
 
@@ -223,7 +216,7 @@ public class ClipControllerTest {
         assertEquals("2:05", ClipController.ClipView.duration(125));
         assertEquals("PT2M5S", ClipController.ClipView.isoDuration(125));
 
-        // 한 시간을 넘기는 클립은 없지만, 없다고 믿고 쓰면 언젠가 "65:00" 이 나온다
+        // 한 시간 넘는 클립은 없지만, 없다고 믿으면 언젠가 "65:00" 이 나온다
         assertEquals("1:01:05", ClipController.ClipView.duration(3665));
         assertEquals("PT1H1M5S", ClipController.ClipView.isoDuration(3665));
     }
@@ -240,7 +233,7 @@ public class ClipControllerTest {
         assertEquals("2025-07-30T21:54:50+09:00", ClipController.ClipView.isoDate("2025-07-30 21:54:50"));
     }
 
-    /** 치지직이 주는 모양이 바뀌어도 화면 전체가 무너지지는 않아야 한다 */
+    /** 형식이 바뀌어도 화면 전체가 무너지면 안 된다 */
     @Test
     public void 날짜_모양이_다르면_날짜_줄만_빈다() {
         assertEquals("", ClipController.ClipView.koreanDate("어제"));
@@ -282,7 +275,7 @@ public class ClipControllerTest {
         return clip;
     }
 
-    /** 아직 목록을 다 받지 못한 캐시 — 못 찾아도 "없다" 고 단정하지 못한다 */
+    /** 목록 미완성 캐시 — 못 찾아도 "없음" 으로 단정 불가 */
     @SafeVarargs
     private static ClipController controllerUnsure(final Map<String, Object>... clips) throws Exception {
         final Map<String, Map<String, Object>> known = index(clips);
@@ -295,7 +288,7 @@ public class ClipControllerTest {
         });
     }
 
-    /** 패키지 밖에서는 ClipLookup 을 만들 수 없다 — 생성자가 패키지 전용이라 리플렉션으로 짓는다 */
+    /** ClipLookup 생성자가 패키지 전용 — 리플렉션으로 생성 */
     private static LiveFeedService.ClipLookup lookup(Map<String, Object> clip, boolean complete) {
         try {
             java.lang.reflect.Constructor<LiveFeedService.ClipLookup> constructor =
@@ -331,7 +324,7 @@ public class ClipControllerTest {
         return inject(new LiveFeedService() {
             @Override
             public ClipLookup findClip(String clipId) {
-                // 아는 목록이 전부다 — 못 찾으면 정말로 없는 것이다
+                // 아는 목록이 전부 — 못 찾으면 실제로 없음
                 return lookup(known.get(clipId), true);
             }
         });

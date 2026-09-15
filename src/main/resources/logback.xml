@@ -3,7 +3,7 @@
 
     <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"/>
 
-    <!-- 상대경로면 톰캣 작업 디렉터리 기준이라 어디 쌓이는지 알 수 없다 — catalina.base 아래로 고정 -->
+    <!-- 상대경로는 톰캣 작업 디렉터리 기준이라 위치를 알 수 없다 — catalina.base 아래로 고정 -->
     <property name="LOG_DIR" value="${catalina.base:-.}/logs"/>
 
     <!-- Console Appender -->
@@ -14,7 +14,7 @@
         </encoder>
     </appender>
 
-    <!-- 날짜로만 나누면 몰린 날 파일이 무한정 커진다 — 크기와 총 보관량에도 상한을 둔다 -->
+    <!-- 날짜로만 나누면 몰린 날 파일이 커진다 — 크기·총 보관량에도 상한 -->
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_DIR}/yeti-125.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
@@ -30,8 +30,8 @@
     </appender>
 
     <!--
-      기본 INFO. DEBUG 면 SQL 과 요청 파라미터가 그대로 쌓이므로 파일을 고치지 말고
-      기동 옵션으로 올린다 — -Dyeti.log.level, -Dyeti.sql.log.level
+      기본 INFO. DEBUG 는 SQL·요청 파라미터가 그대로 쌓이므로 파일 대신
+      기동 옵션으로 — -Dyeti.log.level, -Dyeti.sql.log.level
     -->
     <logger name="com.irion" level="${yeti.log.level:-INFO}"/>
     <logger name="org.springframework" level="INFO"/>

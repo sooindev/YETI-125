@@ -1,6 +1,6 @@
 /**
- * 첫 페인트 전에 도는 초기화 — 테마 확정과 폰트 대기. <head>에서 동기로 로드된다.
- * 다른 스크립트는 </body> 앞이라 첫 페인트 뒤에 실행돼 이 일을 못 맡는다.
+ * 첫 페인트 전 초기화 — 테마 확정과 폰트 대기. <head> 에서 동기 로드.
+ * 다른 스크립트는 </body> 앞이라 첫 페인트 뒤에 실행돼 이 일을 못 맡는다
  */
 (function () {
     'use strict';
@@ -8,17 +8,17 @@
     var KEY = 'yeti-theme';
     var root = document.documentElement;
 
-    // 모드(고른 것: system|light|dark)와 테마(칠한 색: light|dark)는 다르다.
-    // 버튼 아이콘은 모드를, <html> 은 테마를 따라간다.
+    // 모드(선택값: system|light|dark)와 테마(실제 색: light|dark)는 다르다.
+    // 버튼 아이콘은 모드를, <html> 은 테마를 따른다
     var MODES = ['system', 'light', 'dark'];
 
-    // 저장값이 없으면 시스템을 따른다. 예전 방문자의 light/dark 값도 그대로 유효하다.
+    // 저장값이 없으면 시스템을 따른다. 옛 light/dark 값도 유효
     function storedMode() {
         try {
             var v = localStorage.getItem(KEY);
             return (v === 'dark' || v === 'light') ? v : 'system';
         } catch (e) {
-            // 사파리 프라이빗 모드 등에서 localStorage 접근이 막힐 수 있다
+            // 사파리 프라이빗 모드 등에서 localStorage 접근이 막힐 수 있음
             return 'system';
         }
     }
@@ -31,7 +31,7 @@
         return mode === 'system' ? (systemPrefersDark() ? 'dark' : 'light') : mode;
     }
 
-    // 버튼 title 은 "다음에 무엇이 되는지" 를 알려준다
+    // 버튼 title 은 다음 상태를 안내
     var NEXT_HINT = {
         system: '시스템 설정 따르기',
         light:  '라이트 모드로 전환',
@@ -50,7 +50,7 @@
     function apply(mode) {
         root.setAttribute('data-theme', resolve(mode));
 
-        // <head> 에서 도는 첫 호출에는 버튼이 아직 없다. DOMContentLoaded 에서 다시 부른다.
+        // <head> 첫 호출에는 버튼이 없다 — DOMContentLoaded 에서 재호출
         var btn = document.getElementById('themeToggle');
         if (btn) {
             btn.setAttribute('data-mode', mode);
@@ -59,11 +59,11 @@
         }
     }
 
-    // 첫 페인트 전에 확정
+    // 첫 페인트 전 확정
     apply(storedMode());
 
     // 인트로 텍스트만 폰트를 기다린다. 대상은 Anton + JetBrains Mono(1.1KB)뿐 —
-    // Noto Sans KR(90.8KB)까지 기다리면 문이 늦게 열린다.
+    // Noto Sans KR(90.8KB)까지 기다리면 문이 늦게 열린다
     var FONTS_TIMEOUT_MS = 1500;
     var fontsSettled = false;
 
@@ -73,13 +73,13 @@
         root.classList.remove('fonts-pending');
     }
 
-    // JS 가 꺼져 있으면 클래스가 안 붙어 원래대로 바로 보인다
+    // JS 가 꺼져 있으면 클래스가 안 붙어 바로 보인다
     root.classList.add('fonts-pending');
 
-    // 폰트 서버가 막히면 영영 오지 않는다
+    // 폰트 서버가 막히면 영영 오지 않음
     setTimeout(fontsReady, FONTS_TIMEOUT_MS);
 
-    // @font-face 는 스타일시트 파싱 뒤에 등록된다 — 그전에 물으면 "없다" 는 답이 온다
+    // @font-face 는 스타일시트 파싱 뒤에 등록 — 그전에 물으면 없다고 답한다
     document.addEventListener('DOMContentLoaded', function () {
         if (!document.fonts || !document.fonts.load) {
             fontsReady();
@@ -92,7 +92,7 @@
     });
 
     window.YetiTheme = {
-        // 지금 칠해진 색
+        // 현재 칠해진 색
         get: function () {
             return root.getAttribute('data-theme') || 'light';
         },
@@ -103,7 +103,7 @@
         set: function (mode) {
             if (MODES.indexOf(mode) === -1) return;
             try {
-                // system 은 "저장값 없음" 으로 표현한다 — 지워야 OS 를 다시 따라간다
+                // system 은 저장값 없음으로 표현 — 지워야 OS 를 따라간다
                 if (mode === 'system') localStorage.removeItem(KEY);
                 else localStorage.setItem(KEY, mode);
             } catch (e) {}
@@ -115,7 +115,7 @@
         }
     };
 
-    // system 모드인 동안에는 OS 설정 변경을 그대로 따라간다
+    // system 모드에서는 OS 설정 변경을 따라간다
     if (window.matchMedia) {
         var mq = window.matchMedia('(prefers-color-scheme: dark)');
         var onChange = function () {
@@ -126,7 +126,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-        // 초기 렌더가 흔들리지 않도록 transition 억제
+        // 초기 렌더 흔들림 방지로 transition 억제
         document.body.classList.add('preload');
         setTimeout(function () {
             document.body.classList.remove('preload');

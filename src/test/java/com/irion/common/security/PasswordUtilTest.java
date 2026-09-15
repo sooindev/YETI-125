@@ -61,7 +61,7 @@ public class PasswordUtilTest {
 
     @Test
     public void 옛_형식_해시는_더_이상_통하지_않는다() throws Exception {
-        // 2026-08-22 제거. 옛 해시는 검증이 1ms 도 안 걸려 응답 시간으로 계정을 알아낼 수 있었다.
+        // 2026-08-22 제거. 옛 해시는 검증이 1ms 도 안 걸려 응답 시간으로 계정이 드러났다
         String legacy = legacyEncode("hunter2");
 
         assertFalse("맞는 비밀번호여도 통과시키지 않는다", PasswordUtil.matches("hunter2", legacy));
@@ -92,7 +92,7 @@ public class PasswordUtilTest {
         assertFalse(PasswordUtil.matchesDummy(null));
     }
 
-    /** 더미 검증이 진짜 검증과 같은 비용이어야 시간 차이가 안 벌어진다. */
+    /** 더미 검증이 진짜와 같은 비용이어야 시간 차이가 안 난다 */
     @Test
     public void 더미_검증도_진짜_검증만큼_시간을_쓴다() {
         String stored = PasswordUtil.encode("hunter2");
@@ -105,7 +105,7 @@ public class PasswordUtilTest {
                 dummy * 2 >= real);
     }
 
-    /** 여러 번 돌려 가장 빨랐던 시간(ns) — 다른 프로세스의 방해를 덜 받는다 */
+    /** 여러 번 실행한 최소 시간(ns) — 다른 프로세스의 방해를 덜 받는다 */
     private static long fastest(Runnable task) {
         long best = Long.MAX_VALUE;
         for (int i = 0; i < 5; i++) {
@@ -116,7 +116,7 @@ public class PasswordUtilTest {
         return best;
     }
 
-    /** 옛 구현이 만들던 값 그대로 — salt:hash, SHA-256 1회 */
+    /** 옛 구현의 값 — salt:hash, SHA-256 1회 */
     private static String legacyEncode(String password) throws Exception {
         byte[] salt = new byte[16];
         new SecureRandom().nextBytes(salt);

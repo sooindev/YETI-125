@@ -38,7 +38,7 @@ CREATE TABLE tb_schedule (
     INDEX idx_schedule_date (start_date, end_date)
 );
 
--- 방명록 테이블 — 이미 돌고 있는 DB 에는 이 CREATE 문만 따로 실행한다
+-- 방명록 테이블 — 운영 중인 DB 에는 이 CREATE 문만 따로 실행
 CREATE TABLE tb_guestbook (
     guestbook_id  BIGINT       NOT NULL AUTO_INCREMENT,
     nickname      VARCHAR(30)  NOT NULL,
@@ -47,7 +47,7 @@ CREATE TABLE tb_guestbook (
     reg_date      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     del_yn        CHAR(1)      NOT NULL DEFAULT 'N',
     PRIMARY KEY (guestbook_id),
-    -- 걸러내기와 정렬을 한 인덱스에서 끝내려면 이 순서여야 한다
+    -- 필터와 정렬을 한 인덱스에서 끝내려면 이 순서
     INDEX idx_guestbook_list (del_yn, guestbook_id)
 );
 

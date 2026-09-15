@@ -11,7 +11,7 @@ import java.util.Map;
 
 import static org.junit.Assert.*;
 
-/** 경로 정규화 / AJAX 판정. getRequestURI() 는 정규화 전 원본이라 contains 판정은 뚫린다. */
+/** 경로 정규화와 AJAX 판정. getRequestURI() 는 정규화 전 원본이라 contains 판정은 뚫린다 */
 public class RequestUtilTest {
 
     @Test
@@ -28,7 +28,7 @@ public class RequestUtilTest {
 
     @Test
     public void 상위_경로_기호를_정리한다() {
-        // 예전 필터는 이 요청을 "/admin/login 을 포함하니 공개" 로 통과시켰다
+        // 예전 필터는 "/admin/login 포함" 으로 보고 통과시켰다
         assertEquals("/admin/admin-schedule.html",
                 RequestUtil.normalizedPath(request("/admin/login/../admin-schedule.html", "")));
     }
@@ -51,10 +51,7 @@ public class RequestUtilTest {
                 RequestUtil.normalizedPath(request("/../../../etc/passwd", "")));
     }
 
-    /**
-     * 톰캣도 스프링도 매핑 전에 경로 파라미터를 뗀다. 여기만 들고 있으면
-     * "/admin/" 으로 시작하지 않는 것처럼 보여 인증 필터가 통째로 열린다.
-     */
+    /** 톰캣·스프링은 매핑 전에 경로 파라미터를 뗀다. 여기만 들고 있으면 인증 필터가 열린다 */
     @Test
     public void 경로_파라미터는_떼고_본다() {
         assertEquals("/admin/schedule",
@@ -65,17 +62,14 @@ public class RequestUtilTest {
                 RequestUtil.normalizedPath(request("/admin;a=1/schedule;b=2", "")));
     }
 
-    /** 경로 파라미터를 떼고도 .. 는 그대로 눌러야 한다 */
+    /** 경로 파라미터를 떼도 .. 는 눌러야 한다 */
     @Test
     public void 경로_파라미터와_상위이동이_겹쳐도_막는다() {
         assertEquals("/admin/admin-schedule.html",
                 RequestUtil.normalizedPath(request("/admin;x=1/loginProc/../admin-schedule.html", "")));
     }
 
-    /**
-     * 떼는 시점은 디코딩보다 앞이다 — 톰캣이 그 순서다.
-     * 뒤에 떼면 %3B 로 보낸 진짜 세미콜론까지 잘려 이번엔 반대로 어긋난다.
-     */
+    /** 제거 시점은 디코딩보다 앞 — 뒤에 떼면 %3B 로 보낸 세미콜론까지 잘린다 */
     @Test
     public void 인코딩된_세미콜론은_파라미터가_아니다() {
         assertEquals("/admin/loginProc;x",
@@ -132,7 +126,7 @@ public class RequestUtilTest {
 
     @Test
     public void 프록시를_거친_요청은_X_Forwarded_For_의_마지막_값을_쓴다() {
-        // nginx 의 $proxy_add_x_forwarded_for 는 자기가 본 주소를 뒤에 덧붙인다
+        // nginx 는 자기가 본 주소를 뒤에 덧붙인다
         assertEquals("203.0.113.9",
                 RequestUtil.clientIp(incoming("127.0.0.1", "198.51.100.7, 203.0.113.9")));
     }
@@ -142,14 +136,14 @@ public class RequestUtilTest {
         assertEquals("203.0.113.9", RequestUtil.clientIp(incoming("127.0.0.1", "203.0.113.9")));
     }
 
-    /** 앞쪽 값은 보낸 쪽이 지어낸 것일 수 있다 — 그걸 쓰면 제한을 무한히 우회한다 */
+    /** 앞쪽 값은 지어낸 것일 수 있다 — 쓰면 제한을 무한 우회 */
     @Test
     public void 앞에_지어낸_값이_붙어도_마지막_값만_본다() {
         assertEquals("203.0.113.9",
                 RequestUtil.clientIp(incoming("127.0.0.1", "9.9.9.9, 8.8.8.8, 203.0.113.9")));
     }
 
-    /** 톰캣에 직접 닿은 요청이다. 헤더는 전부 보낸 쪽 말이라 믿지 않는다 */
+    /** 톰캣에 직접 닿은 요청 — 헤더는 전부 보낸 쪽 말이라 신뢰하지 않는다 */
     @Test
     public void 프록시를_거치지_않으면_헤더를_보지_않는다() {
         assertEquals("198.51.100.7",
@@ -177,7 +171,7 @@ public class RequestUtilTest {
     }
 
 
-    /** clientIp 는 상대 주소와 X-Forwarded-For 두 가지만 본다 */
+    /** clientIp 는 상대 주소와 X-Forwarded-For 만 본다 */
     private static HttpServletRequest incoming(final String remoteAddr, final String forwardedFor) {
         Map<String, String> headers = new HashMap<String, String>();
         if (forwardedFor != null) {
@@ -195,7 +189,7 @@ public class RequestUtilTest {
         return request(uri, contextPath, headers, contentType, null);
     }
 
-    /** HttpServletRequest 는 메서드가 많아 동적 프록시로 필요한 것만 답한다 */
+    /** 메서드가 많아 동적 프록시로 필요한 것만 */
     private static HttpServletRequest request(final String uri, final String contextPath,
                                               final Map<String, String> headers, final String contentType,
                                               final String remoteAddr) {

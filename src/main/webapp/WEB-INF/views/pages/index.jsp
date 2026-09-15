@@ -102,7 +102,7 @@
   }
   </script>
   <link rel="stylesheet" href="/resources/css/base/common.css">
-  <%-- 홈 스타일 — 순서가 곧 겹침 우선순위다. 바꾸지 말 것 --%>
+  <%-- 홈 스타일 — 순서가 곧 겹침 우선순위. 변경 금지 --%>
   <link rel="stylesheet" href="/resources/css/pages/index/hero.css">
   <link rel="stylesheet" href="/resources/css/components/media-card.css">
   <link rel="stylesheet" href="/resources/css/pages/index/media.css">
@@ -161,8 +161,8 @@
           </div>
         </div>
         <a id="liveLink" href="#" target="_blank" class="live-thumb">
-          <%-- src 를 비워두면 브라우저가 페이지 자신을 이미지로 받아 깨진 아이콘을 그린다.
-               19금 방송은 치지직이 주소를 주지 않으므로, 주소가 온 뒤에 index.js 가 켠다. --%>
+          <%-- src 가 비면 브라우저가 페이지 자신을 이미지로 받아 깨진 아이콘이 된다.
+               19금은 주소가 없으므로 주소가 온 뒤 index.js 가 켠다 --%>
           <img id="liveThumbnail" alt="방송 썸네일" width="1280" height="720" style="display: none;">
           <div id="liveThumbFallback"></div>
           <span class="live-thumb-cta">
@@ -175,7 +175,7 @@
 
   <%-- ===== Default Hero (오프라인) ===== --%>
   <section id="defaultHero" class="hero">
-    <%-- 상단 마키. 트랙을 -50% 밀었다 되돌리는 방식이라 반복 횟수는 짝수여야 한다 --%>
+    <%-- 상단 마키. 트랙을 -50% 밀었다 되돌리므로 반복 횟수는 짝수 --%>
     <div class="hero-noise-line" aria-hidden="true">
       <div class="hero-noise-track">
         <span>IRION ARCHIVE · 125 · 설녀 VTUBER · NON-COMMERCIAL FAN ARCHIVE</span>
@@ -207,7 +207,7 @@
               현재 채널이 오프라인 상태입니다. 다음 라이브를 기다려 주세요.
             </p>
 
-            <%-- 다음 방송. 예정이 없으면 위 문구가 그대로 남는다 (index.js) --%>
+            <%-- 다음 방송. 예정이 없으면 위 문구 유지(index.js) --%>
             <div class="hero-next" id="heroNext" hidden>
               <span class="hero-next-label">다음 방송까지</span>
               <p class="hero-next-countdown" id="heroNextCountdown"></p>
@@ -261,7 +261,7 @@
       <div id="clipsEmpty" class="feed-state" style="display: none;">
         <span class="feed-state-mark">∅</span> 클립이 없습니다
       </div>
-      <%-- 홈의 더보기는 끝이 있다. 상한에 닿으면 버튼이 아카이브로 바뀐다 (clips.js 의 HOME_CLIP_MAX) --%>
+      <%-- 홈의 더보기에는 끝이 있다 — 상한에서 버튼이 아카이브로 바뀐다(clips.js 의 HOME_CLIP_MAX) --%>
       <div class="feed-more" id="clipsMore" style="display: none;">
         <button id="loadMoreBtn" class="btn">더 불러오기 <span class="btn-arrow">↓</span></button>
         <a id="clipsArchiveLink" class="btn btn-primary" href="/clips" hidden>
@@ -416,7 +416,7 @@
 <script src="/resources/js/features/door-intro.js"></script>
 <script src="/resources/js/core/common.js"></script>
 <script src="/resources/js/core/scroll-animations.js"></script>
-<%-- 홈 스크립트 — media.js 가 clips.js·videos.js 보다 먼저 실려야 한다 --%>
+<%-- 홈 스크립트 — media-card.js 가 clips.js·videos.js 보다 먼저 --%>
 <script src="/resources/js/pages/index/bootstrap.js"></script>
 <script src="/resources/js/pages/index/live.js"></script>
 <script src="/resources/js/pages/index/next-schedule.js"></script>

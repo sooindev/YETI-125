@@ -109,16 +109,16 @@ function loadUpcomingEvents() {
                 const now = new Date();
 
                 const futureEvents = data.filter(function(event) {
-                    // 서버는 "2026-05-20 08:00:00" 형식으로 준다 — 브라우저에 맡기지 말고 공용 파서로 읽는다
+                    // 서버 형식은 "2026-05-20 08:00:00" — 브라우저 대신 공용 파서로
                     const startDate = YetiUtil.parseDate(event.start);
                     if (!startDate) return false;
                     const endDate = event.end ? YetiUtil.parseDate(event.end) : null;
 
-                    // 종료 시간이 있으면 종료 시간 기준, 없으면 시작 시간 기준
+                    // 종료 시간이 있으면 그 기준, 없으면 시작 시간 기준
                     if (endDate) {
                         return endDate > now;
                     } else if (event.allDay) {
-                        // 종일 일정은 오늘이거나 미래면 표시
+                        // 종일 일정은 오늘·미래면 표시
                         const startOfDay = new Date(startDate);
                         startOfDay.setHours(0, 0, 0, 0);
                         const todayStart = new Date(now);
@@ -154,8 +154,8 @@ function loadUpcomingEvents() {
     });
 }
 
-// 카드에는 인덱스만 남기고 원본은 배열에 둔다. 인라인 onclick 에 값을 박으면
-// escapeHtml 이 만든 &#039; 가 되살아나 제목에 ' 가 든 일정에서 SyntaxError 가 났다.
+// 카드에는 인덱스만, 원본은 배열에. 인라인 onclick 에 값을 박으면
+// escapeHtml 의 &#039; 가 되살아나 제목에 ' 가 든 일정에서 SyntaxError 가 났다
 let upcomingEventsData = [];
 
 function renderUpcomingEvents(events) {
@@ -190,7 +190,7 @@ function renderUpcomingEvents(events) {
     });
 }
 
-// 카드 클릭 / 키보드(Enter, Space) — 인덱스로 원본을 되찾아 상세를 연다
+// 카드 클릭·키보드(Enter/Space) — 인덱스로 원본을 찾아 상세를 연다
 $(document).on('click', '.upcoming-item', function() {
     openUpcomingDetail($(this).attr('data-upcoming-index'));
 });
@@ -217,14 +217,14 @@ function openUpcomingDetail(index) {
     });
 }
 
-// 일정은 DB 에서 받아 그리므로 HTML 에 글자가 남지 않는다. 검색엔진용으로 schema.org/Event 를 심는다.
+// 일정은 DB 에서 받아 그려 HTML 에 글자가 없다 — 검색엔진용 schema.org/Event 삽입
 function publishEventSchema(events) {
     const CHANNEL = 'https://chzzk.naver.com/63368ec9081dc85e61d0e4310b7e1602';
 
     const items = [];
     events.slice(0, 20).forEach(function (event) {
         const startAt = YetiUtil.parseDate(event.start);
-        // 날짜를 못 읽으면 건너뛴다 — toISOString() 이 예외를 던져 뒤가 통째로 멈춘다
+        // 날짜를 못 읽으면 건너뛴다 — toISOString() 예외로 뒤가 통째로 멈춘다
         if (!startAt) return;
 
         const node = {
@@ -317,7 +317,7 @@ function formatDateKorean(value) {
     return `${year}년 ${month}월 ${day}일`;
 }
 
-// 상세 HTML 을 만드는 유일한 곳. 들어오는 값은 항상 원본이고 이스케이프는 여기서만 한다.
+// 상세 HTML 생성의 유일한 자리. 입력은 항상 원본, 이스케이프도 여기서만
 function showScheduleDetailFrom(data) {
     const typeName = getScheduleTypeName(data.type || 'STREAM');
     const description = data.description || '';
@@ -378,4 +378,4 @@ function showScheduleDetail(event) {
     });
 }
 
-// 모달 열고 닫기는 common.js(YetiUtil) 가 맡는다 — 여기서 같은 이름으로 다시 정의하지 말 것.
+// 모달 개폐는 common.js(YetiUtil) 담당 — 같은 이름으로 재정의 금지

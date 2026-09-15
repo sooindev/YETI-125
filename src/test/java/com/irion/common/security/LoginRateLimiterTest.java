@@ -6,13 +6,10 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.Assert.*;
 
-/**
- * 주소 기준 로그인 빈도 제한. 창이 열리고 닫히는 동작과 함께,
- * 기록이 무한히 쌓이지 않는지 본다.
- */
+/** 주소 기준 빈도 제한. 창의 개폐 동작과 기록이 무한히 쌓이지 않는지 */
 public class LoginRateLimiterTest {
 
-    /** 창이 닫히는 순간은 기다려서 볼 수 없다 — 시계를 직접 옮긴다 */
+    /** 창이 닫히는 순간은 기다려 볼 수 없다 — 시계를 옮긴다 */
     private final AtomicLong clock = new AtomicLong(1_000_000L);
 
     private LoginRateLimiter limiter(int maxRequests, long windowMillis) {
@@ -55,7 +52,7 @@ public class LoginRateLimiterTest {
         assertEquals("창이 지났으니 다시 통과해야 한다", 0, limiter.retryAfterSeconds("1.2.3.4"));
     }
 
-    /** 막힌 상태에서 계속 두드려도 창이 뒤로 밀리면 안 된다 — 영영 안 풀린다 */
+    /** 차단 중 계속 호출해도 창이 밀리면 안 된다 — 영영 안 풀린다 */
     @Test
     public void 막힌_뒤에_계속_두드려도_창은_밀리지_않는다() {
         LoginRateLimiter limiter = limiter(1, 60_000L);
@@ -83,7 +80,7 @@ public class LoginRateLimiterTest {
                 0, limiter.retryAfterSeconds("5.6.7.8"));
     }
 
-    /** 서버 시계가 뒤로 가면 elapsed 가 음수가 된다. 그대로 두면 창이 영영 안 끝난다 */
+    /** 시계 역행 시 elapsed 가 음수 — 그대로 두면 창이 안 끝난다 */
     @Test
     public void 시계가_뒤로_가도_잠기지_않는다() {
         LoginRateLimiter limiter = limiter(1, 60_000L);
@@ -108,7 +105,7 @@ public class LoginRateLimiterTest {
         assertTrue("상한(10,000) 안에 있어야 한다. 실제: " + tracked, tracked <= 10_000);
     }
 
-    /** 창이 끝난 항목은 치우고 새 주소를 받아야 한다 — 안 그러면 상한이 곧 정지 버튼이다 */
+    /** 만료 항목을 치우고 새 주소를 받아야 한다 — 안 그러면 상한이 곧 정지 버튼 */
     @Test
     public void 창이_끝난_기록은_치우고_새_주소를_받는다() {
         LoginRateLimiter limiter = limiter(20, 60_000L);
@@ -122,7 +119,7 @@ public class LoginRateLimiterTest {
         assertEquals("자리를 비우고 통과시켜야 한다", 0, limiter.retryAfterSeconds("203.0.113.9"));
     }
 
-    /** 헤더에서 온 값이라 길이를 믿지 않는다 */
+    /** 헤더에서 온 값이라 길이를 신뢰하지 않는다 */
     @Test
     public void 아주_긴_주소도_잘라서_보관한다() {
         LoginRateLimiter limiter = limiter(20, 60_000L);

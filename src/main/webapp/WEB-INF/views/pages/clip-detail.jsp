@@ -1,13 +1,11 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%--
-  클립 한 건.
+  클립 한 건. 이 화면만 서버가 내용까지 그린다 —
+  제목·썸네일이 HTML 에 박혀야 검색엔진과 공유 미리보기가 읽는다.
 
-  이 화면만 서버가 내용까지 그린다. 제목과 썸네일이 HTML 에 박혀 나가야
-  검색엔진이 색인하고 카카오톡·X 가 미리보기를 뽑기 때문이다.
-
-  ${...} 는 JSTL 없이 받은 글자를 그대로 찍는다. 여기 꽂히는 값은 전부
-  ClipController.ClipView 에서 이스케이프를 마친 것이다 — 새 값을 넣을 때도
-  반드시 거기서 Escape 를 지나게 할 것.
+  ${...} 는 JSTL 없이 받은 글자를 그대로 찍는다.
+  여기 꽂히는 값은 전부 ClipController.ClipView 에서 이스케이프를 마친 것 —
+  새 값도 반드시 거기서 Escape 를 지나게 할 것
 --%>
 <!DOCTYPE html>
 <html lang="ko">
@@ -20,7 +18,7 @@
   <meta name="robots" content="${robots}">
   <link rel="canonical" href="${pageUrl}">
 
-  <%-- Open Graph — 공유했을 때 뜨는 카드가 이 화면의 존재 이유 절반이다 --%>
+  <%-- Open Graph — 공유 미리보기가 이 화면의 존재 이유 절반 --%>
   <meta property="og:type" content="video.other">
   <meta property="og:site_name" content="YETI-125">
   <meta property="og:title" content="${title} — 이리온 클립">
@@ -111,14 +109,14 @@
       <nav class="clip-crumb" aria-label="현재 위치">
         <a href="/clips">클립 아카이브</a>
         <span class="clip-crumb-sep">/</span>
-        <%-- 구조화 데이터(BreadcrumbList)의 3번째 항목과 같은 이름이어야 한다.
-             clipUID 를 찍으면 방문자에게는 뜻 없는 글자고, 우리가 검색엔진에 알린 것과도 어긋난다 --%>
+        <%-- BreadcrumbList 3번 항목과 같은 이름이어야 한다 —
+             clipUID 는 방문자에게 뜻이 없고 검색엔진에 알린 것과도 어긋난다 --%>
         <span class="clip-crumb-current">${title}</span>
       </nav>
 
       <div class="clip-detail-grid">
 
-        <%-- 썸네일. 재생은 치지직에서 한다 — 눌러도 이 자리에서 열리지 않는다 --%>
+        <%-- 썸네일. 재생은 치지직에서 — 눌러도 이 자리에서 열리지 않는다 --%>
         <div class="clip-detail-media">
           <img class="clip-detail-img" src="${thumbnailUrl}" alt="${title} 썸네일"${thumbnailHidden}>
           <div class="thumb-fallback" role="img" aria-label="${fallbackLabel}"${fallbackHidden}>

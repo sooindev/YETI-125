@@ -13,7 +13,7 @@ import java.util.Set;
 
 import static org.junit.Assert.*;
 
-/** ScheduleVO 제약. 검증기는 servlet-context.xml 과 같은 방식(EL 없는 보간기)으로 만든다. */
+/** ScheduleVO 제약. 검증기는 servlet-context.xml 과 같은 방식(EL 없는 보간기) */
 public class ScheduleVOValidationTest {
 
     private static Validator validator;
@@ -83,7 +83,7 @@ public class ScheduleVOValidationTest {
         assertFalse(validator.validate(vo).isEmpty());
     }
 
-    /** 드래그로 옮길 때 FullCalendar 가 비워 보낸다. 없는 것과 잘못된 것은 다르다. */
+    /** 드래그 이동 시 FullCalendar 가 비워 보낸다 — 없는 것과 잘못된 것은 다르다 */
     @Test
     public void 선택_항목은_비어_있어도_통과한다() {
         ScheduleVO vo = valid();

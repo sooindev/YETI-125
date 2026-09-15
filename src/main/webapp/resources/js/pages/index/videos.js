@@ -1,4 +1,4 @@
-/* 홈 — 다시보기. 월별로 묶어 보여준다 */
+/* 홈 — 다시보기. 월별 묶음 */
 
 let videoOffset = 0;
 let hasMoreVideos = false;
@@ -85,10 +85,10 @@ function loadMoreVideos() {
     });
 }
 
-// 치지직이 VOD 임베드를 지원하지 않아 나가기 전에 한 번 알린다
+// 치지직이 VOD 임베드를 지원하지 않아 이동 전 안내
 const VIDEO_SKIP_KEY = 'yeti-video-leave';
 
-// localStorage 가 막히면 읽기는 "묻는다"로, 쓰기는 조용히 넘어간다
+// localStorage 가 막히면 읽기는 "묻는다", 쓰기는 무시
 function skipVideoConfirm() {
     try {
         return localStorage.getItem(VIDEO_SKIP_KEY) === 'skip';
@@ -109,7 +109,7 @@ function forgetVideoSkip() {
     } catch (e) {}
 }
 
-// 되돌릴 길은 꺼져 있을 때만 보여준다
+// 되돌리기는 꺼져 있을 때만 노출
 function syncVideoRestoreLink() {
     $('#videoConfirmRestore').prop('hidden', !skipVideoConfirm());
 }
@@ -118,20 +118,20 @@ function initVideoModal() {
     $(document).on('click', '.video-card', function(e) {
         const url = $(this).attr('href');
         if (!url) return;
-        // 새 탭 열기(⌘/Ctrl/Shift/휠 클릭)는 묻지 않고 그대로 보낸다
+        // 새 탭 열기(⌘/Ctrl/Shift/휠)는 묻지 않고 통과
         if (e.metaKey || e.ctrlKey || e.shiftKey || e.which === 2) return;
-        // 다시 묻지 않기를 고른 사람도 그대로 보낸다
+        // "다시 묻지 않기" 선택자도 통과
         if (skipVideoConfirm()) return;
 
         e.preventDefault();
         $('#videoModalTitle').text($(this).attr('data-video-title') || '다시보기');
         $('#videoModalGo').attr('href', url);
-        // 체크는 매번 풀린 상태로 시작한다 — 켜져 있었다면 여기까지 오지 않는다
+        // 체크는 매번 해제 상태로 시작 — 켜져 있었다면 여기까지 안 온다
         $('#videoModalSkip').prop('checked', false);
         YetiUtil.openModal('videoModal');
     });
 
-    // 기억은 실제로 이동할 때만 한다 — 체크하고 취소한 것은 "묻지 말라"가 아니다
+    // 기억은 실제 이동 시에만 — 체크 후 취소는 "묻지 말라" 가 아니다
     $(document).on('click', '#videoModalGo', function() {
         if ($('#videoModalSkip').prop('checked')) {
             rememberVideoSkip();
@@ -151,17 +151,17 @@ function initVideoModal() {
     syncVideoRestoreLink();
 }
 
-// 더보기로 이어 받을 때 같은 달 머리말을 다시 찍지 않도록 마지막 값을 들고 있는다
+// 더보기 시 같은 달 머리말 중복 방지용 마지막 값
 let lastVideoGroup = '';
 
-/** "2026-08" — 정렬·비교용 키 */
+/** "2026-08" — 비교용 키 */
 function videoGroupKey(publishDate) {
     const at = YetiUtil.parseDate(publishDate);
     if (!at) return '';
     return at.getFullYear() + '-' + ('0' + (at.getMonth() + 1)).slice(-2);
 }
 
-/** "2026년 8월" — 화면에 찍는 이름 */
+/** "2026년 8월" — 화면 표시용 */
 function videoGroupLabel(key) {
     const parts = key.split('-');
     return parts[0] + '년 ' + parseInt(parts[1], 10) + '월';
@@ -176,7 +176,7 @@ function renderVideos(videos, append) {
     }
 
     $.each(videos, function(index, video) {
-        // 달이 바뀌는 자리에 머리말을 끼운다. 날짜를 못 읽은 항목은 앞 묶음에 남긴다
+        // 달이 바뀌면 머리말 삽입. 날짜를 못 읽은 항목은 앞 묶음에
         const group = videoGroupKey(video.publishDate);
         if (group && group !== lastVideoGroup) {
             lastVideoGroup = group;

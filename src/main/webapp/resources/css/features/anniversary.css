@@ -1,15 +1,14 @@
 /* 데뷔 3주년 축하 연출 — 폭죽 캔버스, 축하 팝업, 반짝이 */
-/* 기간이 끝나면 이 파일과 anniversary.js 의 <link>/<script> 두 줄만 빼면 원래대로 돌아간다 */
+/* 기간 종료 시 이 파일과 anniversary.js 의 두 줄만 빼면 원래대로 */
 
-/* 그레인 9000 < 폭죽 9400 < 팝업 9450 < 모달 9500 < 토스트 9600 < 인트로 9999.
-   폭죽이 그레인 위라 노이즈가 끼지 않고, 모달 아래라 클립 창을 가리지 않는다 */
+/* 그레인 9000 < 폭죽 9400 < 팝업 9450 < 모달 9500 < 토스트 9600 < 인트로 9999 */
 
 .anniv-canvas {
     position: fixed;
     inset: 0;
     z-index: 9400;
     pointer-events: none;
-    /* 폭죽이 끝나도 반짝이가 계속 쓰므로 남겨 둔다. 알갱이가 없으면 루프도 멈춘다 */
+    /* 폭죽이 끝나도 반짝이가 쓰므로 유지. 알갱이가 없으면 루프도 멈춘다 */
 }
 
 /* ---- 축하 팝업 — 슬래브 판, 화면 정중앙 ---------------------- */
@@ -27,7 +26,7 @@
     box-shadow: 0 30px 70px -20px rgba(var(--shadow-rgb), 0.4);
     padding: 34px 30px 28px;
 
-    /* 뒤쪽 페이지를 막지 않는다 — 스크림 없이 카드만 떠 있고 클릭은 카드에서만 받는다 */
+    /* 뒤 페이지를 막지 않는다 — 스크림 없이 카드만, 클릭도 카드에서만 */
     transform: translate(-50%, calc(-50% + 18px));
     opacity: 0;
     visibility: hidden;
@@ -40,7 +39,7 @@
     transition: opacity var(--t-fast), transform var(--t-slow), visibility 0s;
 }
 
-/* 하늘색에서 분홍으로 넘어가는 머리 띠 — 사이트의 두 액센트를 한 줄에 담는다 */
+/* 하늘색 → 분홍 머리 띠. 사이트의 두 액센트 */
 .anniv-pop::before {
     content: "";
     position: absolute;
@@ -103,7 +102,7 @@
     line-height: 1.35;
     color: var(--bone);
     margin-top: 8px;
-    /* 한글은 단어 중간에서 끊지 않는다 (사이트 본문 규칙) */
+    /* 한글은 단어 중간에서 끊지 않는다(본문 규칙) */
     word-break: keep-all;
 }
 .anniv-pop-title em {
@@ -116,8 +115,7 @@
     line-height: 1.7;
     color: var(--bone-dim);
     margin-top: 12px;
-    /* 문장 사이는 <br> 로 끊고, 남는 줄은 어절 단위로 접는다.
-       띄어쓰기 없는 긴 영문·URL 만 강제로 자른다 */
+    /* 문장 사이는 <br>, 나머지는 어절 단위. 긴 영문·URL 만 강제로 자른다 */
     word-break: keep-all;
     overflow-wrap: anywhere;
 }
@@ -127,9 +125,9 @@
     gap: 10px;
     margin-top: 24px;
 }
-/* 공용 .btn 은 본문용이라 팝업 안에서는 크다. 여백과 자간만 줄여 쓴다 */
+/* 공용 .btn 은 팝업에서 크다 — 여백과 자간만 축소 */
 .anniv-pop-actions .btn {
-    flex: 1;   /* 버튼이 하나라 카드 너비를 꽉 채운다 */
+    flex: 1;   /* 버튼이 하나라 카드 너비를 채운다 */
     justify-content: center;
     padding: 13px 14px;
     font-size: 0.7rem;
@@ -141,8 +139,7 @@
     .anniv-pop { padding: 30px 22px 24px; }
 }
 
-/* 움직임을 줄이도록 설정한 사용자 — 폭죽·반짝이는 아예 켜지 않고(anniversary.js),
-   팝업은 미끄러지지 않고 나타나기만 한다 */
+/* prefers-reduced-motion — 폭죽·반짝이는 꺼지고(anniversary.js) 팝업은 나타나기만 */
 @media (prefers-reduced-motion: reduce) {
     .anniv-pop { transform: translate(-50%, -50%); }
 }

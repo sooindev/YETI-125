@@ -25,7 +25,7 @@ main { padding-top: var(--head-total); }
     width: 100%;
     aspect-ratio: 4 / 5;
     object-fit: cover;
-    /* 항상 컬러로 표시 — hover 시 흑백에서 풀리던 연출은 제거 */
+    /* 항상 컬러 — hover 시 흑백 해제 연출은 제거 */
     filter: contrast(1.08);
 }
 .portrait-tag {

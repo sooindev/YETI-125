@@ -8,9 +8,7 @@ import java.util.Map;
 
 /**
  * 테스트용 ClipFeed 조립기.
- *
- * ClipFeed 의 생성자는 패키지 전용이다 — 캐시 밖에서 아무나 만들면 커서가 어긋나기 때문이다.
- * 다른 패키지의 테스트(사이트맵이 그렇다)가 클립 목록을 흉내 내야 해서 이 창구만 열어 둔다.
+ * 생성자가 패키지 전용이라(캐시 밖에서 만들면 커서가 어긋난다) 다른 패키지 테스트용 창구
  */
 public final class ClipFeeds {
 
@@ -21,7 +19,7 @@ public final class ClipFeeds {
         return new LiveFeedService.ClipFeed(clips, null, null);
     }
 
-    /** 아직 이어 받을 것이 남은 목록 — canGrow() 가 참이다 */
+    /** 더 받을 것이 남은 목록 — canGrow() 참 */
     public static LiveFeedService.ClipFeed growable(List<Map<String, Object>> clips) {
         return new LiveFeedService.ClipFeed(clips, "cursor-남음", "100");
     }
@@ -30,7 +28,7 @@ public final class ClipFeeds {
         return of(new ArrayList<Map<String, Object>>(Arrays.asList(clips)));
     }
 
-    /** 사이트맵·목록 테스트가 쓰는 최소한의 클립 한 건 */
+    /** 최소 구성의 클립 한 건 */
     public static Map<String, Object> clip(String id, String title, String createdAt, boolean adult) {
         Map<String, Object> clip = new HashMap<String, Object>();
         clip.put("clipId", id);

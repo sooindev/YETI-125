@@ -1,11 +1,7 @@
 /*
   미디어 카드 — 클립과 다시보기가 함께 쓰는 카드 한 장.
-
-  전에는 홈 전용(pages/index/media.css)에 있었다. 클립 아카이브(/clips)가 같은 카드를
-  쓰면서 두 화면의 공용이 되어 여기로 옮겼다. 홈에만 있는 것(다시보기 월 머리말,
-  라이브 히어로의 대체 자리 크기)은 옮기지 않고 그대로 두었다.
-
-  이 파일을 부르는 화면은 pages/index.jsp 와 pages/clips.jsp 다.
+  홈과 클립 아카이브 공용. 홈 전용(다시보기 월 머리말, 라이브 히어로 대체 자리 크기)은
+  pages/index/media.css 에 남겼다.
 */
 
 .card-grid {
@@ -51,9 +47,9 @@
     transform: scale(1.05);
 }
 
-/* 썸네일 대체 자리 — 19금 방송·다시보기는 치지직이 이미지 주소를 주지 않는다.
-   빈 src 로 깨진 아이콘을 띄우는 대신 이 자리를 채운다. 클립·다시보기 카드와
-   라이브 히어로가 모두 position: relative 라 inset 으로 그대로 덮인다. */
+/* 썸네일 대체 자리 — 19금은 치지직이 이미지 주소를 주지 않는다.
+   빈 src 의 깨진 아이콘 대신 이 자리를 채운다. 카드와 히어로가 모두
+   position: relative 라 inset 으로 덮인다 */
 .thumb-fallback {
     position: absolute;
     inset: 0;
@@ -186,9 +182,7 @@
     margin-top: 32px;
 }
 
-/* 좁은 화면 — 3열에서 2열, 다시 1열로.
-   전에는 홈의 community.css 안 @media 에 섞여 있었다. 카드가 여기로 온 이상
-   카드의 반응형도 여기 있어야 한다 — 안 그러면 /clips 에서만 3열로 남는다 */
+/* 좁은 화면 — 3열 → 2열 → 1열. 카드가 여기 있으므로 반응형도 여기 */
 @media (max-width: 900px) {
     .card-grid { grid-template-columns: repeat(2, 1fr); }
 }

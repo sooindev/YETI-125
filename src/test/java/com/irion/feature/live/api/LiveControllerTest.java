@@ -14,9 +14,7 @@ import java.util.Map;
 
 import static org.junit.Assert.*;
 
-/**
- * 목록 API 가 값을 다듬는 규칙 — paginate 의 경계값과, 클립 아카이브가 쓰는 정렬·검색.
- */
+/** 목록 API 의 값 처리 — paginate 경계값과 아카이브의 정렬·검색 */
 public class LiveControllerTest {
 
     private final LiveController controller = new LiveController();
@@ -24,11 +22,8 @@ public class LiveControllerTest {
     // ── 덜 찬 목록 ───────────────────────────────────────
 
     /**
-     * 캐시를 다시 채우는 몇 초 동안 다른 요청은 있는 만큼만 받아 간다.
-     *
-     * 그 목록으로 최신순을 매기면 <b>체계적으로</b> 틀린다 — 새 클립일수록 조회수가 낮아
-     * 인기순 목록의 뒤쪽에 있어서, 덜 받은 목록에는 정작 최신 클립이 빠져 있다.
-     * 화면이 다시 물어볼 수 있도록 알려야 한다.
+     * 캐시 재적재 중에는 부분 목록만 받는다. 그것으로 최신순을 매기면 체계적으로 틀린다 —
+     * 새 클립일수록 조회수가 낮아 뒤쪽에 있어 덜 받은 목록에는 최신이 빠진다
      */
     @Test
     public void 목록이_덜_찼으면_알린다() throws Exception {
@@ -50,7 +45,7 @@ public class LiveControllerTest {
                 data(result).get("partial"));
     }
 
-    /** 검색도 전량이 필요하므로 같은 규칙을 탄다 */
+    /** 검색도 전량이 필요해 같은 규칙 */
     @Test
     public void 검색도_덜_찼으면_알린다() throws Exception {
         LiveController controller = controllerWith(ClipFeeds.growable(titled("노래방송")));
@@ -60,7 +55,7 @@ public class LiveControllerTest {
         assertEquals(Boolean.TRUE, data(result).get("partial"));
     }
 
-    /** 홈이 쓰는 인기순 경로는 애초에 전량을 보지 않는다 — 여기 끼어들면 안 된다 */
+    /** 홈의 인기순 경로는 전량을 보지 않는다 — 여기 끼어들면 안 됨 */
     @Test
     public void 인기순_기본_화면은_partial_을_말하지_않는다() throws Exception {
         LiveController controller = controllerWith(ClipFeeds.growable(clips("2024-01-01 10:00:00")));
@@ -110,7 +105,7 @@ public class LiveControllerTest {
         assertEquals("2024-01-01 10:00:00", sorted.get(2).get("createdAt"));
     }
 
-    /** 날짜를 못 받은 항목이 맨 앞으로 올라오면 최신순이 거짓말이 된다 */
+    /** 날짜 없는 항목이 앞으로 오면 최신순이 거짓이 된다 */
     @Test
     public void 날짜가_없는_클립은_뒤로_밀린다() {
         List<Map<String, Object>> withBlank = clips("2024-01-01 10:00:00", "");
@@ -130,10 +125,7 @@ public class LiveControllerTest {
         assertEquals("2024-01-01 10:00:00", kept.get(0).get("createdAt"));
     }
 
-    /**
-     * 이 테스트가 있는 이유. 캐시가 들고 있는 목록을 제자리에서 정렬하면
-     * 다음 요청이 뒤섞인 차례를 "인기순"이라고 믿는다.
-     */
+    /** 캐시 목록을 제자리 정렬하면 다음 요청이 뒤섞인 순서를 인기순으로 믿는다 */
     @Test
     public void 정렬해도_원본_목록은_그대로다() {
         List<Map<String, Object>> original = clips("2024-01-01 10:00:00", "2026-03-05 09:00:00");
@@ -231,7 +223,7 @@ public class LiveControllerTest {
 
     @Test
     public void offset_이_목록을_넘어도_예외가_아니라_빈_페이지다() {
-        // subList 가 IndexOutOfBounds 를 던지던 자리
+        // subList 가 IndexOutOfBounds 를 던지던 지점
         Map<String, Object> page = controller.paginate(items(10), "clips", 999, 6);
 
         assertTrue(list(page, "clips").isEmpty());

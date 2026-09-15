@@ -8,7 +8,7 @@
         rootMargin: '0px 0px -50px 0px'
     };
 
-    // 한 번 나타난 요소는 관찰을 끊는다 — 카드가 수백 개로 늘면 스크롤마다 그만큼 콜백이 돈다
+    // 나타난 요소는 관찰 해제 — 카드가 수백 개면 스크롤마다 그만큼 콜백이 돈다
     function handleIntersection(entries, observer) {
         entries.forEach(entry => {
             if (entry.isIntersecting) {

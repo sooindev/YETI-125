@@ -25,14 +25,12 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 /**
- * 치지직 목록 캐시. 이 저장소에서 제일 손대기 어려운 코드다 —
- * TTL 폴백, 커서 페이징, 확장 중복 방지, 무한루프 차단이 한 클래스에 모여 있다.
+ * 치지직 목록 캐시 — TTL 폴백 · 커서 페이징 · 확장 중복 방지 · 무한루프 차단.
  *
- * 여기서 지키려는 것은 두 가지다.
- * 하나는 <b>치지직이 죽어도 화면이 죽지 않는 것</b>(만료된 값으로 물러난다),
- * 다른 하나는 <b>한 요청이 외부 API 를 무제한으로 두드리지 못하는 것</b>이다.
+ * 지키려는 것 둘 — 치지직이 죽어도 화면이 죽지 않을 것(만료값 폴백),
+ * 한 요청이 외부 API 를 무제한 호출하지 않을 것.
  *
- * 외부 호출은 ChzzkClient 를 상속한 대역으로 갈음한다. 진짜 HTTP 는 ChzzkClientTest 가 본다.
+ * 외부 호출은 ChzzkClient 상속 대역으로. 진짜 HTTP 는 ChzzkClientTest
  */
 public class LiveFeedServiceTest {
 
@@ -64,10 +62,7 @@ public class LiveFeedServiceTest {
         assertEquals(2, chzzk.liveCalls.get());
     }
 
-    /**
-     * 이 클래스가 존재하는 이유. 치지직이 죽었을 때 화면에 "오류"가 아니라
-     * 조금 낡은 값이 남아야 한다.
-     */
+    /** 치지직 장애 시 "오류" 가 아니라 낡은 값이 남아야 한다 */
     @Test
     public void 외부가_죽으면_만료된_값이라도_돌려준다() throws Exception {
         FakeChzzk chzzk = new FakeChzzk();
@@ -84,7 +79,7 @@ public class LiveFeedServiceTest {
         assertEquals(Boolean.TRUE, fallback.get("isLive"));
     }
 
-    /** 로더가 터져도 마찬가지다 — 예외가 호출부까지 올라가면 안 된다 */
+    /** 로더 예외도 마찬가지 — 호출부까지 올라가면 안 됨 */
     @Test
     public void 로더가_예외를_던져도_만료된_값으로_물러난다() throws Exception {
         FakeChzzk chzzk = new FakeChzzk();
@@ -101,7 +96,7 @@ public class LiveFeedServiceTest {
         assertEquals(Boolean.TRUE, fallback.get("isLive"));
     }
 
-    /** 물러날 값조차 없는 첫 호출이면 null 이다. 호출부가 실패 응답을 만든다 */
+    /** 폴백할 값도 없는 첫 호출은 null. 실패 응답은 호출부가 만든다 */
     @Test
     public void 물러날_값이_없으면_null_이다() throws Exception {
         FakeChzzk chzzk = new FakeChzzk();
@@ -110,7 +105,7 @@ public class LiveFeedServiceTest {
         assertNull(serviceWith(chzzk).getLiveStatus());
     }
 
-    /** 갱신은 한 스레드만 — 나머지는 그 결과를 나눠 쓴다 */
+    /** 갱신은 한 스레드만 — 나머지는 결과 공유 */
     @Test
     public void 동시에_몰려도_외부는_한_번만_부른다() throws Exception {
         FakeChzzk chzzk = new FakeChzzk();
@@ -127,10 +122,7 @@ public class LiveFeedServiceTest {
 
     // ── 장애 백오프 ───────────────────────────────────────────
 
-    /**
-     * 실패를 적어두지 않으면 요청마다 락 안에서 5초 타임아웃을 처음부터 다시 기다린다.
-     * 한 번 실패했으면 잠깐은 두드리지 않는다.
-     */
+    /** 실패를 안 적으면 요청마다 락 안에서 5초 타임아웃 재대기 */
     @Test
     public void 실패한_직후에는_다시_두드리지_않는다() throws Exception {
         FakeChzzk chzzk = new FakeChzzk();
@@ -152,7 +144,7 @@ public class LiveFeedServiceTest {
                 afterFailure, chzzk.liveCalls.get());
     }
 
-    /** 두드리지 않는 동안에도 낡은 값은 계속 내준다 — 화면이 비면 안 된다 */
+    /** 백오프 중에도 낡은 값은 계속 제공 — 화면이 비면 안 됨 */
     @Test
     public void 백오프_중에도_만료된_값은_계속_돌려준다() throws Exception {
         FakeChzzk chzzk = new FakeChzzk();
@@ -170,7 +162,7 @@ public class LiveFeedServiceTest {
         }
     }
 
-    /** 백오프가 지나면 다시 시도한다 — 치지직이 돌아온 것을 알아채야 한다 */
+    /** 백오프 경과 후 재시도 — 복구를 알아채야 한다 */
     @Test
     public void 백오프가_지나면_다시_시도한다() throws Exception {
         FakeChzzk chzzk = new FakeChzzk();
@@ -192,7 +184,7 @@ public class LiveFeedServiceTest {
         assertEquals("새로 받은 값이어야 한다", Boolean.FALSE, status.get("isLive"));
     }
 
-    /** 복구되면 실패 기록을 지워야 한다 — 안 지우면 다음 장애 때 백오프가 이미 지나 있다 */
+    /** 복구 시 실패 기록 제거 — 안 지우면 다음 장애 때 백오프가 이미 지나 있다 */
     @Test
     public void 복구되면_실패_기록이_지워진다() throws Exception {
         FakeChzzk chzzk = new FakeChzzk();
@@ -214,10 +206,7 @@ public class LiveFeedServiceTest {
                 0L, failedAt(service, "liveStatusCache"));
     }
 
-    /**
-     * 이 백오프가 막으려는 상황 그 자체.
-     * 치지직이 죽은 채로 요청이 몰리면, 예전에는 스레드마다 타임아웃을 처음부터 다시 기다렸다.
-     */
+    /** 백오프가 막으려는 상황 — 장애 중 요청이 몰리면 스레드마다 타임아웃 재대기 */
     @Test
     public void 장애_중_동시에_몰려도_외부는_한_번만_부른다() throws Exception {
         FakeChzzk chzzk = new FakeChzzk();
@@ -234,7 +223,7 @@ public class LiveFeedServiceTest {
 
     // ── 클립 ──────────────────────────────────────────────────
 
-    /** 첫 요청에 미리 두 페이지를 담아둔다 (CLIP_INITIAL_PAGES) */
+    /** 첫 요청에 두 페이지 선적재(CLIP_INITIAL_PAGES) */
     @Test
     public void 클립_첫_로드는_두_페이지를_받는다() throws Exception {
         FakeChzzk chzzk = new FakeChzzk();
@@ -262,10 +251,7 @@ public class LiveFeedServiceTest {
         assertEquals(loaded + ChzzkClient.CLIP_PAGE_SIZE, feed.getClips().size());
     }
 
-    /**
-     * 상한이 없으면 ?offset=2999 하나로 외부 API 를 수십 번 부르게 만들 수 있다.
-     * 한 요청이 낼 수 있는 호출은 CLIP_PAGES_PER_REQUEST 까지다.
-     */
+    /** 상한이 없으면 ?offset=2999 하나로 수십 번 호출됨 — CLIP_PAGES_PER_REQUEST 까지 */
     @Test
     public void 한_요청이_낼_수_있는_외부_호출에_상한이_있다() throws Exception {
         FakeChzzk chzzk = new FakeChzzk();
@@ -279,7 +265,7 @@ public class LiveFeedServiceTest {
         assertTrue("아직 더 남았다고 알려야 한다", feed.canGrow());
     }
 
-    /** 같은 클립이 두 페이지에 걸쳐 와도 한 번만 담는다 */
+    /** 두 페이지에 걸쳐 와도 한 번만 */
     @Test
     public void 같은_클립은_한_번만_담는다() throws Exception {
         FakeChzzk chzzk = new FakeChzzk();
@@ -292,14 +278,11 @@ public class LiveFeedServiceTest {
         assertEquals(15, service.getClips(6).getClips().size());
     }
 
-    /**
-     * 커서가 돌지 않고 같은 페이지가 계속 오면 상한까지 헛돈다.
-     * 진전이 없으면 그 자리에서 멈춰야 한다.
-     */
+    /** 같은 페이지가 계속 오면 상한까지 헛돈다 — 진전 없으면 중단 */
     @Test
     public void 커서가_돌지_않으면_그_자리에서_멈춘다() throws Exception {
         FakeChzzk chzzk = new FakeChzzk();
-        // 첫 두 페이지는 정상, 그 뒤로는 이미 본 것만 계속 돌려준다
+        // 첫 두 페이지는 정상, 이후로는 본 것만 반복
         chzzk.clipPage = call -> (call < 2)
                 ? clipPage(call * ChzzkClient.CLIP_PAGE_SIZE, ChzzkClient.CLIP_PAGE_SIZE, "cursor")
                 : clipPage(0, ChzzkClient.CLIP_PAGE_SIZE, "cursor");
@@ -311,10 +294,7 @@ public class LiveFeedServiceTest {
                 3, chzzk.clipCalls.get());
     }
 
-    /**
-     * 빈 목록을 값으로 캐시하면 장애가 TTL(10분) 내내 굳는다.
-     * 실패 백오프(30초)만 지나면 다시 시도해야 한다 — 10분을 기다리지 않는다.
-     */
+    /** 빈 목록을 캐시하면 장애가 TTL(10분) 내내 굳는다 — 백오프(30초) 후 재시도 */
     @Test
     public void 클립이_비면_TTL_만큼_굳지_않는다() throws Exception {
         FakeChzzk chzzk = new FakeChzzk();
@@ -333,7 +313,7 @@ public class LiveFeedServiceTest {
                 chzzk.clipCalls.get() > afterFirst);
     }
 
-    /** 확장이 실패해도 이미 받아둔 목록은 지키고 있어야 한다 */
+    /** 확장 실패해도 기존 목록은 유지 */
     @Test
     public void 확장이_실패해도_받아둔_목록은_남는다() throws Exception {
         FakeChzzk chzzk = new FakeChzzk();
@@ -349,7 +329,7 @@ public class LiveFeedServiceTest {
 
     // ── 다시보기 ──────────────────────────────────────────────
 
-    /** 한 페이지에 맞추면 쌓였을 때 잘린다 — 마지막 페이지까지 이어 받는다 */
+    /** 한 페이지로 맞추면 쌓였을 때 잘림 — 마지막까지 적재 */
     @Test
     public void 다시보기는_마지막_페이지까지_이어_받는다() throws Exception {
         FakeChzzk chzzk = new FakeChzzk();
@@ -363,7 +343,7 @@ public class LiveFeedServiceTest {
         assertEquals("덜 찬 페이지를 만나면 멈춘다", 2, chzzk.videoCalls.get());
     }
 
-    /** 페이지가 끝없이 꽉 차 와도 VIDEO_MAX_PAGES 에서 끊는다 */
+    /** 페이지가 끝없이 와도 VIDEO_MAX_PAGES 에서 중단 */
     @Test
     public void 다시보기_페이지_수에_상한이_있다() throws Exception {
         FakeChzzk chzzk = new FakeChzzk();
@@ -376,7 +356,7 @@ public class LiveFeedServiceTest {
         assertEquals(20, chzzk.videoCalls.get());
     }
 
-    /** HIDDEN_VIDEO_NOS — 지우는 것이 아니라 이 사이트에서만 가린다 */
+    /** HIDDEN_VIDEO_NOS — 삭제가 아니라 이 사이트에서만 숨김 */
     @Test
     public void 감춘_다시보기는_목록에서_빠진다() throws Exception {
         FakeChzzk chzzk = new FakeChzzk();
@@ -401,7 +381,7 @@ public class LiveFeedServiceTest {
         assertEquals(ChzzkClient.VIDEO_PAGE_SIZE + 10, serviceWith(chzzk).getVideos().size());
     }
 
-    /** 첫 페이지부터 실패했으면 만료된 캐시로 폴백시켜야 한다 */
+    /** 첫 페이지부터 실패 시 만료 캐시로 폴백 */
     @Test
     public void 다시보기가_비면_TTL_만큼_굳지_않는다() throws Exception {
         FakeChzzk chzzk = new FakeChzzk();
@@ -439,9 +419,7 @@ public class LiveFeedServiceTest {
     // ── 대역 ──────────────────────────────────────────────────
 
     // ── 로그 ─────────────────────────────────────────────────
-    //
-    // 장애를 알아채는 유일한 통로다. 너무 적게 남기면 모르고 지나가고,
-    // 너무 많이 남기면 정작 "언제 시작됐나" 가 수천 줄에 묻힌다.
+    // 장애를 알아채는 유일한 통로. 적으면 놓치고, 많으면 "언제 시작됐나" 가 묻힌다
 
     @Test
     public void 실패가_시작될_때_한_번만_경고를_남긴다() throws Exception {
@@ -457,11 +435,9 @@ public class LiveFeedServiceTest {
             expire(service, "liveStatusCache");   // 낡았지만 아직 실패한 적은 없다
             service.getLiveStatus();              // 첫 실패 — 이 한 줄이 남아야 한다
 
-            // 장애가 이어지는 동안의 모습: 값은 낡았고(TTL 만료), 실패 기록은 남아 있고,
-            // 백오프만 지났다. 여기서 또 남기면 하루에 수천 줄이 쌓인다.
-            //
-            // expire() 는 실패 기록까지 지워 매번 "처음 실패" 로 보이고,
-            // expireBackoff() 는 적재 시각을 그대로 둬 캐시가 신선하다며 아예 부르지 않는다.
+            // 장애 지속 상태: 값 낡음(TTL 만료) + 실패 기록 있음 + 백오프만 경과.
+            // expire() 는 실패 기록까지 지워 "처음 실패" 로 보이고,
+            // expireBackoff() 는 적재 시각을 둬 캐시가 신선하다며 호출하지 않는다
             for (int i = 0; i < 9; i++) {
                 long longAgo = System.currentTimeMillis() - LONG_AGO_MILLIS;
                 rewriteSnapshot(service, "liveStatusCache", longAgo, longAgo);
@@ -516,7 +492,7 @@ public class LiveFeedServiceTest {
         }
     }
 
-    /** 파싱이 깨져 예외가 난 것과 치지직이 값을 안 준 것은 원인이 다르다 */
+    /** 파싱 예외와 빈 응답은 원인이 다르다 */
     @Test
     public void 예외로_실패하면_원인을_남긴다() throws Exception {
         FakeChzzk chzzk = new FakeChzzk();
@@ -536,10 +512,8 @@ public class LiveFeedServiceTest {
     // ── 클립 한 건 찾기 (상세 화면) ──────────────────────
 
     /**
-     * 상세 화면이 존재할 수 있는 근거.
-     *
-     * 첫 적재는 두 페이지(100개)뿐이다. 주소로 들어온 클립이 그 뒤에 있어도 찾아내야 한다 —
-     * 못 찾고 404 를 내면 검색엔진에 올린 주소가 어느 날 갑자기 없는 쪽이 된다.
+     * 첫 적재는 두 페이지(100개)뿐 — 그 뒤에 있는 클립도 찾아내야 한다.
+     * 404 를 내면 검색엔진에 올린 주소가 갑자기 없는 쪽이 된다
      */
     @Test
     public void 첫_묶음_너머의_클립도_찾아낸다() throws Exception {
@@ -577,12 +551,7 @@ public class LiveFeedServiceTest {
         assertEquals(0, chzzk.clipCalls.get());
     }
 
-    /**
-     * 치지직이 죽었을 때 "없다" 고 답하면 안 된다.
-     *
-     * 이 클립이 없는 것이 아니라 우리가 모르는 것이다 — 화면은 404 가 아니라 503 을 내야 하고,
-     * 그 판단의 근거가 isComplete 다.
-     */
+    /** 치지직 장애는 "없음" 이 아니라 "모름" — 404 가 아니라 503 이고, 근거가 isComplete */
     @Test
     public void 치지직이_죽어_있으면_없다고_단정하지_않는다() throws Exception {
         FakeChzzk chzzk = new FakeChzzk();   // 모든 페이지가 실패한다
@@ -594,21 +563,21 @@ public class LiveFeedServiceTest {
         assertFalse("목록이 아예 없다 — 없다고 단정할 수 없다", unknown.isComplete());
     }
 
-    /** 커서가 남아 있는데 못 찾은 것도 "아직 모른다" 다 */
+    /** 커서가 남았는데 못 찾은 것도 "모름" */
     @Test
     public void 목록을_덜_받았으면_없다고_단정하지_않는다() throws Exception {
         FakeChzzk chzzk = new FakeChzzk();
         chzzk.clipPage = endlessClipPages();   // 커서가 마르지 않는다
         LiveFeedService service = serviceWith(chzzk);
 
-        // 상한(CLIP_MAX)까지 받아도 커서가 남지만, 상한에 닿았으면 더 받지 않는다
+        // 상한(CLIP_MAX)까지 받으면 커서가 남아도 더 받지 않는다
         LiveFeedService.ClipLookup capped = service.findClip("clip-99999");
 
         assertNull(capped.getClip());
         assertTrue("상한에 닿았으면 우리로서는 끝까지 받은 것이다", capped.isComplete());
     }
 
-    /** 한 번 채워 두면 다음 상세 화면은 치지직을 다시 두드리지 않는다 */
+    /** 한 번 채우면 다음 상세는 치지직을 다시 부르지 않는다 */
     @Test
     public void 채워둔_목록은_다시_받지_않는다() throws Exception {
         FakeChzzk chzzk = new FakeChzzk();
@@ -639,10 +608,7 @@ public class LiveFeedServiceTest {
         assertFalse("다 받았으면 더 늘 것이 없다", feed.canGrow());
     }
 
-    /**
-     * 상한이 지켜지는지. 끝나지 않는 목록을 물려도 CLIP_MAX 에서 멈춰야 한다 —
-     * 멈추지 않으면 2GB 서버의 메모리가 클립으로 찬다.
-     */
+    /** 끝나지 않는 목록이어도 CLIP_MAX 에서 중단 — 안 그러면 2GB 서버가 클립으로 찬다 */
     @Test
     public void 전량_적재도_상한을_넘지_않는다() throws Exception {
         FakeChzzk chzzk = new FakeChzzk();
@@ -684,24 +650,24 @@ public class LiveFeedServiceTest {
     }
 
 
-    /** ChzzkClient 를 상속해 호출만 가로챈다. 어떤 커서로 불렸는지도 남긴다 */
+    /** ChzzkClient 상속 대역. 호출 커서도 기록 */
     private static final class FakeChzzk extends ChzzkClient {
 
         final AtomicInteger liveCalls = new AtomicInteger();
         final AtomicInteger clipCalls = new AtomicInteger();
         final AtomicInteger videoCalls = new AtomicInteger();
 
-        /** 클립 페이지를 부를 때 실린 clipUID (첫 페이지는 null) */
+        /** 호출 시 실린 clipUID(첫 페이지는 null) */
         final List<String> clipCursors = new ArrayList<String>();
 
         Map<String, Object> liveStatus;
         RuntimeException liveFailure;
         long liveDelayMillis;
 
-        /** 호출 순번 → 페이지. null 이면 실패 */
+        /** 호출 순번 → 페이지. null = 실패 */
         IntFunction<ChzzkClient.ClipPage> clipPage = call -> null;
 
-        /** 페이지 번호 → 목록. null 이면 실패 */
+        /** 페이지 번호 → 목록. null = 실패 */
         IntFunction<List<Map<String, Object>>> videoPage = page -> null;
 
         @Override
@@ -738,7 +704,7 @@ public class LiveFeedServiceTest {
 
     // ── 거들 ──────────────────────────────────────────────────
 
-    /** 여러 스레드를 같은 순간에 풀어 놓고 전부 끝나기를 기다린다 */
+    /** 여러 스레드를 동시에 풀고 전부 끝날 때까지 대기 */
     private static void runConcurrently(int threads, Runnable task) throws Exception {
         CountDownLatch start = new CountDownLatch(1);
         CountDownLatch done = new CountDownLatch(threads);
@@ -774,31 +740,31 @@ public class LiveFeedServiceTest {
         return service;
     }
 
-    /** 가장 긴 TTL(10분)과 백오프(30초)보다 확실히 오래 전 */
+    /** 가장 긴 TTL(10분)·백오프(30초)보다 충분히 과거 */
     private static final long LONG_AGO_MILLIS = TimeUnit.HOURS.toMillis(1);
 
     /**
-     * 캐시를 만료시킨다. TTL 이 1~10분이라 기다릴 수 없어 적재 시각만 과거로 돌린다.
-     * 실패 기록은 함께 지운다 — 만료와 백오프가 겹치면 무엇 때문에 안 부르는지 알 수 없다.
+     * 캐시 만료. TTL 이 1~10분이라 적재 시각만 과거로 돌린다.
+     * 실패 기록도 제거 — 만료와 백오프가 겹치면 원인을 가릴 수 없다
      */
     private static void expire(LiveFeedService service, String cacheField) throws Exception {
         rewriteSnapshot(service, cacheField,
                 System.currentTimeMillis() - LONG_AGO_MILLIS, 0L);
     }
 
-    /** 실패 백오프만 풀어준다. 적재 시각은 건드리지 않는다 */
+    /** 백오프만 해제. 적재 시각은 유지 */
     private static void expireBackoff(LiveFeedService service, String cacheField) throws Exception {
         rewriteSnapshot(service, cacheField,
                 snapshotLong(service, cacheField, "loadedAt"),
                 System.currentTimeMillis() - LONG_AGO_MILLIS);
     }
 
-    /** 실패 기록이 남아 있는가 — 복구 뒤 지워졌는지 확인할 때 쓴다 */
+    /** 실패 기록 유무 — 복구 후 제거 확인용 */
     private static long failedAt(LiveFeedService service, String cacheField) throws Exception {
         return snapshotLong(service, cacheField, "failedAt");
     }
 
-    /** 값은 그대로 두고 시각만 바꿔 새 Snapshot 으로 갈아 끼운다 */
+    /** 값은 유지하고 시각만 바꿔 Snapshot 교체 */
     private static void rewriteSnapshot(LiveFeedService service, String cacheField,
                                         long loadedAt, long failedAt) throws Exception {
         Object snapshot = snapshotOf(service, cacheField);
@@ -836,7 +802,7 @@ public class LiveFeedServiceTest {
         return (AtomicReference<Object>) field.get(service);
     }
 
-    /** pages 장까지만 주고 그 뒤로는 커서를 끊는, 끝이 있는 목록 */
+    /** pages 장까지만 주고 커서를 끊는 유한 목록 */
     private static IntFunction<ChzzkClient.ClipPage> finiteClipPages(int pages) {
         return call -> {
             if (call >= pages) {
@@ -848,7 +814,7 @@ public class LiveFeedServiceTest {
         };
     }
 
-    /** 매 호출마다 새 클립 50개와 다음 커서를 주는, 끝나지 않는 목록 */
+    /** 매번 새 클립 50개와 커서를 주는 무한 목록 */
     private static IntFunction<ChzzkClient.ClipPage> endlessClipPages() {
         return call -> clipPage(call * ChzzkClient.CLIP_PAGE_SIZE,
                 ChzzkClient.CLIP_PAGE_SIZE, "cursor-" + call);

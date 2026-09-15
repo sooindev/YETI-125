@@ -10,7 +10,7 @@ import java.lang.reflect.Proxy;
 
 import static org.junit.Assert.*;
 
-/** 로그인 화면 입구. HttpSession 을 파라미터로 받으면 빈 세션이 쌓인다. */
+/** 로그인 화면 입구. HttpSession 을 파라미터로 받으면 빈 세션이 쌓인다 */
 public class AdminControllerTest {
 
     @Test
@@ -42,7 +42,7 @@ public class AdminControllerTest {
                 new AdminController().loginPage(request));
     }
 
-    /** adminService 없이도 통과한다는 것이 DB 조회 앞에서 끊긴다는 뜻이다. */
+    /** adminService 없이 통과 = DB 조회 앞에서 끊긴다는 뜻 */
     @Test
     public void 있을_수_없는_길이의_아이디는_먼저_끊는다() {
         StringBuilder huge = new StringBuilder();
@@ -60,7 +60,7 @@ public class AdminControllerTest {
     }
 
 
-    /** getSession(false) 는 existing 을, 그 밖은 "만들었다" 로 기록 */
+    /** getSession(false) 는 existing, 그 외는 "생성" 으로 기록 */
     private static HttpServletRequest request(boolean[] created, HttpSession existing) {
         return (HttpServletRequest) Proxy.newProxyInstance(
                 HttpServletRequest.class.getClassLoader(),
@@ -90,7 +90,7 @@ public class AdminControllerTest {
                 });
     }
 
-    /** 프록시가 기본형 반환 메서드를 물어봐도 터지지 않도록 */
+    /** 기본형 반환 메서드에도 프록시가 터지지 않도록 */
     private static Object blank(Class<?> type) {
         if (!type.isPrimitive() || type == void.class) {
             return null;

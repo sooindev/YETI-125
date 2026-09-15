@@ -93,8 +93,8 @@
   </script>
   <link rel="stylesheet" href="/resources/css/base/common.css">
   <link rel="stylesheet" href="/resources/css/pages/info.css">
-  <%-- scroll-animations.js 와 짝이다. 이게 없으면 .scroll-animate 가 정의되지 않아
-       요소가 처음부터 보이고 등장 효과가 나지 않는다 (index.jsp 와 같은 순서로 둔다) --%>
+  <%-- scroll-animations.js 와 짝. 없으면 .scroll-animate 가 정의되지 않아
+       요소가 처음부터 보인다(index.jsp 와 같은 순서) --%>
   <link rel="stylesheet" href="/resources/css/base/scroll-animations.css">
 </head>
 <body>
@@ -112,7 +112,7 @@
       <div class="profile-hero-grid">
 
         <div class="profile-portrait">
-          <%-- 이 이미지만 width/height 를 붙이지 않는다 — CSS 의 aspect-ratio 를 속성값이 이겨버린다 --%>
+          <%-- 이 이미지만 width/height 생략 — 속성값이 CSS 의 aspect-ratio 를 이긴다 --%>
           <img src="/resources/images/profile/Irion-profile.jpg" alt="이리온">
           <span class="portrait-tag idx">FILE / IRION-125</span>
         </div>

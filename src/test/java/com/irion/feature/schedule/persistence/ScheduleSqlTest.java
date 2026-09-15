@@ -16,7 +16,7 @@ import java.util.Date;
 
 import static org.junit.Assert.*;
 
-/** 매퍼 XML 이 만드는 SQL 문장. 서비스 테스트는 매퍼가 가짜라 못 잡아 DB 없이 문장만 본다. */
+/** 매퍼 XML 이 만드는 SQL. 서비스 테스트는 매퍼가 가짜라 못 잡으므로 DB 없이 문장만 본다 */
 public class ScheduleSqlTest {
 
     private static final String NS = "com.irion.feature.schedule.persistence.ScheduleMapper.";
@@ -26,7 +26,7 @@ public class ScheduleSqlTest {
     @BeforeClass
     public static void 매퍼_XML_을_읽는다() throws Exception {
         config = new Configuration();
-        // 형식상 필요할 뿐 연결은 열지 않는다
+        // 형식상 필요할 뿐 연결은 열지 않음
         config.setEnvironment(new Environment(
                 "test", new JdbcTransactionFactory(), new UnpooledDataSource()));
         config.getTypeAliasRegistry().registerAlias("ScheduleVO", ScheduleVO.class);
@@ -46,7 +46,7 @@ public class ScheduleSqlTest {
                 sql.contains("display_yn"));
     }
 
-    /** 조건 없이 덮어쓰면 숨겨둔 일정이 조용히 공개된다 */
+    /** 조건 없이 덮어쓰면 숨긴 일정이 공개된다 */
     @Test
     public void 공개여부가_없으면_문장에서_빠진다() {
         String sql = updateSql(schedule(null));
@@ -63,7 +63,7 @@ public class ScheduleSqlTest {
                 sql.contains("display_yn"));
     }
 
-    /** 조건이 빠져도 SET 절의 쉼표가 어긋나지 않아야 한다 */
+    /** 조건이 빠져도 SET 절 쉼표가 어긋나면 안 된다 */
     @Test
     public void 공개여부가_빠져도_문장이_망가지지_않는다() {
         String sql = normalize(updateSql(schedule(null)));
@@ -73,7 +73,7 @@ public class ScheduleSqlTest {
         assertFalse("WHERE 앞에 쉼표가 남으면 안 된다: " + sql, sql.contains(", WHERE"));
         assertFalse("쉼표가 겹치면 안 된다: " + sql, sql.contains(",,"));
 
-        // 나머지 컬럼은 그대로 있어야 한다
+        // 나머지 컬럼은 유지
         for (String column : new String[] {
                 "title", "description", "schedule_type", "start_date",
                 "end_date", "all_day_yn", "color" }) {
@@ -83,7 +83,7 @@ public class ScheduleSqlTest {
         assertTrue("삭제된 행은 제외해야 한다: " + sql, sql.contains("del_yn = 'N'"));
     }
 
-    /** 공개 목록 조회는 공개 여부로 걸러야 한다 */
+    /** 공개 목록은 공개 여부로 필터 */
     @Test
     public void 공개_목록은_display_yn_으로_거른다() {
         String sql = normalize(sqlOf("selectDisplayScheduleList", new ScheduleVO()));
@@ -92,11 +92,10 @@ public class ScheduleSqlTest {
     }
 
     /**
-     * 기간 조건은 상한·하한이 둘 다 살아 있어야 한다.
+     * 기간 조건은 상한·하한이 둘 다 필요.
      *
-     * `OR end_date IS NULL` 로 단발 일정을 살리면 그 일정에는 하한이 사라진다 —
-     * "종료일이 없으면 무조건 통과"라 시작일을 아예 안 보게 되어, 이틀치를 물어도
-     * 테이블 전체가 돌아왔다. DateRange 의 400일 상한도 같이 무의미해진다.
+     * `OR end_date IS NULL` 로 단발 일정을 살리면 그 일정의 하한이 사라진다 —
+     * 시작일을 안 보게 되어 이틀치를 물어도 테이블 전체가 돌아왔다(DateRange 상한도 무의미)
      */
     @Test
     public void 기간_조건에_하한이_살아_있다() {
@@ -112,7 +111,7 @@ public class ScheduleSqlTest {
         }
     }
 
-    /** 삭제는 행을 지우지 않고 표시만 한다 */
+    /** 삭제는 행 제거가 아니라 표시만 */
     @Test
     public void 삭제는_소프트_삭제다() {
         String sql = normalize(sqlOf("deleteSchedule", 1L));
@@ -133,7 +132,7 @@ public class ScheduleSqlTest {
         return boundSql.getSql();
     }
 
-    /** 문장 모양만 보면 되므로 공백을 한 칸으로 */
+    /** 문장 모양만 보므로 공백은 한 칸으로 */
     private static String normalize(String sql) {
         return sql.replaceAll("\\s+", " ").trim();
     }

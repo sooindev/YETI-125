@@ -1,8 +1,6 @@
 /* 홈 — 3주년 방명록 띠 */
 
-/* ---- 3주년 방명록 띠 -----------------------------------------
-   라이브 중일 때 방송 정보를 아래로 밀지 않도록 한 줄 높이로 묶는다.
-   ----------------------------------------------------------- */
+/* ---- 3주년 방명록 띠 — 라이브 중 방송 정보를 밀지 않게 한 줄 높이 ---- */
 
 .gb-band-section {
     padding: clamp(28px, 4vw, 44px) 0 0;
@@ -16,7 +14,7 @@
     padding: clamp(18px, 2.4vw, 26px) clamp(20px, 2.6vw, 30px);
     background: var(--ink-raise);
     border: 1px solid var(--ink-line-2);
-    /* 왼쪽에 분홍 굵은 선 한 줄 — 기념 구역이라는 표시. 커뮤니티 슬랩과 구분된다 */
+    /* 왼쪽 분홍 굵은 선 — 기념 구역 표시. 커뮤니티 슬랩과 구분 */
     border-left: 3px solid var(--rose);
     transition: border-color var(--t-fast), transform var(--t-fast), box-shadow var(--t-fast);
 }
@@ -33,7 +31,7 @@
     line-height: 0.9;
     text-transform: uppercase;
     color: transparent;
-    /* 푸터의 em 과 같은 처리 — 속을 비운 글자 */
+    /* 푸터의 em 과 같은 처리 — 속 빈 글자 */
     -webkit-text-stroke: 1.5px var(--rose);
 }
 
@@ -77,7 +75,7 @@
 .gb-band:hover .btn-arrow { transform: translateX(4px); }
 
 @media (max-width: 560px) {
-    /* 좁은 화면에서는 "방명록" 글씨를 빼고 화살표만 남긴다 — 제목이 두 줄 되는 걸 막는다 */
+    /* 좁은 화면에서는 "방명록" 을 빼고 화살표만 — 제목이 두 줄 되는 것을 방지 */
     .gb-band { gap: 14px; padding: 16px 18px; }
     .gb-band-cta-label { display: none; }
 }
@@ -86,7 +84,7 @@
     .gb-band:hover { transform: none; }
 }
 
-/* 눕힌 폰 — 세로가 390px 남짓이라 제목 세 줄이면 썸네일이 접힌 화면 밖으로 나간다 */
+/* 눕힌 폰 — 세로 390px 남짓이라 제목 세 줄이면 썸네일이 화면 밖으로 */
 @media (max-height: 520px) and (orientation: landscape) {
     .live-title {
         -webkit-line-clamp: 2;

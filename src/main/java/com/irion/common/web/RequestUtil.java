@@ -6,13 +6,13 @@ import java.net.URLDecoder;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
-/** 요청 판별. 필터와 인터셉터가 같은 판정을 써야 401 과 리다이렉트가 엇갈리지 않는다. */
+/** 요청 판별. 필터와 인터셉터가 같은 기준을 써야 401 과 리다이렉트가 엇갈리지 않음 */
 public final class RequestUtil {
 
     private RequestUtil() {
     }
 
-    /** AJAX 요청인가. X-Requested-With 만 보면 헤더를 빠뜨린 호출을 놓친다. */
+    /** AJAX 여부. X-Requested-With 만 보면 헤더 없는 호출을 놓침 */
     public static boolean isAjaxRequest(HttpServletRequest request) {
         if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
             return true;
@@ -30,20 +30,16 @@ public final class RequestUtil {
     }
 
     /**
-     * 요청을 보낸 쪽의 주소. 빈도 제한이 이 값으로 사람을 가른다.
+     * 요청자 주소. 빈도 제한의 기준값.
      *
-     * 헤더는 보낸 쪽이 마음대로 적을 수 있으므로 그냥 믿으면 안 된다 — X-Forwarded-For 를
-     * 통째로 믿으면 한 줄만 바꿔 보내며 제한을 무한히 우회한다. 반대로 남의 주소를 적어
-     * 그 사람을 막아버릴 수도 있다.
+     * 헤더는 보낸 쪽이 지어낼 수 있다 — 통째로 믿으면 제한을 무한 우회하거나
+     * 남의 주소를 적어 그 사람을 막을 수 있다. 그래서 두 가지만 신뢰한다.
      *
-     * 그래서 두 가지만 믿는다.
-     *   1. 루프백에서 온 요청 — 앞단 nginx 가 넘긴 것이다. 이때만 X-Forwarded-For 를 본다.
-     *   2. 그 헤더의 <b>마지막</b> 값 — nginx 의 $proxy_add_x_forwarded_for 는 자기가 본
-     *      주소를 뒤에 덧붙인다. 앞쪽은 보낸 쪽이 지어낸 값일 수 있어도 마지막은 아니다.
+     *   1. 루프백 요청 — nginx 가 넘긴 것. 이때만 X-Forwarded-For 확인
+     *   2. 그 헤더의 마지막 값 — nginx 가 자기가 본 주소를 뒤에 덧붙임
      *
-     * 루프백이 아니면 톰캣에 직접 닿은 요청이라 헤더를 아예 보지 않는다.
-     * nginx 가 X-Forwarded-For 를 붙이지 않으면 모든 요청이 루프백 하나로 묶인다 —
-     * config/nginx 의 proxy_set_header 가 필요한 이유다.
+     * 루프백이 아니면 톰캣에 직접 닿은 요청이라 헤더를 보지 않는다.
+     * nginx 가 헤더를 안 붙이면 모든 요청이 루프백 하나로 묶인다(config/nginx 참고)
      */
     public static String clientIp(HttpServletRequest request) {
         String remoteAddr = request.getRemoteAddr();
@@ -61,7 +57,7 @@ public final class RequestUtil {
             return remoteAddr;
         }
 
-        // 마지막 값부터 거꾸로 — 빈 칸(", ,") 이 끼어 있어도 실제 값을 집는다
+        // 뒤에서부터 — 빈 칸(", ,") 이 끼어도 실제 값을 집음
         String[] hops = forwarded.split(",");
         for (int i = hops.length - 1; i >= 0; i--) {
             String hop = hops[i].trim();
@@ -72,7 +68,7 @@ public final class RequestUtil {
         return remoteAddr;
     }
 
-    /** nginx 와 톰캣이 같은 장비에 있다. 프록시를 거친 요청은 여기서 온다. */
+    /** nginx 와 톰캣이 같은 장비 — 프록시를 거친 요청의 출처 */
     private static boolean isLoopback(String address) {
         return "127.0.0.1".equals(address)
                 || "::1".equals(address)
@@ -81,11 +77,11 @@ public final class RequestUtil {
     }
 
     /**
-     * 컨텍스트 경로를 뗀 정규화 경로. 항상 "/" 로 시작한다.
-     * getRequestURI() 원본으로 인증 예외를 판정하면 /admin/x/../admin-schedule 같은 요청에 뚫린다.
+     * 컨텍스트 경로를 뗀 정규화 경로. 항상 "/" 로 시작.
      *
-     * 톰캣이 필터를 고르고 스프링이 컨트롤러를 고를 때 쓰는 경로와 같은 모양이어야 한다.
-     * 어긋나면 "필터는 딴 주소로 보고 통과시켰는데 스프링은 관리자 화면으로 보낸" 상태가 된다.
+     * 원본 URI 로 인증 예외를 판정하면 /admin/x/../admin-schedule 같은 요청에 뚫린다.
+     * 톰캣·스프링이 쓰는 경로와 모양이 같아야 함 — 어긋나면
+     * 필터는 통과시키고 스프링은 관리자 화면으로 보내는 상태가 된다
      */
     public static String normalizedPath(HttpServletRequest request) {
         String uri = request.getRequestURI();
@@ -95,17 +91,17 @@ public final class RequestUtil {
                 ? uri.substring(contextPath.length())
                 : uri;
 
-        // 디코딩보다 먼저 떼야 한다 — 톰캣이 그 순서다.
-        // 뒤에 떼면 %3B 로 보낸 진짜 세미콜론까지 잘라내 이번엔 반대로 어긋난다.
+        // 디코딩보다 먼저 — 톰캣과 같은 순서.
+        // 뒤에 떼면 %3B 로 보낸 진짜 세미콜론까지 잘려 반대로 어긋남
         path = stripPathParameters(path);
 
         try {
             path = URLDecoder.decode(path, "UTF-8");
         } catch (UnsupportedEncodingException | IllegalArgumentException e) {
-            // 디코딩할 수 없으면 원본 그대로 정규화한다
+            // 디코딩 불가 시 원본 그대로 정규화
         }
 
-        // 역슬래시를 구분자로 받아들이는 환경이 있다 (윈도우)
+        // 역슬래시를 구분자로 받는 환경 대비(윈도우)
         path = path.replace('\\', '/');
 
         Deque<String> segments = new ArrayDeque<String>();
@@ -128,11 +124,10 @@ public final class RequestUtil {
     }
 
     /**
-     * 경로 파라미터를 뗀다 — 세그먼트마다 ';' 부터 다음 '/' 까지.
+     * 경로 파라미터 제거 — 세그먼트마다 ';' 부터 다음 '/' 까지.
      *
      * /admin;x=1/schedule 을 톰캣도 스프링도 /admin/schedule 로 읽는다.
-     * 여기서만 ';x=1' 을 들고 있으면 "/admin/" 으로 시작하지 않는 것처럼 보여
-     * 인증 검사를 통째로 건너뛴다.
+     * 여기서만 ';x=1' 을 들고 있으면 "/admin/" 으로 안 보여 인증 검사를 건너뛴다
      */
     static String stripPathParameters(String path) {
         int semicolon = path.indexOf(';');
@@ -148,7 +143,7 @@ public final class RequestUtil {
 
             int slash = path.indexOf('/', semicolon);
             if (slash < 0) {
-                // 마지막 세그먼트였다 — 뒤는 전부 파라미터다
+                // 마지막 세그먼트 — 뒤는 전부 파라미터
                 return stripped.toString();
             }
 

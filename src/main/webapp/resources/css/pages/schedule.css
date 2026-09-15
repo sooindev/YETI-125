@@ -52,7 +52,7 @@ main { padding-top: var(--head-total); }
     display: block;
 }
 
-/* FullCalendar 테마 덮어쓰기 — ink/frost 토큰으로 다시 칠한다 */
+/* FullCalendar 테마 덮어쓰기 — ink/frost 토큰으로 */
 .calendar-wrapper {
     --fc-border-color: var(--ink-line);
     --fc-page-bg-color: transparent;
@@ -223,7 +223,7 @@ main { padding-top: var(--head-total); }
     color: var(--bone-dim);
 }
 
-/* 다가오는 일정 목록 — schedule.js 가 그린다 */
+/* 다가오는 일정 — schedule.js 가 그린다 */
 .upcoming-head { margin-bottom: 28px; }
 .upcoming-head .kicker { margin-bottom: 14px; }
 .upcoming-title {
@@ -381,7 +381,7 @@ main { padding-top: var(--head-total); }
 }
 
 @media (max-width: 560px) {
-    /* 칸 폭이 40px 남짓이라 유형 색 막대로만 표시한다 (색은 dot 의 인라인 border-color) */
+    /* 칸 폭이 40px 남짓이라 유형 색 막대로만(색은 dot 의 인라인 border-color) */
     .fc-daygrid-event .fc-event-time,
     .fc-daygrid-event .fc-event-title,
     .fc-daygrid-event .fc-event-title-container { display: none; }
@@ -389,7 +389,7 @@ main { padding-top: var(--head-total); }
         display: block;
         background: transparent;
         border: none;
-        /* 보이는 굵기는 5px 로 두고, 위아래 여백으로 탭 영역만 15px 로 넓힌다 */
+        /* 보이는 굵기 5px, 위아래 여백으로 탭 영역만 15px */
         padding: 5px 0;
         margin: 0 3px;
         min-height: 0;
@@ -410,10 +410,10 @@ main { padding-top: var(--head-total); }
         align-items: flex-start;
         gap: 14px;
     }
-    /* 세로로 쌓인 툴바가 화면을 잡아먹지 않도록 간격을 좁힌다 */
+    /* 세로로 쌓인 툴바가 화면을 잡아먹지 않게 간격 축소 */
     .fc .fc-toolbar-chunk { margin: 0; }
 
-    /* 손가락으로 누르는 화면이므로 최소 44px를 확보한다 */
+    /* 터치 화면이라 최소 44px 확보 */
     .fc .fc-button,
     .fc .fc-button-primary {
         min-height: 44px;

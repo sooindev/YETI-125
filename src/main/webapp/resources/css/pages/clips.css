@@ -2,7 +2,7 @@
 
 main { padding-top: var(--head-total); }
 
-/* 화면에서는 감추고 스크린 리더에는 남긴다 */
+/* 화면에서는 숨기고 스크린 리더에만 */
 .sr-only {
     position: absolute;
     width: 1px; height: 1px;
@@ -49,7 +49,7 @@ main { padding-top: var(--head-total); }
 }
 .clips-search-input::placeholder { color: var(--bone-faint); }
 
-/* 검색 지우기 버튼(X)은 브라우저마다 모양이 달라 숨긴다 — 지우기는 입력칸을 비우면 된다 */
+/* 브라우저마다 모양이 다른 기본 지우기 버튼 숨김 */
 .clips-search-input::-webkit-search-cancel-button { -webkit-appearance: none; }
 
 .clips-search-btn {
@@ -98,7 +98,7 @@ main { padding-top: var(--head-total); }
 }
 .clips-count[hidden] { display: none; }
 
-/* 카드 그리드는 머리말 아래로 한 칸 띄운다 */
+/* 카드 그리드는 머리말 아래로 한 칸 */
 .clips-section .card-grid { margin-top: 28px; }
 
 /* ===== 상세 ===== */
@@ -169,7 +169,7 @@ main { padding-top: var(--head-total); }
     font-size: clamp(1.9rem, 4vw, 3.2rem);
     line-height: 1.15;
     color: var(--bone);
-    /* 제목은 시청자가 붙인 이름이라 길이를 예측할 수 없다 — 단어 단위로 접는다 */
+    /* 제목은 시청자가 붙인 이름이라 길이를 예측할 수 없다 — 단어 단위 줄바꿈 */
     word-break: keep-all;
     overflow-wrap: anywhere;
 }

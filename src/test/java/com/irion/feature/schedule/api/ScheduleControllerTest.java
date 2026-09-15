@@ -18,14 +18,13 @@ import java.util.Map;
 import static org.junit.Assert.*;
 
 /**
- * 공개 일정 API 와 관리자 일정 API 의 차이를 못 박는다.
- *
- * 둘은 코드가 거의 같아서 한쪽을 고칠 때 다른 쪽을 따라 고치기 쉽다.
- * 공개 쪽이 숨긴 일정을 흘리거나 공개 여부를 응답에 실으면 여기서 걸린다.
+ * 공개 일정 API 와 관리자 API 의 차이.
+ * 코드가 거의 같아 한쪽을 고칠 때 따라 고치기 쉽다 —
+ * 공개 쪽이 숨긴 일정을 흘리거나 공개 여부를 실으면 여기서 걸린다
  */
 public class ScheduleControllerTest {
 
-    /** 서비스가 어떤 메서드로 어떤 기간을 받았는지 붙잡아 둔다 */
+    /** 서비스가 받은 메서드와 기간 기록 */
     private static final class Captor {
         String calledMethod;
         Date startDate;
@@ -35,7 +34,7 @@ public class ScheduleControllerTest {
 
     // ── 공개 API ────────────────────────────────────────────────
 
-    /** 공개 목록은 display_yn 으로 거르는 질의를 써야 한다 */
+    /** 공개 목록은 display_yn 필터 질의를 써야 한다 */
     @Test
     public void 공개_목록은_공개_전용_조회를_쓴다() {
         Captor captor = new Captor();
@@ -46,7 +45,7 @@ public class ScheduleControllerTest {
         assertEquals("getDisplayScheduleList", captor.calledMethod);
     }
 
-    /** displayYn 이 실려 나가면 어떤 일정이 숨겨져 있는지가 밖에서 보인다 */
+    /** displayYn 이 나가면 숨긴 일정의 존재가 드러난다 */
     @Test
     public void 공개_응답에는_공개여부가_없다() {
         Captor captor = new Captor();
@@ -72,7 +71,7 @@ public class ScheduleControllerTest {
         assertEquals("getScheduleList", captor.calledMethod);
     }
 
-    /** 관리자 화면은 숨긴 일정을 흐리게 그려야 해서 공개 여부가 필요하다 */
+    /** 관리자 화면은 숨긴 일정을 흐리게 그려야 해 공개 여부가 필요 */
     @Test
     public void 관리자_응답에는_공개여부가_있다() {
         Captor captor = new Captor();
@@ -86,7 +85,7 @@ public class ScheduleControllerTest {
 
     // ── 공통 ────────────────────────────────────────────────────
 
-    /** 상한이 없으면 ?end=9999-12-31 하나로 테이블 전체를 훑게 된다 */
+    /** 상한이 없으면 ?end=9999-12-31 하나로 테이블 전체 스캔 */
     @Test
     public void 조회_기간이_너무_넓으면_상한까지만_내려간다() {
         Captor captor = new Captor();
@@ -110,7 +109,7 @@ public class ScheduleControllerTest {
         assertEquals(start.getTime() + DateRange.MAX_SPAN_MILLIS, captor.endDate.getTime());
     }
 
-    /** FullCalendar 는 allDay 를 불리언으로 받는다 — "Y"/"N" 을 그대로 주면 항상 참이 된다 */
+    /** FullCalendar 는 allDay 가 불리언 — "Y"/"N" 을 그대로 주면 항상 참 */
     @Test
     public void 종일_여부를_불리언으로_바꾼다() {
         Captor captor = new Captor();
@@ -136,7 +135,7 @@ public class ScheduleControllerTest {
         return controller;
     }
 
-    /** 스프링 없이 필드에 직접 꽂는다 */
+    /** 스프링 없이 필드 직접 주입 */
     private static void inject(Object controller, Class<?> type, ScheduleService service) {
         try {
             Field field = type.getDeclaredField("scheduleService");

@@ -7,7 +7,7 @@ import java.util.Date;
 
 import static org.junit.Assert.*;
 
-/** 조회 기간 상한. 전에는 요청 한 줄로 100년치를 훑게 만들 수 있었다. */
+/** 조회 기간 상한. 전에는 요청 한 줄로 100년치를 훑을 수 있었다 */
 public class DateRangeTest {
 
     @Test
@@ -20,7 +20,7 @@ public class DateRangeTest {
 
     @Test
     public void 달력_연간_보기_폭도_그대로_둔다() {
-        // 앞뒤로 몇 주씩 더 붙어도 상한(400일)에 걸리지 않아야 한다
+        // 앞뒤로 몇 주가 붙어도 상한(400일)에 걸리면 안 된다
         Date start = date("2026-01-01");
         Date end = date("2026-12-31");
 

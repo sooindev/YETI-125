@@ -1,10 +1,10 @@
 <%@ page pageEncoding="UTF-8" %>
 <%--
-  클립 모달 — 홈과 클립 아카이브가 함께 쓴다.
-  치지직 공식 임베드로 그 자리에서 재생하고, 조회수 집계·시청 제한은 치지직 정책을 따른다.
+  클립 모달 — 홈과 클립 아카이브 공용.
+  치지직 공식 임베드로 재생하며 조회수·시청 제한은 치지직 정책을 따른다.
 
-  링크가 둘인 이유: 모달로 보면 주소가 바뀌지 않아, 마음에 든 클립의 주소를 집어갈 길이
-  없다. "이 클립 페이지" 가 그 길이다 (js/components/clip-modal.js 가 두 주소를 채운다).
+  링크가 둘인 이유 — 모달은 주소가 바뀌지 않아 클립 주소를 집어갈 길이 없다.
+  두 주소는 js/components/clip-modal.js 가 채운다
 --%>
 <div id="clipModal" class="modal">
   <div class="modal-content clip-modal-content">

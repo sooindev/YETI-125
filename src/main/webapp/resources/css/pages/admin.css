@@ -59,7 +59,7 @@
 
 .field-row {
     display: grid;
-    /* datetime-local 은 최소 폭이 커서 1fr 이면 모달 밖으로 삐져나간다 — minmax(0,1fr) 로 묶는다 */
+    /* datetime-local 은 최소 폭이 커서 1fr 이면 모달 밖으로 나간다 — minmax(0,1fr) */
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 16px;
 }
@@ -447,8 +447,8 @@
         min-height: 38vh;
     }
 
-    /* iOS 사파리는 16px 미만 입력창에 포커스하면 화면을 자동 확대한다.
-       common.css 의 동일 규칙보다 이 선택자가 우선하므로 여기서 다시 지정 */
+    /* iOS 사파리는 16px 미만 입력창 포커스 시 화면을 확대한다.
+       common.css 보다 이 선택자가 우선하므로 여기서 재지정 */
     .field input[type="text"],
     .field input[type="password"],
     .field input[type="datetime-local"],
@@ -459,8 +459,7 @@
 }
 
 @media (max-width: 560px) {
-    /* 칸 폭이 40px 남짓이라 유형 색 막대로만 알린다. 색은 .fc-daygrid-event-dot 의
-       인라인 border-color 라, 그 점을 늘려 막대로 쓴다 */
+    /* 칸 폭이 40px 남짓이라 유형 색 막대로만. 색은 dot 의 인라인 border-color 라 점을 늘려 쓴다 */
     .fc-daygrid-event .fc-event-time,
     .fc-daygrid-event .fc-event-title,
     .fc-daygrid-event .fc-event-title-container { display: none; }
@@ -468,7 +467,7 @@
         display: block;
         background: transparent;
         border: none;
-        /* 보이는 굵기는 5px 로 두고, 위아래 여백으로 탭 영역만 15px 로 넓힌다 */
+        /* 보이는 굵기 5px, 위아래 여백으로 탭 영역만 15px */
         padding: 5px 0;
         margin: 0 3px;
         min-height: 0;
@@ -486,8 +485,7 @@
 
     .field-row { grid-template-columns: minmax(0, 1fr); }
 
-    /* 체크박스 라벨이 22px라 손가락으로 누르기 어렵다. 체크 표시는
-       그대로 두고 라벨 전체의 세로 탭 영역만 넓힌다. */
+    /* 체크박스 라벨이 22px 라 누르기 어렵다 — 표시는 두고 라벨의 탭 영역만 확장 */
     .check { min-height: 44px; }
     .modal-footer { flex-direction: column-reverse; }
     .modal-footer .btn { width: 100%; }
