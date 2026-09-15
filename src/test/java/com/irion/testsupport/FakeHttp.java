@@ -1,9 +1,11 @@
 package com.irion.testsupport;
 
 import javax.servlet.FilterChain;
+import javax.servlet.http.HttpServletMapping;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.MappingMatch;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Proxy;
@@ -31,6 +33,9 @@ public final class FakeHttp {
         private String remoteAddr = "127.0.0.1";   // 평소에는 nginx 를 거쳐 들어온다
         private final Map<String, String> headers = new HashMap<String, String>();
         private final Map<String, String> params = new HashMap<String, String>();
+
+        /** 요청 속성. 스프링 핸들러 매핑이 계산한 경로를 여기 캐시해 두고 다시 꺼내 쓴다 */
+        private final Map<String, Object> attributes = new HashMap<String, Object>();
 
         /** getSession(true) 가 불렸는지 — 필터가 세션을 새로 만들면 안 된다 */
         public boolean sessionCreated;
@@ -113,6 +118,21 @@ public final class FakeHttp {
                                 return headers.get((String) args[0]);
                             case "getParameter":
                                 return params.get((String) args[0]);
+                            /*
+                             * 서블릿 4.0. 스프링의 UrlPathHelper 가 "요청이 어느 서블릿 매핑으로
+                             * 들어왔나" 를 여기서 묻는다 — null 이면 핸들러 매핑이 NPE 로 죽는다.
+                             * DispatcherServlet 이 "/" 에 걸린 상태를 흉내 낸다.
+                             */
+                            case "getAttribute":
+                                return attributes.get((String) args[0]);
+                            case "setAttribute":
+                                attributes.put((String) args[0], args[1]);
+                                return null;
+                            case "removeAttribute":
+                                attributes.remove((String) args[0]);
+                                return null;
+                            case "getHttpServletMapping":
+                                return rootServletMapping();
                             case "getSession":
                                 boolean create = args == null || args.length == 0
                                         || Boolean.TRUE.equals(args[0]);
@@ -161,6 +181,22 @@ public final class FakeHttp {
                 });
     }
 
+
+    /** DispatcherServlet 이 "/" 에 매핑된 상태 (web.xml 과 같다) */
+    private static HttpServletMapping rootServletMapping() {
+        return (HttpServletMapping) Proxy.newProxyInstance(
+                HttpServletMapping.class.getClassLoader(),
+                new Class<?>[] { HttpServletMapping.class },
+                (proxy, method, args) -> {
+                    switch (method.getName()) {
+                        case "getMappingMatch": return MappingMatch.DEFAULT;
+                        case "getPattern":      return "/";
+                        case "getServletName":  return "dispatcher";
+                        case "getMatchValue":   return "";
+                        default:                return blank(method.getReturnType());
+                    }
+                });
+    }
 
     public static final class Response {
         public int status = 200;

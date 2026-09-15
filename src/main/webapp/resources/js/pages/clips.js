@@ -25,11 +25,30 @@ let archiveQuery = '';
 /** 목록을 받는 중인가. 더보기 연타로 같은 구간을 두 번 붙이지 않게 막는다 */
 let archiveLoading = false;
 
+/** 지금 날아가 있는 요청. 조건이 바뀌면 끊는다 */
+let archiveRequest = null;
+
+/**
+ * 덜 찬 목록을 받아 다시 물어봤는가.
+ *
+ * 초기화는 loadArchive 가 아니라 <b>사용자가 조건을 바꾸는 자리</b>에서 한다.
+ * loadArchive 안에서 초기화하면 재시도가 스스로 플래그를 풀어 1.5초마다 영원히 다시 묻는다.
+ */
+let archiveRetried = false;
+
+/**
+ * 몇 번째 요청인가. 응답이 오는 사이에 조건이 또 바뀌었으면 그 응답은 버린다.
+ * 요청 객체로 비교하지 않는 이유는, 응답이 즉시 돌아오면 $.ajax 가 반환하기도 전에
+ * 콜백이 먼저 도는 경우가 있어 아직 아무것도 대입되지 않은 상태를 보기 때문이다.
+ */
+let archiveGeneration = 0;
+
 $(document).ready(function() {
     readStateFromUrl();
     syncControls();
     initControls();
     initClipModal();
+    archiveRetried = false;
     loadArchive(false);
 });
 
@@ -69,6 +88,7 @@ function initControls() {
         archiveSort = sort;
         syncControls();
         writeStateToUrl();
+        archiveRetried = false;
         loadArchive(false);
     });
 
@@ -81,6 +101,7 @@ function initControls() {
 
         archiveQuery = next;
         writeStateToUrl();
+        archiveRetried = false;
         loadArchive(false);
     });
 
@@ -92,7 +113,23 @@ function initControls() {
 /* ===== 목록 ===== */
 
 function loadArchive(append) {
-    if (archiveLoading) return;
+    // 더보기 연타만 막는다 — 같은 구간이 두 번 붙는다
+    if (append && archiveLoading) return;
+
+    /*
+     * 조건이 바뀐 요청은 앞선 것을 이긴다.
+     *
+     * 앞엣것이 끝나기를 기다리며 물러나면, 버튼과 주소는 새 조건인데 목록만 옛것으로
+     * 남는다. 전량 적재(최신순·검색)는 캐시가 식었을 때 몇 초가 걸려서, 사용자가
+     * 조급해 다시 누르는 바로 그 순간에 걸린다.
+     */
+    if (archiveRequest) {
+        const stale = archiveRequest;
+        archiveRequest = null;
+        stale.abort();
+    }
+
+    const generation = ++archiveGeneration;
     archiveLoading = true;
 
     if (!append) {
@@ -106,7 +143,7 @@ function loadArchive(append) {
         $('#loadMoreBtn').prop('disabled', true).text('불러오는 중...');
     }
 
-    $.ajax({
+    archiveRequest = $.ajax({
         url: '/live/clips',
         type: 'GET',
         data: {
@@ -119,6 +156,8 @@ function loadArchive(append) {
         // 검색·최신순은 목록 전량을 받아야 해서 첫 요청이 길다 (캐시가 식었을 때만)
         timeout: 20000,
         success: function(response) {
+            if (generation !== archiveGeneration) return;   // 지난 세대의 응답
+
             if (!response.success || !response.data) {
                 showArchiveFailure(append);
                 return;
@@ -135,11 +174,26 @@ function loadArchive(append) {
             }
             showCount(response.data.total);
             $('#clipsMore').toggle(archiveHasMore);
+
+            /*
+             * 서버가 "아직 다 못 받았다" 고 했다. 캐시를 채우는 중이라 몇 초면 끝난다.
+             * 그 사이의 목록으로 매긴 최신순은 최신 클립이 빠져 있으므로 한 번 다시 묻는다.
+             */
+            if (response.data.partial && !append && !archiveRetried) {
+                archiveRetried = true;
+                setTimeout(function() {
+                    if (generation === archiveGeneration) loadArchive(false);
+                }, 1500);
+            }
         },
         error: function() {
+            if (generation !== archiveGeneration) return;   // 우리가 끊은 요청이다
             showArchiveFailure(append);
         },
         complete: function() {
+            if (generation !== archiveGeneration) return;
+
+            archiveRequest = null;
             archiveLoading = false;
             $('#clipsLoading').hide();
             $('#loadMoreBtn').prop('disabled', false).text('더보기');

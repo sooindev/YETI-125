@@ -111,7 +111,9 @@
       <nav class="clip-crumb" aria-label="현재 위치">
         <a href="/clips">클립 아카이브</a>
         <span class="clip-crumb-sep">/</span>
-        <span class="clip-crumb-current">${clipId}</span>
+        <%-- 구조화 데이터(BreadcrumbList)의 3번째 항목과 같은 이름이어야 한다.
+             clipUID 를 찍으면 방문자에게는 뜻 없는 글자고, 우리가 검색엔진에 알린 것과도 어긋난다 --%>
+        <span class="clip-crumb-current">${title}</span>
       </nav>
 
       <div class="clip-detail-grid">

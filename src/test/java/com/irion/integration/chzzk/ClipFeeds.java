@@ -21,6 +21,11 @@ public final class ClipFeeds {
         return new LiveFeedService.ClipFeed(clips, null, null);
     }
 
+    /** 아직 이어 받을 것이 남은 목록 — canGrow() 가 참이다 */
+    public static LiveFeedService.ClipFeed growable(List<Map<String, Object>> clips) {
+        return new LiveFeedService.ClipFeed(clips, "cursor-남음", "100");
+    }
+
     public static LiveFeedService.ClipFeed of(Map<String, Object>... clips) {
         return of(new ArrayList<Map<String, Object>>(Arrays.asList(clips)));
     }

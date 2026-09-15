@@ -114,7 +114,6 @@ public class ClipController {
 
             Map<String, Object> model = new HashMap<String, Object>();
 
-            model.put("clipId", id);
             model.put("clipUrl", Escape.html(text("clipUrl")));
             model.put("pageUrl", pageUrl);
 

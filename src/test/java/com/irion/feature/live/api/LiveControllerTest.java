@@ -1,7 +1,11 @@
 package com.irion.feature.live.api;
 
+import com.irion.common.api.JsonResult;
+import com.irion.integration.chzzk.ClipFeeds;
+import com.irion.integration.chzzk.LiveFeedService;
 import org.junit.Test;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -16,6 +20,82 @@ import static org.junit.Assert.*;
 public class LiveControllerTest {
 
     private final LiveController controller = new LiveController();
+
+    // ── 덜 찬 목록 ───────────────────────────────────────
+
+    /**
+     * 캐시를 다시 채우는 몇 초 동안 다른 요청은 있는 만큼만 받아 간다.
+     *
+     * 그 목록으로 최신순을 매기면 <b>체계적으로</b> 틀린다 — 새 클립일수록 조회수가 낮아
+     * 인기순 목록의 뒤쪽에 있어서, 덜 받은 목록에는 정작 최신 클립이 빠져 있다.
+     * 화면이 다시 물어볼 수 있도록 알려야 한다.
+     */
+    @Test
+    public void 목록이_덜_찼으면_알린다() throws Exception {
+        LiveController controller = controllerWith(ClipFeeds.growable(clips("2024-01-01 10:00:00")));
+
+        JsonResult result = controller.getClips(24, 0, "latest", null);
+
+        assertEquals(Boolean.TRUE, data(result).get("partial"));
+    }
+
+    @Test
+    public void 목록을_다_받았으면_알리지_않는다() throws Exception {
+        LiveController controller = controllerWith(
+                ClipFeeds.of(clips("2024-01-01 10:00:00")));
+
+        JsonResult result = controller.getClips(24, 0, "latest", null);
+
+        assertNull("다 받은 목록에 partial 을 붙이면 화면이 쓸데없이 다시 묻는다",
+                data(result).get("partial"));
+    }
+
+    /** 검색도 전량이 필요하므로 같은 규칙을 탄다 */
+    @Test
+    public void 검색도_덜_찼으면_알린다() throws Exception {
+        LiveController controller = controllerWith(ClipFeeds.growable(titled("노래방송")));
+
+        JsonResult result = controller.getClips(24, 0, null, "노래");
+
+        assertEquals(Boolean.TRUE, data(result).get("partial"));
+    }
+
+    /** 홈이 쓰는 인기순 경로는 애초에 전량을 보지 않는다 — 여기 끼어들면 안 된다 */
+    @Test
+    public void 인기순_기본_화면은_partial_을_말하지_않는다() throws Exception {
+        LiveController controller = controllerWith(ClipFeeds.growable(clips("2024-01-01 10:00:00")));
+
+        JsonResult result = controller.getClips(6, 0, null, null);
+
+        assertNull(data(result).get("partial"));
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> data(JsonResult result) {
+        assertTrue("조회에 성공해야 한다", result.isSuccess());
+        return (Map<String, Object>) result.getData();
+    }
+
+    /** 주어진 목록만 아는 캐시를 물린 컨트롤러 */
+    private static LiveController controllerWith(final LiveFeedService.ClipFeed feed) throws Exception {
+        LiveFeedService liveFeed = new LiveFeedService() {
+            @Override
+            public ClipFeed getAllClips() {
+                return feed;
+            }
+
+            @Override
+            public ClipFeed getClips(int need) {
+                return feed;
+            }
+        };
+
+        LiveController controller = new LiveController();
+        Field field = LiveController.class.getDeclaredField("liveFeed");
+        field.setAccessible(true);
+        field.set(controller, liveFeed);
+        return controller;
+    }
 
     // ── 정렬·검색 (클립 아카이브) ────────────────────────
 

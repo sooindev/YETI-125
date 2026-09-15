@@ -71,6 +71,18 @@ public class LiveController {
             Map<String, Object> result = paginate(arranged, "clips", safeOffset, safeLimit);
             // 전량을 놓고 자른 것이라 paginate 의 hasMore 가 그대로 맞다
             result.put("total", arranged.size());
+
+            /*
+             * 아직 다 못 받았다는 것을 알린다.
+             *
+             * 캐시를 다시 채우는 몇 초 동안 다른 스레드는 있는 만큼만 받아 간다.
+             * 그 목록으로 최신순을 매기면 조용히, 그리고 체계적으로 틀린다 —
+             * 새 클립일수록 조회수가 낮아 인기순 목록의 뒤쪽에 있어서, 덜 받은 목록에는
+             * 정작 최신 클립이 빠져 있다. 화면이 잠시 뒤 다시 물어보게 한다.
+             */
+            if (feed.canGrow()) {
+                result.put("partial", true);
+            }
             return JsonResult.success("조회 성공", result);
         }
 
