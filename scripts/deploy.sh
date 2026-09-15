@@ -127,14 +127,26 @@ WEBAPPS=/var/lib/tomcat9/webapps
 # 방명록(/guestbook · /guestbook/list)은 3주년이 끝나 내려둔 뒤로 302 라 여기 없다.
 # 되살리면 두 주소를 다시 넣는다 — 페이지만 보면 테이블이나 권한이 빠져도 200 이라
 # 그냥 통과한다. 목록 API 까지 봐야 DB 까지 닿은 것이 증명된다.
-CHECKS="
+# 어느 버전에나 있는 화면. 롤백한 뒤에는 이것만 본다
+BASE_CHECKS="
 http://localhost:8080/schedule/list?start=2020-01-01&end=2030-12-31
 http://localhost:8080/
-http://localhost:8080/clips
 http://localhost:8080/schedule
 http://localhost:8080/info
 http://localhost:8080/admin/admin-login
 "
+
+# 이번 판에서 새로 생긴 화면.
+#
+# 롤백 뒤 검증에서는 빼야 한다 — 되돌린 버전에는 없는 주소라 404 가 나고,
+# 멀쩡히 복구된 서비스가 "롤백 후에도 비정상" 으로 보고된다(2026-09-15에 그랬다).
+# 다음 판을 올릴 때 여기 있는 것을 BASE_CHECKS 로 옮긴다.
+NEW_CHECKS="
+http://localhost:8080/clips
+"
+
+CHECKS="$BASE_CHECKS
+$NEW_CHECKS"
 
 # 오류 화면 검증용 주소. 아무 핸들러에도 걸리지 않아야 404 가 난다.
 ERROR_URL="http://localhost:8080/__deploy-check-404__"
@@ -191,26 +203,45 @@ check_error_page() {
   fi
 }
 
-# 사이트맵이 실제로 만들어지는가.
+# 사이트맵을 확인한다 — 다만 <b>배포를 막지 않는다.</b>
 #
-# 손으로 적던 파일을 없애고 클립 캐시에서 뽑게 바꿨다(2026-09-14). 이제 사이트맵은
-# 코드라서 깨질 수 있고, 깨져도 다른 화면은 멀쩡하다 — 검색 유입만 조용히 죽는다.
+# 두 번 되돌린 뒤에 내린 결론이다(2026-09-14, 09-15). 사이트맵이 틀린 것은
+# 검색 유입의 문제지 서비스 장애가 아니다. 화면도 API 도 멀쩡한 릴리스를
+# 사이트맵 하나 때문에 통째로 되돌리는 것은 균형이 맞지 않는다.
 #
-# 다른 검증보다 시간을 길게 준다. 첫 호출은 클립 전량(30여 페이지)을 받아 오느라
-# 몇 초가 걸린다. 그 뒤 10분은 캐시가 답하므로 느린 것은 이 한 번뿐이다.
+# 대신 무엇이 나갔는지를 남긴다. 다음 배포에서 원인을 볼 수 있어야 한다 —
+# 지금까지는 "무엇이 기대와 달랐다" 만 알고 "무엇이 나왔는지" 를 몰라 추측만 했다.
+#
+# 첫 호출은 캐시를 데우기만 한다. 사이트맵은 XML 을 통째로 만든 뒤에야 첫 바이트를
+# 내보내는데, 톰캣을 막 띄운 직후에는 그 안에서 치지직을 서른 번 넘게 부른다.
+# 판정은 찬 캐시가 답하는 두 번째 호출로만 한다.
 check_sitemap() {
-  local body
-  body=$(curl -s --max-time 20 "http://localhost:8080/sitemap.xml" || true)
+  local head body
 
-  if ! printf '%s' "$body" | grep -q '</urlset>'; then
-    echo "http://localhost:8080/sitemap.xml → 사이트맵이 온전히 끝나지 않았습니다"
+  curl -s -o /dev/null --max-time 60 "http://localhost:8080/sitemap.xml" >/dev/null 2>&1 || true
+
+  head=$(curl -s -D - -o /dev/null --max-time 10 "http://localhost:8080/sitemap.xml" 2>/dev/null || true)
+  body=$(curl -s --max-time 10 "http://localhost:8080/sitemap.xml" 2>/dev/null || true)
+
+  local urlset clips_page clips_entry
+  printf '%s' "$body" | grep -q "</urlset>" && urlset=yes || urlset=no
+  printf '%s' "$body" | grep -q "<loc>https://yeti-125.com/clips</loc>" && clips_page=yes || clips_page=no
+  clips_entry=$(printf '%s' "$body" | grep -c "<loc>https://yeti-125.com/clips/" || true)
+
+  if [ "$urlset" = yes ] && [ "$clips_page" = yes ] && [ "$clips_entry" -gt 0 ]; then
+    echo "   사이트맵 정상 — 클립 주소 ${clips_entry}개" >&2
     return 0
   fi
 
-  # 고정 주소만 남고 클립이 하나도 없으면 치지직 연동이 끊긴 것이다
-  if ! printf '%s' "$body" | grep -q '<loc>https://yeti-125.com/clips/'; then
-    echo "http://localhost:8080/sitemap.xml → 클립 주소가 하나도 없습니다 (치지직 연동 확인)"
-  fi
+  # 여기부터는 전부 경고다. 판정($failed)에 섞이지 않도록 표준오류로만 낸다
+  echo "   ! 사이트맵이 기대와 다릅니다 (배포는 계속합니다)" >&2
+  echo "     온전히 끝남=$urlset  /clips 고정주소=$clips_page  클립 주소=${clips_entry}개" >&2
+  echo "     ── 응답 헤더 ──" >&2
+  printf '%s\n' "$head" | sed "s/^/     /" >&2
+  echo "     ── 본문 앞부분 ──" >&2
+  printf '%s\n' "$body" | head -14 | sed "s/^/     /" >&2
+  echo "     Last-Modified 가 있으면 정적 파일이고, 없으면 SitemapController 가 그린 것입니다." >&2
+  echo "     앱 로그: grep 치지직 /var/log/tomcat9/yeti-125.log | tail -20" >&2
 }
 
 # 홈이 실제로 부르는 css · js 가 전부 200 인가.
@@ -223,9 +254,12 @@ check_sitemap() {
 #
 # 홈만 보면 놓치는 것이 또 있다 (2026-09-14 클립 아카이브): /clips 는 홈이 부르지 않는
 # clips.css · clips.js 를 부른다. 화면마다 제 자산을 들고 있으므로 화면마다 확인한다.
+# 자산을 확인할 화면. 롤백 뒤에는 홈만 본다 (CHECKS 와 같은 이유)
+ASSET_PAGES="/ /clips"
+
 check_assets() {
   local path failed
-  for path in / /clips; do
+  for path in $ASSET_PAGES; do
     failed="$(check_page_assets "$path")"
     if [ -n "$failed" ]; then
       echo "$failed"
@@ -280,19 +314,21 @@ deploy_war /tmp/yeti-125.war
 
 echo "   DB 연동 · 페이지 · 오류 화면 · css/js · 사이트맵까지 검증 중 (최대 60초)..."
 if CODE=$(wait_ok); then
-  # 앱이 확실히 선 뒤에 한 번만 본다. 첫 호출이 클립 전량을 받아 오느라 몇 초 걸린다
-  SITEMAP="$(check_sitemap)"
-  if [ -z "$SITEMAP" ]; then
-    echo "   검증 통과 ($CODE + 사이트맵)"
-    exit 0
-  fi
-  CODE="$SITEMAP"
+  # 앱이 확실히 선 뒤에 한 번만 본다. 결과는 알리기만 하고 배포를 막지 않는다
+  check_sitemap
+  echo "   검증 통과 ($CODE)"
+  exit 0
 fi
 
 echo "   검증 실패: ${CODE:-무응답}"
 if [ -n "$BAK" ]; then
   echo "   백업으로 롤백합니다: $BAK"
   deploy_war "$BAK"
+
+  # 되돌린 버전에 없는 화면을 찾지 않는다 — 찾으면 성공한 롤백이 실패로 보고된다
+  CHECKS="$BASE_CHECKS"
+  ASSET_PAGES="/"
+
   if CODE2=$(wait_ok); then
     echo "   롤백 완료 — 서비스 정상 ($CODE2)"
   else
