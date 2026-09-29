@@ -58,7 +58,9 @@ function initCalendar() {
         },
         height: 'auto',
         editable: true,
-        selectable: true,
+        // select 는 터치에서 1초 길게 눌러야 걸린다 — 아이폰에서는 날짜를 눌러도 반응이 없었다.
+        // 쓰는 것도 시작일 하나뿐이라 탭에 바로 반응하는 dateClick 으로
+        selectable: false,
         // ko 로케일 "26일" 은 좁은 화면에서 줄바꿈돼 행 높이가 늘어난다 — 숫자만
         dayCellContent: function(arg) {
             return arg.date.getDate();
@@ -69,8 +71,8 @@ function initCalendar() {
         eventClick: function(info) {
             openEditModal(info.event);
         },
-        select: function(info) {
-            openAddModalWithDate(info.startStr);
+        dateClick: function(info) {
+            openAddModalWithDate(info.dateStr.substring(0, 10));
         },
         eventDrop: function(info) {
             updateScheduleDate(info.event);
@@ -174,6 +176,8 @@ function openAddModalWithDate(dateStr) {
 }
 
 function openEditModal(event) {
+    // 먼저 비운다 — 안 그러면 종료일 없는 일정을 열 때 앞서 연 일정의 종료일이 남아 함께 저장된다
+    resetForm();
     currentScheduleId = event.id;
 
     $('#modalTitle').text('일정 수정');
@@ -337,10 +341,10 @@ function updateScheduleDate(event) {
 function formatDateForServer(dateTimeLocalString) {
     if (!dateTimeLocalString) return null;
 
-    // 초가 없으면 ":00" 을 붙여 "yyyy-MM-dd'T'HH:mm:ss" 로
-    return dateTimeLocalString.length === 16
-        ? dateTimeLocalString + ':00'
-        : dateTimeLocalString;
+    // 서버는 "yyyy-MM-dd'T'HH:mm:ss" 만 받는다. 브라우저에 따라 초·밀리초가 붙어 오는데
+    // 길이로 판단하면 "…:00.000" 이 그대로 나가 400 이 된다 — 분까지 잘라 초를 붙인다
+    const m = /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2})/.exec(dateTimeLocalString);
+    return m ? m[1] + ':00' : null;
 }
 
 /* GET 이면 img 태그 하나로 남의 세션을 끊을 수 있어 POST */
