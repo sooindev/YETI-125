@@ -115,6 +115,18 @@
   </session-config>
 
   <!-- Error Pages -->
+  <!--
+    400·405 가 빠져 있으면 톰캣 기본 화면이 나간다 — "Apache Tomcat/9.0.x" 와
+    빠진 파라미터 이름이 그대로 찍힌다. /schedule/list 를 인자 없이 부르면 400
+  -->
+  <error-page>
+    <error-code>400</error-code>
+    <location>/WEB-INF/views/error/400.jsp</location>
+  </error-page>
+  <error-page>
+    <error-code>405</error-code>
+    <location>/WEB-INF/views/error/400.jsp</location>
+  </error-page>
   <error-page>
     <error-code>404</error-code>
     <location>/WEB-INF/views/error/404.jsp</location>

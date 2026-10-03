@@ -493,7 +493,8 @@ YETI-125/
 │   ├── run-local.sh         로컬 빌드 · 배포 · 기동 확인 (맥)
 │   ├── deploy.sh            테스트 · 빌드 · 전송 · 배포 · 롤백 (맥 → 서버)
 │   ├── strip-comments.py    배포본 css · js 주석 제거 (mvn -Pprod 가 부른다)
-│   └── db-backup.sh         DB 백업 (서버에서 cron 으로)
+│   ├── db-backup.sh         DB 백업 (서버에서 cron 으로)
+│   └── pull-backups.sh      DB 백업 외부 보관 (맥으로 가져오기)
 ├── docs/
 │   ├── db/schema.sql        최초 1회 실행하는 DDL — 실행 자원이 아니라 war 에 넣지 않는다
 │   └── screenshots/         README 용 화면 캡처
@@ -1256,6 +1257,23 @@ sudo crontab -e
 ```bash
 gunzip -c /var/backups/yeti-125/for_125-20260826-040001.sql.gz | mysql for_125
 ```
+
+#### 외부 보관
+
+서버 안의 백업은 서버가 망가지면 함께 사라집니다.
+맥에서 `scripts/pull-backups.sh` 로 한 벌을 더 받아 둡니다.
+
+| | |
+|---|---|
+| 받는 곳 | `~/Backups/yeti-125` (`YETI_BACKUP_DIR` 로 변경) |
+| 보관 개수 | 60개 — 서버(14개)보다 길게 |
+| 대상 서버 | `deploy.env` 의 `YETI_DEPLOY_SERVER` (배포와 같은 값) |
+
+```bash
+./scripts/pull-backups.sh
+```
+
+받은 파일은 `gzip -t` 로 검사해 깨진 것은 지우고, 다음 실행에서 다시 받습니다.
 
 <br>
 

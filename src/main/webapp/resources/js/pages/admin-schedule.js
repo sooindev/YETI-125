@@ -224,6 +224,14 @@ function saveSchedule() {
         return;
     }
 
+    // datetime-local 값은 자리수가 고정이라 문자열 비교 = 시간 비교. 서버도 같은 규칙으로 막는다
+    const endDate = $('#endDate').val();
+    if (endDate && endDate < startDate) {
+        showToast('종료 일시는 시작 일시보다 앞설 수 없습니다.', 'error');
+        $('#endDate').focus();
+        return;
+    }
+
     const data = {
         title: title,
         description: $('#description').val().trim(),

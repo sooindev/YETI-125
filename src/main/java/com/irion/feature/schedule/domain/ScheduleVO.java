@@ -1,7 +1,9 @@
 package com.irion.feature.schedule.domain;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -49,6 +51,16 @@ public class ScheduleVO implements Serializable {
     private String delYn;
 
     public ScheduleVO() {
+    }
+
+    /**
+     * 종료가 시작보다 앞서면 안 된다. 같으면 통과(종일 일정은 둘이 같은 날 0시).
+     * 화면만 막으면 API 직접 호출로 들어온다. JSON 에 "endNotBeforeStart" 가 끼지 않게 @JsonIgnore
+     */
+    @JsonIgnore
+    @AssertTrue(message = "종료 일시는 시작 일시보다 앞설 수 없습니다.")
+    public boolean isEndNotBeforeStart() {
+        return startDate == null || endDate == null || !endDate.before(startDate);
     }
 
     public Long getScheduleId() {

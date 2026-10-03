@@ -5,6 +5,7 @@ import com.irion.feature.admin.domain.AdminVO;
 import com.irion.common.security.CsrfTokens;
 import com.irion.common.api.JsonResult;
 import com.irion.common.security.LoginAttemptGuard;
+import com.irion.common.web.RequestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +54,10 @@ public class AdminController {
             return JsonResult.fail("아이디 또는 비밀번호가 일치하지 않습니다.");
         }
 
-        long lockedFor = loginGuard.lockedSecondsRemaining(adminLoginId);
+        // 잠금은 계정 + 주소 단위 — 남이 틀려도 관리자 자신은 잠기지 않는다
+        String clientIp = RequestUtil.clientIp(request);
+
+        long lockedFor = loginGuard.lockedSecondsRemaining(adminLoginId, clientIp);
         if (lockedFor > 0) {
             logger.warn("Admin login blocked (too many attempts): {}", mask(adminLoginId));
             return JsonResult.fail("로그인 시도가 너무 많습니다. "
@@ -63,12 +67,12 @@ public class AdminController {
         AdminVO admin = adminService.login(adminLoginId, password);
 
         if (admin == null) {
-            loginGuard.recordFailure(adminLoginId);
+            loginGuard.recordFailure(adminLoginId, clientIp);
             logger.warn("Admin login failed: {}", mask(adminLoginId));
             return JsonResult.fail("아이디 또는 비밀번호가 일치하지 않습니다.");
         }
 
-        loginGuard.recordSuccess(adminLoginId);
+        loginGuard.recordSuccess(adminLoginId, clientIp);
         admin.setAdminPassword(null);
 
         // 세션 고정 방어 — 기존 세션 폐기 후 새 ID

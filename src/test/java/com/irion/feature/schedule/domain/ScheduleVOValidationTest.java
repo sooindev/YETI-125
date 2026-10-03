@@ -117,6 +117,25 @@ public class ScheduleVOValidationTest {
         assertEquals("설명은 5000자를 넘을 수 없습니다.", firstMessage(vo));
     }
 
+    @Test
+    public void 종료가_시작보다_앞서면_막는다() {
+        ScheduleVO vo = valid();
+        vo.setStartDate(new Date(2_000_000_000_000L));
+        vo.setEndDate(new Date(2_000_000_000_000L - 60_000L));
+
+        assertEquals("종료 일시는 시작 일시보다 앞설 수 없습니다.", firstMessage(vo));
+    }
+
+    /** 종일 일정은 시작과 종료가 같은 날 0시로 온다 */
+    @Test
+    public void 종료와_시작이_같으면_통과한다() {
+        ScheduleVO vo = valid();
+        vo.setStartDate(new Date(2_000_000_000_000L));
+        vo.setEndDate(new Date(2_000_000_000_000L));
+
+        assertTrue(validator.validate(vo).isEmpty());
+    }
+
 
     private static ScheduleVO valid() {
         ScheduleVO vo = new ScheduleVO();

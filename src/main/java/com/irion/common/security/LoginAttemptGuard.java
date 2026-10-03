@@ -9,8 +9,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * 로그인 시도 제한 — 계정 기준. 한도 초과 시 잠금, 시간이 지나면 해제.
+ * 로그인 시도 제한 — 계정 + 주소 기준. 한도 초과 시 잠금, 시간이 지나면 해제.
  * 아이디는 공격자가 지어내는 값이라 항목 수·키 길이에 상한을 둔다.
+ *
+ * 계정만으로 세면 아이디를 아는 누구나 5번 틀려 관리자를 10분씩 계속 잠글 수 있다.
+ * 주소를 함께 세면 잠기는 것은 틀린 쪽뿐이다. 여러 주소로 나눠 맞히는 공격은
+ * PBKDF2 의 느림과 {@link LoginRateLimiter}(주소당 빈도)가 맡는다.
  *
  * 아이디를 매번 바꾸면 이 카운터에 안 걸린다 — 그쪽은 {@link LoginRateLimiter} 가 주소 기준으로.
  * 톰캣 하나 기준 — 서버를 늘리면 공유 저장소로
@@ -32,6 +36,9 @@ public class LoginAttemptGuard {
     /** admin_login_id 가 VARCHAR(50) — 더 길면 실제 계정일 수 없음 */
     private static final int MAX_KEY_LENGTH = 64;
 
+    /** IPv6 최대 45자. 헤더에서 온 값이라 길이를 믿지 않는다 */
+    private static final int MAX_IP_LENGTH = 45;
+
     private final Map<String, Attempt> attempts = new ConcurrentHashMap<String, Attempt>();
 
     private static final class Attempt {
@@ -41,8 +48,8 @@ public class LoginAttemptGuard {
     }
 
     /** 잠겨 있으면 남은 초, 아니면 0 */
-    public long lockedSecondsRemaining(String loginId) {
-        Attempt attempt = attempts.get(key(loginId));
+    public long lockedSecondsRemaining(String loginId, String clientIp) {
+        Attempt attempt = attempts.get(key(loginId, clientIp));
         if (attempt == null) {
             return 0;
         }
@@ -52,8 +59,8 @@ public class LoginAttemptGuard {
     }
 
     /** 실패 기록. 한도 초과 시 잠금 */
-    public void recordFailure(String loginId) {
-        String key = key(loginId);
+    public void recordFailure(String loginId, String clientIp) {
+        String key = key(loginId, clientIp);
         long now = System.currentTimeMillis();
 
         Attempt attempt = attempts.get(key);
@@ -83,8 +90,8 @@ public class LoginAttemptGuard {
     }
 
     /** 성공 — 기록 제거 */
-    public void recordSuccess(String loginId) {
-        attempts.remove(key(loginId));
+    public void recordSuccess(String loginId, String clientIp) {
+        attempts.remove(key(loginId, clientIp));
     }
 
     /** 만료분 우선 삭제, 넘치면 잠기지 않은 것 중 오래된 순 */
@@ -126,11 +133,13 @@ public class LoginAttemptGuard {
         return attempts.size();
     }
 
-    private static String key(String loginId) {
-        if (loginId == null) {
-            return "";
-        }
-        String key = loginId.trim().toLowerCase();
-        return key.length() <= MAX_KEY_LENGTH ? key : key.substring(0, MAX_KEY_LENGTH);
+    /** 아이디와 주소를 각각 자른 뒤 잇는다 — 합친 뒤 자르면 긴 아이디가 주소를 밀어낸다 */
+    private static String key(String loginId, String clientIp) {
+        return truncate(loginId == null ? "" : loginId.trim().toLowerCase(), MAX_KEY_LENGTH)
+                + "|" + truncate(clientIp == null ? "" : clientIp.trim(), MAX_IP_LENGTH);
+    }
+
+    private static String truncate(String value, int max) {
+        return value.length() <= max ? value : value.substring(0, max);
     }
 }
